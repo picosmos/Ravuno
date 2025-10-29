@@ -1,0 +1,10 @@
+services:
+  DNT-calendar:
+    build:
+      dockerfile: Dockerfile
+    ports:
+      - "1999:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_FORWARDEDHEADERS_ENABLED=true
+    restart: unless-stopped
