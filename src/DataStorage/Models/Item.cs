@@ -1,0 +1,25 @@
+﻿namespace DataStorage.Models;
+
+public enum ItemSource
+{
+    Tekna,
+    DntActivities
+}
+
+public class Item
+{
+    public ItemSource Source { get; set; }
+    public string? RawData { get; set; }
+    public DateTime RetrievedAt { get; set; }
+    public DateTime EventDateTime { get; set; }
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1819:Properties should not return arrays", Justification = "Raw data tags")]
+    public string[]? Tags { get; set; }
+    public string? Title { get; set; }
+    public string? Description { get; set; }
+    public string? Organizer { get; set; } = string.Empty;
+    public string? Location { get; set; }
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1056:URI-like properties should not be strings", Justification = "Entity object with raw data")]
+    public string? Url { get; set; }
+    public string? Price { get; set; }
+    public DateTime EnrollmentDeadline { get; set; }
+}
