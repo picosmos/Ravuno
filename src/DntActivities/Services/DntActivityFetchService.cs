@@ -66,11 +66,12 @@ public class DntActivityFetchService : IDntActivityFetchService
                             continue;
                         }
 
-                        // Fetch detailed event data
                         var detailedItem = await this.FetchEventDetailsAsync(eventId);
                         if (detailedItem != null)
                         {
                             allItems.Add(detailedItem);
+
+                            await Task.Delay(50); // Add a small delay between detail requests
                         }
                     }
 
@@ -79,10 +80,9 @@ public class DntActivityFetchService : IDntActivityFetchService
 
                 pageNumber++;
 
-                // Add a small delay to be respectful to the API
                 if (hasMorePages)
                 {
-                    await Task.Delay(100);
+                    await Task.Delay(100); // Add a small delay to be respectful to the API
                 }
             }
             catch (Exception ex)
@@ -128,9 +128,6 @@ public class DntActivityFetchService : IDntActivityFetchService
                                    ?? DateTime.MinValue,
                 Tags = ExtractTags(root)
             };
-
-            // Add a small delay between detail requests
-            await Task.Delay(50);
 
             return item;
         }
