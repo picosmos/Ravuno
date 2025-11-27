@@ -12,6 +12,8 @@ public class Item
 
     public string? RawData { get; set; }
 
+    public string SourceId { get; set; } = string.Empty;
+
     public DateTime RetrievedAt { get; set; }
 
     public DateTime EventStartDateTime { get; set; }

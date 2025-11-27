@@ -122,7 +122,12 @@ public partial class FetchAndSendHostedService : BackgroundService
             var startTime = DateTime.UtcNow;
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
 
-            dntItems = await dntService.FetchItemsAsync();
+            var existingItems = await dbContext.Items
+                .Where(i => i.Source == ItemSource.DntActivities)
+                .ToListAsync(cancellationToken);
+
+            // We may want to make this configurable later or fetch details for existing based on some criteria
+            dntItems = await dntService.FetchItemsAsync(existingItems, fetchDetailsForExisting: false);
 
             stopwatch.Stop();
             this._logger.LogInformation("Fetched {Count} items from DNT Activities", dntItems.Count);

@@ -23,7 +23,7 @@ public class DntActivityFetchService : IDntActivityFetchService
         this._settings = settings?.Value ?? throw new ArgumentNullException(nameof(settings));
     }
 
-    public async Task<List<Item>> FetchItemsAsync()
+    public async Task<List<Item>> FetchItemsAsync(IReadOnlyCollection<Item> existingItems, bool fetchDetailsForExisting = false)
     {
         var allItems = new List<Item>();
         var pageNumber = 1;
@@ -65,6 +65,10 @@ public class DntActivityFetchService : IDntActivityFetchService
                         if (string.IsNullOrEmpty(eventId))
                         {
                             this._logger?.LogWarning("Activity item has no ID, skipping");
+                            continue;
+                        }
+                        if (!fetchDetailsForExisting && existingItems.Any(i => i.SourceId == eventId))
+                        {
                             continue;
                         }
 
@@ -115,7 +119,8 @@ public class DntActivityFetchService : IDntActivityFetchService
             var item = new Item
             {
                 Source = ItemSource.DntActivities,
-                RawData = content, // Store the full detailed response
+                RawData = content,
+                SourceId = eventId,
                 RetrievedAt = DateTime.UtcNow,
                 Title = GetStringProperty(root, "name") ?? "No title",
                 Description = GetStringProperty(root, "description") ?? "",

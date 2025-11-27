@@ -86,6 +86,7 @@ public class TeknaFetchService : ITeknaFetchService
                             {
                                 Source = ItemSource.Tekna,
                                 RawData = courseItem.GetRawText(),
+                                SourceId = this.GetStringProperty(courseItem, "Id") ?? string.Empty,
                                 RetrievedAt = DateTime.UtcNow,
                                 Title = this.GetStringProperty(courseItem, "Title") ?? "No title",
                                 Description = this.GetStringProperty(courseItem, "Ingress") + "\n" + this.GetStringProperty(courseItem, "Description"),
