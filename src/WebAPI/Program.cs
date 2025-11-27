@@ -1,12 +1,14 @@
 using System.Threading.RateLimiting;
 using DntActivities.Services;
 using DntActivities.Services.Contracts;
+using DntActivities.Settings;
 using Email.Services;
 using Email.Services.Contracts;
 using Email.Settings;
 using Microsoft.AspNetCore.HttpOverrides;
 using Tekna.Services;
 using Tekna.Services.Contracts;
+using Tekna.Settings;
 using WebAPI.Extensions;
 using WebAPI.Services;
 using WebAPI.Services.Contracts;
@@ -28,6 +30,12 @@ builder.Services.AddSwaggerGen();
 // Configure email settings
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 builder.Services.AddScoped<IEmailService, EmailService>();
+
+// Configure Tekna settings
+builder.Services.Configure<TeknaSettings>(builder.Configuration.GetSection("Tekna"));
+
+// Configure DNT Activities settings
+builder.Services.Configure<DntActivitiesSettings>(builder.Configuration.GetSection("DntActivities"));
 
 // Configure Tekna service
 builder.Services.AddHttpClient<ITeknaFetchService, TeknaFetchService>();

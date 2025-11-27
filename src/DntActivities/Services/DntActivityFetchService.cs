@@ -4,7 +4,9 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using DataStorage.Models;
 using DntActivities.Services.Contracts;
+using DntActivities.Settings;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace DntActivities.Services;
 
@@ -12,13 +14,13 @@ public class DntActivityFetchService : IDntActivityFetchService
 {
     private readonly HttpClient _httpClient;
     private readonly ILogger<DntActivityFetchService>? _logger;
-    private const string BaseUrl = "https://www.dnt.no/api/activities?pageSize=100&page=";
-    private const string EventDetailBaseUrl = "https://p-lrapapi-weu-app.app.p.letsreg.com/api/v1/events/";
+    private readonly DntActivitiesSettings _settings;
 
-    public DntActivityFetchService(HttpClient httpClient, ILogger<DntActivityFetchService>? logger = null)
+    public DntActivityFetchService(HttpClient httpClient, IOptions<DntActivitiesSettings> settings, ILogger<DntActivityFetchService>? logger = null)
     {
         this._httpClient = httpClient;
         this._logger = logger;
+        this._settings = settings?.Value ?? throw new ArgumentNullException(nameof(settings));
     }
 
     public async Task<List<Item>> FetchItemsAsync()
@@ -33,7 +35,7 @@ public class DntActivityFetchService : IDntActivityFetchService
             {
                 this._logger?.LogInformation("Fetching DNT activities page {PageNumber}", pageNumber);
 
-                var url = $"{BaseUrl}{pageNumber}";
+                var url = string.Format(CultureInfo.InvariantCulture, this._settings.ActivitiesApiUrl, pageNumber);
                 var response = await this._httpClient.GetAsync(url);
                 response.EnsureSuccessStatusCode();
 
@@ -102,7 +104,7 @@ public class DntActivityFetchService : IDntActivityFetchService
         {
             this._logger?.LogInformation("Fetching event details for ID {EventId}", eventId);
 
-            var url = $"{EventDetailBaseUrl}{eventId}";
+            var url = string.Format(CultureInfo.InvariantCulture, this._settings.EventDetailApiUrl, eventId);
             var response = await this._httpClient.GetAsync(url);
             response.EnsureSuccessStatusCode();
 

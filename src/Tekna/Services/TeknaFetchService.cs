@@ -2,7 +2,9 @@ using System.Globalization;
 using System.Text.Json;
 using DataStorage.Models;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Tekna.Services.Contracts;
+using Tekna.Settings;
 
 namespace Tekna.Services;
 
@@ -12,12 +14,13 @@ public class TeknaFetchService : ITeknaFetchService
 {
     private readonly HttpClient _httpClient;
     private readonly ILogger<TeknaFetchService>? _logger;
-    private const string BaseUrl = "https://www.tekna.no/api/typeahead/lists?q=course:format=full:pageSize=100:refiner=regiondigital!oslo,searchtargetgroup!tv,fieldsofstudy,pricegroup,language:insession=false,start:pagenumber=";
+    private readonly TeknaSettings _settings;
 
-    public TeknaFetchService(HttpClient httpClient, ILogger<TeknaFetchService>? logger = null)
+    public TeknaFetchService(HttpClient httpClient, IOptions<TeknaSettings> settings, ILogger<TeknaFetchService>? logger = null)
     {
         this._httpClient = httpClient;
         this._logger = logger;
+        this._settings = settings?.Value ?? throw new ArgumentNullException(nameof(settings));
     }
 
     public async Task<List<Item>> FetchItemsAsync()
@@ -32,7 +35,7 @@ public class TeknaFetchService : ITeknaFetchService
             {
                 this._logger?.LogInformation("Fetching Tekna courses page {PageNumber}", pageNumber);
 
-                var url = $"{BaseUrl}{pageNumber}";
+                var url = string.Format(CultureInfo.InvariantCulture, this._settings.CoursesApiUrl, pageNumber);
                 var response = await this._httpClient.GetAsync(url);
                 response.EnsureSuccessStatusCode();
 
