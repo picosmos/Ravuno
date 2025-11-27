@@ -464,6 +464,7 @@ public partial class FetchAndSendHostedService : BackgroundService
                 }
 
                 description = description.Replace("\n", "<br/>");
+                var tags = item.Tags != null ? string.Join(", ", item.Tags) : "";
 
                 sb.AppendLine("<tr>");
                 sb.AppendLine(CultureInfo.InvariantCulture, $"<td><a href=\"{item.Url}\">{item.Title}</a></td>");
@@ -472,7 +473,7 @@ public partial class FetchAndSendHostedService : BackgroundService
                 sb.AppendLine(CultureInfo.InvariantCulture, $"<td>{item.Price?.Replace("\n", "<br/>")}</td>");
                 sb.AppendLine("</tr>");
                 sb.AppendLine("<tr>");
-                sb.AppendLine(CultureInfo.InvariantCulture, $"<td colspan=\"5\" class=\"description\">{description}</td>");
+                sb.AppendLine(CultureInfo.InvariantCulture, $"<td colspan=\"5\" class=\"description\">{description}<br/>{tags}</td>");
                 sb.AppendLine("</tr>");
             }
 
