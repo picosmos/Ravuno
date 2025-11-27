@@ -1,10 +1,23 @@
 services:
-  DNT-calendar:
+  ravuno:
     build:
       dockerfile: Dockerfile
     ports:
-      - "1999:8080"
+      - "1868:8080"
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
-      - ASPNETCORE_FORWARDEDHEADERS_ENABLED=true
+      - ConnectionStrings__DataStorage=Data Source=/app/data/ravuno.db
+      - FetchAndSendService__IntervalHours=12
+      - FetchAndSendService__FetchThresholdHours=12
+      - UpdateConfigurationsPath=/app/config/updates
+      - EmailSettings__SmtpHost=your.smtp.server
+      - EmailSettings__SmtpPort=587
+      - EmailSettings__SmtpUsername=your-username
+      - EmailSettings__SmtpPassword=your-password
+      - EmailSettings__FromEmail=noreply@example.com
+      - EmailSettings__FromName=Ravuno
+      - EmailSettings__EnableSsl=true
     restart: unless-stopped
+    volumes:
+      - ./docker/data:/app/data
+      - ./docker/config:/app/config
