@@ -21,6 +21,8 @@ Copy `.sql` files into `/app/config/updates` of the docker container to define c
 
 ### Example Filter
 
+<!--cspell:ignore Arrang julianday mbassadør rgruppe -->
+
 ```sql
 -- DNT Aktiviteter: Multi day trip in Norway
 -- receiver@example.com

@@ -1,13 +1,72 @@
 # .dockerignore
+
+# Build outputs
 **/bin/
 **/obj/
+**/out/
+
+# IDE and editor folders
 **/.vs/
 **/.vscode/
-**/node_modules/
-**/npm-debug.log
+**/.idea/
+**/.rider/
+
+# Git files
 **/.git/
 **/.gitignore
-**/README.md
+**/.gitattributes
+
+# Docker files (already in context)
 **/Dockerfile*
 **/docker-compose*
 **/.dockerignore
+
+# Documentation
+**/README.md
+**/README.MD
+**/*.md
+!**/appsettings*.json
+
+# Node modules (if any)
+**/node_modules/
+**/npm-debug.log
+**/yarn.lock
+**/package-lock.json
+
+# Test results and coverage
+**/TestResults/
+**/coverage/
+**/*.trx
+
+# User-specific files
+**/*.user
+**/*.suo
+**/*.userosscache
+**/*.sln.docstates
+
+# NuGet packages (will be restored during build)
+**/packages/
+**/*.nupkg
+**/*.snupkg
+
+# Database files (exclude local dev databases)
+**/docker/data/
+**/*.db
+**/*.db-shm
+**/*.db-wal
+
+# Logs
+**/logs/
+**/*.log
+
+# OS generated files
+**/.DS_Store
+**/Thumbs.db
+**/*~
+
+# Temporary files
+**/tmp/
+**/temp/
+**/*.tmp
+**/*.bak
+**/*.swp
