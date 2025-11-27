@@ -257,7 +257,7 @@ public partial class FetchAndSendHostedService : BackgroundService
         // Send email if there are changes
         if (newDelta.Count > 0 || updatedDelta.Count > 0)
         {
-            var emailBody = this.BuildEmailBody(newDelta, updatedDelta);
+            var emailBody = this.BuildEmailBody([.. newDelta.OrderBy(item => item.EventStartDateTime)], [.. updatedDelta.OrderBy(item => item.EventStartDateTime)]);
             await emailService.SendEmailAsync(config.EmailReceiverAddress, "[Ravuno] " + config.QueryTitle, emailBody, isHtml: true);
             this._logger.LogInformation("Email sent to {Email} for {QueryTitle}",
                 config.EmailReceiverAddress, config.QueryTitle);
@@ -298,7 +298,8 @@ public partial class FetchAndSendHostedService : BackgroundService
                 .FirstOrDefaultAsync(i =>
                     i.Source == fetchedItem.Source &&
                     i.Title == fetchedItem.Title &&
-                    i.EventDateTime == fetchedItem.EventDateTime,
+                    i.EventStartDateTime == fetchedItem.EventStartDateTime &&
+                    i.EventEndDateTime == fetchedItem.EventEndDateTime,
                     cancellationToken);
 
             if (existingItem == null)
@@ -378,7 +379,8 @@ public partial class FetchAndSendHostedService : BackgroundService
             {
                 Source = Enum.Parse<ItemSource>(reader.GetString(reader.GetOrdinal("Source"))),
                 RetrievedAt = reader.GetDateTime(reader.GetOrdinal("RetrievedAt")),
-                EventDateTime = reader.GetDateTime(reader.GetOrdinal("EventDateTime")),
+                EventStartDateTime = reader.GetDateTime(reader.GetOrdinal("EventStartDateTime")),
+                EventEndDateTime = reader.GetDateTime(reader.GetOrdinal("EventEndDateTime")),
                 Title = await reader.IsDBNullAsync(reader.GetOrdinal("Title"), cancellationToken) ? null : reader.GetString(reader.GetOrdinal("Title")),
                 Description = await reader.IsDBNullAsync(reader.GetOrdinal("Description"), cancellationToken) ? null : reader.GetString(reader.GetOrdinal("Description")),
                 Location = await reader.IsDBNullAsync(reader.GetOrdinal("Location"), cancellationToken) ? null : reader.GetString(reader.GetOrdinal("Location")),
@@ -398,13 +400,15 @@ public partial class FetchAndSendHostedService : BackgroundService
     {
         return item1.Source == item2.Source &&
                item1.Title == item2.Title &&
-               item1.EventDateTime.Date == item2.EventDateTime.Date;
+               item1.EventEndDateTime.Date == item2.EventEndDateTime.Date &&
+               item1.EventStartDateTime.Date == item2.EventStartDateTime.Date;
     }
 
     private static bool AreItemsFullyEqual(Item item1, Item item2)
     {
         return AreItemsEqual(item1, item2) &&
-               item1.EventDateTime == item2.EventDateTime &&
+               item1.EventStartDateTime == item2.EventStartDateTime &&
+               item1.EventEndDateTime == item2.EventEndDateTime &&
                item1.Price == item2.Price &&
                item1.Description == item2.Description &&
                item1.Location == item2.Location &&
@@ -446,10 +450,9 @@ public partial class FetchAndSendHostedService : BackgroundService
             sb.AppendLine("<table>");
             sb.AppendLine("<tr>");
             sb.AppendLine("<th style=\"min-width: 20em;\">Title</th>");
-            sb.AppendLine("<th>Date</th>");
+            sb.AppendLine("<th>When? (Enrollment Deadline)</th>");
             sb.AppendLine("<th style=\"min-width: 10em;\">Location</th>");
             sb.AppendLine("<th style=\"min-width: 10em;\">Price</th>");
-            sb.AppendLine("<th>Enrollment Deadline</th>");
             sb.AppendLine("</tr>");
 
             foreach (var item in items)
@@ -464,10 +467,9 @@ public partial class FetchAndSendHostedService : BackgroundService
 
                 sb.AppendLine("<tr>");
                 sb.AppendLine(CultureInfo.InvariantCulture, $"<td><a href=\"{item.Url}\">{item.Title}</a></td>");
-                sb.AppendLine(CultureInfo.InvariantCulture, $"<td>{item.EventDateTime:yyyy-MM-dd HH:mm}</td>");
+                sb.AppendLine(CultureInfo.InvariantCulture, $"<td>{item.EventStartDateTime:yyyy-MM-dd HH:mm} - {item.EventEndDateTime:yyyy-MM-dd HH:mm}<br/>({item.EnrollmentDeadline:yyyy-MM-dd})</td>");
                 sb.AppendLine(CultureInfo.InvariantCulture, $"<td>{item.Location?.Replace("\n", "<br/>")}</td>");
                 sb.AppendLine(CultureInfo.InvariantCulture, $"<td>{item.Price?.Replace("\n", "<br/>")}</td>");
-                sb.AppendLine(CultureInfo.InvariantCulture, $"<td>{item.EnrollmentDeadline:yyyy-MM-dd}</td>");
                 sb.AppendLine("</tr>");
                 sb.AppendLine("<tr>");
                 sb.AppendLine(CultureInfo.InvariantCulture, $"<td colspan=\"5\" class=\"description\">{description}</td>");

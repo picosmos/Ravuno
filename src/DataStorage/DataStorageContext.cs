@@ -29,7 +29,7 @@ public class DataStorageContext : DbContext
             entity.Property(e => e.RetrievedAt)
                 .IsRequired();
 
-            entity.Property(e => e.EventDateTime)
+            entity.Property(e => e.EventStartDateTime)
                 .IsRequired();
 
             entity.Property(e => e.Title)

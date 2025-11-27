@@ -97,7 +97,8 @@ public class TeknaFetchService : ITeknaFetchService
                                 Organizer = fullOrganizerName,
                                 Url = this.GetStringProperty(courseItem, "PublicUrl") ?? "",
                                 Price = this.ExtractPrice(courseItem),
-                                EventDateTime = this.GetDateTimeProperty(courseItem, "StartDate") ?? DateTime.MinValue,
+                                EventStartDateTime = this.GetDateTimeProperty(courseItem, "StartDate") ?? DateTime.MinValue,
+                                EventEndDateTime = this.GetDateTimeProperty(courseItem, "EndDate") ?? DateTime.MinValue,
                                 EnrollmentDeadline = this.GetDateTimeProperty(courseItem, "EnrollmentDeadline")
                                                    ?? this.GetDateTimeProperty(courseItem, "StartDate")
                                                    ?? DateTime.MinValue,

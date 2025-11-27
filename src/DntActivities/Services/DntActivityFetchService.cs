@@ -121,7 +121,8 @@ public class DntActivityFetchService : IDntActivityFetchService
                 Location = ExtractFullLocation(root),
                 Url = $"https://aktiviteter.dnt.no/register/{eventId}",
                 Price = ExtractPricesFromDetail(root),
-                EventDateTime = GetDateTimePropertyFromRoot(root, "startDate") ?? DateTime.MinValue,
+                EventStartDateTime = GetDateTimePropertyFromRoot(root, "startDate") ?? DateTime.MinValue,
+                EventEndDateTime = GetDateTimePropertyFromRoot(root, "endDate") ?? DateTime.MinValue,
                 EnrollmentDeadline = GetDateTimePropertyFromRoot(root, "registrationEndDate")
                                    ?? GetDateTimePropertyFromRoot(root, "startDate")
                                    ?? DateTime.MinValue,
