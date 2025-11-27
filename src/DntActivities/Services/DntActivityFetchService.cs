@@ -227,12 +227,12 @@ public class DntActivityFetchService : IDntActivityFetchService
                     sb.Append(name);
                 }
 
-                if (!string.IsNullOrWhiteSpace(value) && !Regex.IsMatch("^0.(0+)$", value))
+                if (!string.IsNullOrWhiteSpace(value) && !Regex.IsMatch(@"^0\.(0+)$", value))
                 {
-                    sb.Append(value).Append(' ').Append(currency);
+                    sb.Append(' ').Append(value).Append(' ').Append(currency);
                 }
 
-                if (!string.IsNullOrWhiteSpace(vat) && !Regex.IsMatch("^0.(0+)$", vat))
+                if (!string.IsNullOrWhiteSpace(vat) && !Regex.IsMatch(@"^0\.(0+)$", vat))
                 {
                     sb.Append(" (mva: ").Append(vat).Append(' ').Append(currency).Append(')');
                 }
@@ -340,6 +340,12 @@ public class DntActivityFetchService : IDntActivityFetchService
             {
                 return property.GetString();
             }
+
+            if (property.ValueKind == JsonValueKind.Number)
+            {
+                return property.GetDouble().ToString(CultureInfo.InvariantCulture);
+            }
+
             if (property.ValueKind != JsonValueKind.Null)
             {
                 return property.ToString();

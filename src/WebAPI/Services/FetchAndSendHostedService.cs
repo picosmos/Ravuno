@@ -258,7 +258,7 @@ public partial class FetchAndSendHostedService : BackgroundService
         if (newDelta.Count > 0 || updatedDelta.Count > 0)
         {
             var emailBody = this.BuildEmailBody([.. newDelta.OrderBy(item => item.EventStartDateTime)], [.. updatedDelta.OrderBy(item => item.EventStartDateTime)]);
-            await emailService.SendEmailAsync(config.EmailReceiverAddress, "[Ravuno] " + config.QueryTitle, emailBody, isHtml: true);
+            await emailService.SendEmailAsync(config.EmailReceiverAddress, $"[Ravuno] {config.QueryTitle} ({newDelta.Count} new, {updatedDelta.Count} updated)", emailBody, isHtml: true);
             this._logger.LogInformation("Email sent to {Email} for {QueryTitle}",
                 config.EmailReceiverAddress, config.QueryTitle);
 
@@ -428,7 +428,7 @@ public partial class FetchAndSendHostedService : BackgroundService
             var htmlWithLinebreaks = HtmlLineBreaksRegex().Replace(html.Replace("\r", "").Replace("\n", ""), "\n");
             var text = HtmlTagsRegex().Replace(htmlWithLinebreaks, string.Empty);
             text = System.Net.WebUtility.HtmlDecode(text);
-            return MultipleLineBreaksRegex().Replace(text, "\n");
+            return MultipleLineBreaksRegex().Replace(text, "\n").Trim();
         }
         catch (Exception ex)
         {
@@ -450,9 +450,9 @@ public partial class FetchAndSendHostedService : BackgroundService
             sb.AppendLine("<table>");
             sb.AppendLine("<tr>");
             sb.AppendLine("<th style=\"min-width: 20em;\">Title</th>");
-            sb.AppendLine("<th>When? (Enrollment Deadline)</th>");
-            sb.AppendLine("<th style=\"min-width: 10em;\">Location</th>");
-            sb.AppendLine("<th style=\"min-width: 10em;\">Price</th>");
+            sb.AppendLine("<th style=\"min-width: 5em;\">When?<br/>(Enrollment Deadline)</th>");
+            sb.AppendLine("<th style=\"min-width: 5em;\">Location</th>");
+            sb.AppendLine("<th style=\"min-width: 5em;\">Price</th>");
             sb.AppendLine("</tr>");
 
             foreach (var item in items)
@@ -467,7 +467,7 @@ public partial class FetchAndSendHostedService : BackgroundService
 
                 sb.AppendLine("<tr>");
                 sb.AppendLine(CultureInfo.InvariantCulture, $"<td><a href=\"{item.Url}\">{item.Title}</a></td>");
-                sb.AppendLine(CultureInfo.InvariantCulture, $"<td>{item.EventStartDateTime:yyyy-MM-dd HH:mm} - {item.EventEndDateTime:yyyy-MM-dd HH:mm}<br/>({item.EnrollmentDeadline:yyyy-MM-dd})</td>");
+                sb.AppendLine(CultureInfo.InvariantCulture, $"<td>{item.EventStartDateTime:yyyy-MM-dd HH:mm} to<br/>{item.EventEndDateTime:yyyy-MM-dd HH:mm}<br/>({item.EnrollmentDeadline:yyyy-MM-dd})</td>");
                 sb.AppendLine(CultureInfo.InvariantCulture, $"<td>{item.Location?.Replace("\n", "<br/>")}</td>");
                 sb.AppendLine(CultureInfo.InvariantCulture, $"<td>{item.Price?.Replace("\n", "<br/>")}</td>");
                 sb.AppendLine("</tr>");
@@ -487,7 +487,7 @@ public partial class FetchAndSendHostedService : BackgroundService
         sb.AppendLine("body { font-family: 'Trebuchet MS', Arial, sans-serif; }");
         sb.AppendLine("h2 { color: #333; }");
         sb.AppendLine("table { border-collapse: collapse; min-width: 100%; margin-bottom: 20px; }");
-        sb.AppendLine("th, td { border: 1px solid #ddd; padding: 2px 6px 2px 6px; text-align: left; }");
+        sb.AppendLine("th, td { border: 1px solid #ddd; padding: 2px 6px 2px 6px; text-align: left; vertical-align: top; }");
         sb.AppendLine("th { background-color: #4CAF50; color: white; }");
         sb.AppendLine("tr:nth-child(even) { background-color: #f2f2f2; }");
         sb.AppendLine("a { color: #1a73e8; text-decoration: none; }");
@@ -506,12 +506,12 @@ public partial class FetchAndSendHostedService : BackgroundService
         return sb.ToString();
     }
 
-    [GeneratedRegex("<.*?>")]
+    [GeneratedRegex(@"<.*?>")]
     private static partial Regex HtmlTagsRegex();
 
     [GeneratedRegex(@"<(/?)(br|p)[^>]*>")]
     private static partial Regex HtmlLineBreaksRegex();
 
-    [GeneratedRegex("\n+")]
+    [GeneratedRegex(@"(\n\s*)+")]
     private static partial Regex MultipleLineBreaksRegex();
 }
