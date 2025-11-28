@@ -32,11 +32,18 @@ builder.Services.AddSwaggerGen();
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 builder.Services.AddScoped<IEmailService, EmailService>();
 
+// Configure FetchAndSend settings
+builder.Services.Configure<FetchAndSendSettings>(builder.Configuration.GetSection("FetchAndSendSettings"))
+    .AddOptions<FetchAndSendSettings>()
+    .Bind(builder.Configuration.GetSection("FetchAndSendSettings"))
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
+
 // Configure Tekna settings
-builder.Services.Configure<TeknaSettings>(builder.Configuration.GetSection("Tekna"));
+builder.Services.Configure<TeknaSettings>(builder.Configuration.GetSection("TeknaSettings"));
 
 // Configure DNT Activities settings
-builder.Services.Configure<DntActivitiesSettings>(builder.Configuration.GetSection("DntActivities"));
+builder.Services.Configure<DntActivitiesSettings>(builder.Configuration.GetSection("DntActivitiesSettings"));
 
 // Configure Cleanup settings
 builder.Services.Configure<CleanupSettings>(builder.Configuration.GetSection("CleanupSettings"))

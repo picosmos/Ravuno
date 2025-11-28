@@ -6,8 +6,10 @@ using DataStorage.Models;
 using DntActivities.Services.Contracts;
 using Email.Services.Contracts;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Tekna.Services.Contracts;
 using WebAPI.Services.Contracts;
+using WebAPI.Settings;
 
 namespace WebAPI.Services;
 
@@ -15,27 +17,25 @@ public partial class FetchAndSendHostedService : BackgroundService
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<FetchAndSendHostedService> _logger;
-    private readonly TimeSpan _interval;
-    private readonly TimeSpan _fetchThreshold;
+    private readonly FetchAndSendSettings _settings;
 
     public FetchAndSendHostedService(
         IServiceProvider serviceProvider,
-        IConfiguration configuration,
-        ILogger<FetchAndSendHostedService> logger)
+        ILogger<FetchAndSendHostedService> logger,
+        IOptions<FetchAndSendSettings> settings)
     {
+        ArgumentNullException.ThrowIfNull(settings);
         this._serviceProvider = serviceProvider;
         this._logger = logger;
-
-        var intervalHours = configuration.GetValue("FetchAndSendService:IntervalHours", 24);
-        this._interval = TimeSpan.FromHours(intervalHours);
-
-        var fetchThresholdHours = configuration.GetValue("FetchAndSendService:FetchThresholdHours", 24);
-        this._fetchThreshold = TimeSpan.FromHours(fetchThresholdHours);
+        this._settings = settings.Value;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        this._logger.LogInformation("FetchAndSendHostedService is starting");
+        this._logger.LogInformation(
+            "FetchAndSendHostedService is starting. Interval: {Interval}, Fetch threshold: {FetchThreshold}",
+            this._settings.Interval,
+            this._settings.FetchThreshold);
 
         while (!stoppingToken.IsCancellationRequested)
         {
@@ -48,8 +48,8 @@ public partial class FetchAndSendHostedService : BackgroundService
                 this._logger.LogError(ex, "Error occurred during fetch and send operation");
             }
 
-            this._logger.LogInformation("Next run scheduled in {Interval}", this._interval);
-            await Task.Delay(this._interval, stoppingToken);
+            this._logger.LogInformation("Next run scheduled in {Interval}", this._settings.Interval);
+            await Task.Delay(this._settings.Interval, stoppingToken);
         }
 
         this._logger.LogInformation("FetchAndSendHostedService is stopping");
@@ -210,7 +210,7 @@ public partial class FetchAndSendHostedService : BackgroundService
         }
 
         var timeSinceLastFetch = DateTime.UtcNow - lastFetch.ExecutionStartTime;
-        return timeSinceLastFetch >= this._fetchThreshold;
+        return timeSinceLastFetch >= this._settings.FetchThreshold;
     }
 
     private async Task ProcessUpdateConfigurationAsync(
