@@ -1,8 +1,8 @@
 using System.Net;
 using System.Net.Mail;
+using Microsoft.Extensions.Options;
 using Ravuno.Email.Services.Contracts;
 using Ravuno.Email.Settings;
-using Microsoft.Extensions.Options;
 
 namespace Ravuno.Email.Services;
 

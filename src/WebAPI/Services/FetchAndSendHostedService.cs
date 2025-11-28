@@ -1,12 +1,12 @@
 using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
-using Ravuno.DataStorage;
-using Ravuno.DataStorage.Models;
-using Ravuno.Fetcher.DntActivities.Services.Contracts;
-using Ravuno.Email.Services.Contracts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Ravuno.DataStorage;
+using Ravuno.DataStorage.Models;
+using Ravuno.Email.Services.Contracts;
+using Ravuno.Fetcher.DntActivities.Services.Contracts;
 using Ravuno.Fetcher.Tekna.Services.Contracts;
 using Ravuno.WebAPI.Services.Contracts;
 using Ravuno.WebAPI.Settings;

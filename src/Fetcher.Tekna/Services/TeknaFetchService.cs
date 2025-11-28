@@ -1,8 +1,8 @@
 using System.Globalization;
 using System.Text.Json;
-using Ravuno.DataStorage.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Ravuno.DataStorage.Models;
 using Ravuno.Fetcher.Tekna.Services.Contracts;
 using Ravuno.Fetcher.Tekna.Settings;
 
