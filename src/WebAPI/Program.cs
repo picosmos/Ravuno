@@ -33,6 +33,16 @@ builder.Services.Configure<FetchAndSendSettings>(builder.Configuration.GetSectio
     .AddOptions<FetchAndSendSettings>()
     .Bind(builder.Configuration.GetSection("FetchAndSendSettings"))
     .ValidateDataAnnotations()
+    .Validate(settings =>
+    {
+        var validSources = Enum.GetValues<Ravuno.DataStorage.Models.ItemSource>();
+        var invalidSources = settings.EnabledSources.Except(validSources).ToList();
+        return invalidSources.Count > 0
+            ? throw new InvalidOperationException(
+                $"Invalid sources configured: {string.Join(", ", invalidSources)}. " +
+                $"Valid sources are: {string.Join(", ", validSources)}")
+            : true;
+    }, "EnabledSources must only contain valid ItemSource values")
     .ValidateOnStart();
 builder.Services.Configure<TeknaSettings>(builder.Configuration.GetSection("TeknaSettings"));
 builder.Services.Configure<DntActivitiesSettings>(builder.Configuration.GetSection("DntActivitiesSettings"));

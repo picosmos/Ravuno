@@ -39,9 +39,10 @@ public partial class FetchAndSendHostedService : BackgroundService
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         this._logger.LogInformation(
-            "FetchAndSendHostedService is starting. Interval: {Interval}, Fetch threshold: {FetchThreshold}",
+            "FetchAndSendHostedService is starting. Interval: {Interval}, Fetch threshold: {FetchThreshold}, Enabled sources: {EnabledSources}",
             this._settings.Interval,
-            this._settings.FetchThreshold);
+            this._settings.FetchThreshold,
+            string.Join(", ", this._settings.EnabledSources));
 
         while (!stoppingToken.IsCancellationRequested)
         {
@@ -87,7 +88,8 @@ public partial class FetchAndSendHostedService : BackgroundService
 
         var allItems = new List<Item>();
         var fetchHistoryTrackerItems = new Dictionary<ItemSource, FetchHistory>();
-        foreach (var (source, fetchFunc) in ItemFetcher)
+        var enabledFetchers = ItemFetcher.Where(kv => this._settings.EnabledSources.Contains(kv.Key));
+        foreach (var (source, fetchFunc) in enabledFetchers)
         {
             this._logger.LogInformation("Preparing to fetch items from source: {Source}", source);
 
@@ -132,7 +134,7 @@ public partial class FetchAndSendHostedService : BackgroundService
         // Compare and update database, tracking stats per source
         var (newItems, updatedItems) = await CompareAndUpdateItemsAsync(dbContext, allFetchedItems, cancellationToken);
 
-        foreach (var (source, _) in ItemFetcher)
+        foreach (var (source, _) in enabledFetchers)
         {
             if (!fetchHistoryTrackerItems.ContainsKey(source))
             {
