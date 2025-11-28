@@ -19,6 +19,12 @@ public partial class FetchAndSendHostedService : BackgroundService
     private readonly ILogger<FetchAndSendHostedService> _logger;
     private readonly FetchAndSendSettings _settings;
 
+    private static readonly Dictionary<ItemSource, Func<IServiceScope, IReadOnlyCollection<Item>, Task<List<Item>>>> ItemFetcher = new()
+    {
+        [ItemSource.Tekna] = (scope, _) => scope.ServiceProvider.GetRequiredService<ITeknaFetchService>().FetchItemsAsync(),
+        [ItemSource.DntActivities] = (scope, existing) => scope.ServiceProvider.GetRequiredService<IDntActivityFetchService>().FetchItemsAsync(existing, false),
+    };
+
     public FetchAndSendHostedService(
         IServiceProvider serviceProvider,
         ILogger<FetchAndSendHostedService> logger,
@@ -59,8 +65,6 @@ public partial class FetchAndSendHostedService : BackgroundService
     {
         using var scope = this._serviceProvider.CreateScope();
 
-        var teknaService = scope.ServiceProvider.GetRequiredService<ITeknaFetchService>();
-        var dntService = scope.ServiceProvider.GetRequiredService<IDntActivityFetchService>();
         var dbContext = scope.ServiceProvider.GetRequiredService<DataStorageContext>();
         var emailService = scope.ServiceProvider.GetRequiredService<IEmailService>();
         var configService = scope.ServiceProvider.GetRequiredService<IUpdateConfigurationService>();
@@ -81,91 +85,63 @@ public partial class FetchAndSendHostedService : BackgroundService
                 config.QueryTitle, beforeResults.Count);
         }
 
-        // Check if we should fetch from Tekna
-        var shouldFetchTekna = await this.ShouldFetchSourceAsync(dbContext, ItemSource.Tekna, cancellationToken);
-        List<Item> teknaItems = [];
-        FetchHistory? teknaFetchHistory = null;
-        if (shouldFetchTekna)
+        var allItems = new List<Item>();
+        var fetchHistoryTrackerItems = new Dictionary<ItemSource, FetchHistory>();
+        foreach (var (source, fetchFunc) in ItemFetcher)
         {
-            this._logger.LogInformation("Fetching data from Tekna");
-            var startTime = DateTime.UtcNow;
-            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+            this._logger.LogInformation("Preparing to fetch items from source: {Source}", source);
 
-            teknaItems = await teknaService.FetchItemsAsync();
-
-            stopwatch.Stop();
-            this._logger.LogInformation("Fetched {Count} items from Tekna", teknaItems.Count);
-
-            teknaFetchHistory = new FetchHistory
+            var shouldFetch = await this.ShouldFetchSourceAsync(dbContext, source, cancellationToken);
+            if (!shouldFetch)
             {
-                Source = ItemSource.Tekna,
-                ExecutionStartTime = startTime,
-                ExecutionDuration = stopwatch.Elapsed,
-                ItemsRetrieved = teknaItems.Count,
-                NewItems = 0,
-                UpdatedItems = 0
-            };
-            dbContext.FetchHistories.Add(teknaFetchHistory);
-            dbContext.Entry(teknaFetchHistory).State = EntityState.Added;
-        }
-        else
-        {
-            this._logger.LogInformation("Skipping Tekna fetch - last fetch was within threshold");
-        }
-
-        // Check if we should fetch from DNT Activities
-        var shouldFetchDnt = await this.ShouldFetchSourceAsync(dbContext, ItemSource.DntActivities, cancellationToken);
-        List<Item> dntItems = [];
-        FetchHistory? dntFetchHistory = null;
-        if (shouldFetchDnt)
-        {
-            this._logger.LogInformation("Fetching data from DNT Activities");
-            var startTime = DateTime.UtcNow;
-            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+                this._logger.LogInformation("Skipping fetch from source {Source} - last fetch was within threshold", source);
+                continue;
+            }
 
             var existingItems = await dbContext.Items
-                .Where(i => i.Source == ItemSource.DntActivities)
+                .Where(i => i.Source == source)
                 .ToListAsync(cancellationToken);
 
-            // We may want to make this configurable later or fetch details for existing based on some criteria
-            dntItems = await dntService.FetchItemsAsync(existingItems, fetchDetailsForExisting: false);
+            this._logger.LogInformation("Fetching data from {Source}", source);
+            var startTime = DateTime.UtcNow;
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+
+            var items = await fetchFunc(scope, existingItems);
 
             stopwatch.Stop();
-            this._logger.LogInformation("Fetched {Count} items from DNT Activities", dntItems.Count);
+            this._logger.LogInformation("Fetched {Count} items from {Source}", items.Count, source);
 
-            dntFetchHistory = new FetchHistory
+            var fetchHistory = new FetchHistory
             {
-                Source = ItemSource.DntActivities,
+                Source = source,
                 ExecutionStartTime = startTime,
                 ExecutionDuration = stopwatch.Elapsed,
-                ItemsRetrieved = dntItems.Count,
+                ItemsRetrieved = items.Count,
                 NewItems = 0,
                 UpdatedItems = 0
             };
-            dbContext.FetchHistories.Add(dntFetchHistory);
-            dbContext.Entry(dntFetchHistory).State = EntityState.Added;
-        }
-        else
-        {
-            this._logger.LogInformation("Skipping DNT Activities fetch - last fetch was within threshold");
+            dbContext.FetchHistories.Add(fetchHistory);
+            dbContext.Entry(fetchHistory).State = EntityState.Added;
+            fetchHistoryTrackerItems.Add(source, fetchHistory);
+
+            allItems.AddRange(items);
         }
 
-        var allFetchedItems = teknaItems.Concat(dntItems).ToList();
+        var allFetchedItems = allItems;
 
         // Compare and update database, tracking stats per source
         var (newItems, updatedItems) = await CompareAndUpdateItemsAsync(dbContext, allFetchedItems, cancellationToken);
 
-        // Update fetch histories with actual new/updated counts
-        if (teknaFetchHistory != null)
+        foreach (var (source, _) in ItemFetcher)
         {
-            teknaFetchHistory.NewItems = newItems.Count(i => i.Source == ItemSource.Tekna);
-            teknaFetchHistory.UpdatedItems = updatedItems.Count(i => i.Source == ItemSource.Tekna);
-        }
+            if (!fetchHistoryTrackerItems.ContainsKey(source))
+            {
+                continue;
+            }
 
-        if (dntFetchHistory != null)
-        {
-            dntFetchHistory.NewItems = newItems.Count(i => i.Source == ItemSource.DntActivities);
-            dntFetchHistory.UpdatedItems = updatedItems.Count(i => i.Source == ItemSource.DntActivities);
+            var fetchHistory = fetchHistoryTrackerItems[source];
+            fetchHistory.NewItems = newItems.Count(i => i.Source == source);
+            fetchHistory.UpdatedItems = updatedItems.Count(i => i.Source == source);
         }
 
         await dbContext.SaveChangesAsync(cancellationToken);
@@ -368,39 +344,9 @@ public partial class FetchAndSendHostedService : BackgroundService
         string sqlQuery,
         CancellationToken cancellationToken)
     {
-        var items = new List<Item>();
-
-        await using var command = dbContext.Database.GetDbConnection().CreateCommand();
-        command.CommandText = sqlQuery;
-
-        if (command.Connection?.State != System.Data.ConnectionState.Open)
-        {
-            await dbContext.Database.OpenConnectionAsync(cancellationToken);
-        }
-
-        await using var reader = await command.ExecuteReaderAsync(cancellationToken);
-
-        while (await reader.ReadAsync(cancellationToken))
-        {
-            var item = new Item
-            {
-                Source = Enum.Parse<ItemSource>(reader.GetString(reader.GetOrdinal("Source"))),
-                RetrievedAt = reader.GetDateTime(reader.GetOrdinal("RetrievedAt")),
-                EventStartDateTime = reader.GetDateTime(reader.GetOrdinal("EventStartDateTime")),
-                EventEndDateTime = reader.GetDateTime(reader.GetOrdinal("EventEndDateTime")),
-                Title = await reader.IsDBNullAsync(reader.GetOrdinal("Title"), cancellationToken) ? null : reader.GetString(reader.GetOrdinal("Title")),
-                Description = await reader.IsDBNullAsync(reader.GetOrdinal("Description"), cancellationToken) ? null : reader.GetString(reader.GetOrdinal("Description")),
-                Location = await reader.IsDBNullAsync(reader.GetOrdinal("Location"), cancellationToken) ? null : reader.GetString(reader.GetOrdinal("Location")),
-                Url = await reader.IsDBNullAsync(reader.GetOrdinal("Url"), cancellationToken) ? null : reader.GetString(reader.GetOrdinal("Url")),
-                Price = await reader.IsDBNullAsync(reader.GetOrdinal("Price"), cancellationToken) ? null : reader.GetString(reader.GetOrdinal("Price")),
-                EnrollmentDeadline = reader.GetDateTime(reader.GetOrdinal("EnrollmentDeadline")),
-                RawData = await reader.IsDBNullAsync(reader.GetOrdinal("RawData"), cancellationToken) ? null : reader.GetString(reader.GetOrdinal("RawData"))
-            };
-
-            items.Add(item);
-        }
-
-        return items;
+        return await dbContext.Database.SqlQueryRaw<Item>(sqlQuery)
+            .AsNoTracking()
+            .ToListAsync(cancellationToken);
     }
 
     private static bool AreItemsEqual(Item item1, Item item2)
@@ -408,7 +354,8 @@ public partial class FetchAndSendHostedService : BackgroundService
         return item1.Source == item2.Source &&
                item1.Title == item2.Title &&
                item1.EventEndDateTime.Date == item2.EventEndDateTime.Date &&
-               item1.EventStartDateTime.Date == item2.EventStartDateTime.Date;
+               item1.EventStartDateTime.Date == item2.EventStartDateTime.Date &&
+               item1.SourceId == item2.SourceId;
     }
 
     private static bool AreItemsFullyEqual(Item item1, Item item2)
