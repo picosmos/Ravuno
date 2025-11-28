@@ -1,0 +1,29 @@
+﻿using Microsoft.EntityFrameworkCore.Migrations;
+
+#nullable disable
+
+namespace DataStorage.Migrations
+{
+    /// <inheritdoc />
+    public partial class AddItemId : Migration
+    {
+        /// <inheritdoc />
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.AddColumn<long>(
+                name: "Id",
+                table: "Items",
+                type: "INTEGER",
+                nullable: false,
+                defaultValue: 0L);
+        }
+
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropColumn(
+                name: "Id",
+                table: "Items");
+        }
+    }
+}

@@ -1,13 +1,9 @@
 ﻿namespace DataStorage.Models;
 
-public enum ItemSource
-{
-    Tekna,
-    DntActivities
-}
-
 public class Item
 {
+    public long Id { get; set; }
+
     public ItemSource Source { get; set; }
 
     public string? RawData { get; set; }
