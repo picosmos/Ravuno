@@ -91,42 +91,49 @@ public partial class FetchAndSendHostedService : BackgroundService
         var enabledFetchers = ItemFetcher.Where(kv => this._settings.EnabledSources.Contains(kv.Key));
         foreach (var (source, fetchFunc) in enabledFetchers)
         {
-            this._logger.LogInformation("Preparing to fetch items from source: {Source}", source);
-
-            var shouldFetch = await this.ShouldFetchSourceAsync(dbContext, source, cancellationToken);
-            if (!shouldFetch)
+            try
             {
-                this._logger.LogInformation("Skipping fetch from source {Source} - last fetch was within threshold", source);
-                continue;
+                this._logger.LogInformation("Preparing to fetch items from source: {Source}", source);
+
+                var shouldFetch = await this.ShouldFetchSourceAsync(dbContext, source, cancellationToken);
+                if (!shouldFetch)
+                {
+                    this._logger.LogInformation("Skipping fetch from source {Source} - last fetch was within threshold", source);
+                    continue;
+                }
+
+                var existingItems = await dbContext.Items
+                    .Where(i => i.Source == source)
+                    .ToListAsync(cancellationToken);
+
+                this._logger.LogInformation("Fetching data from {Source}", source);
+                var startTime = DateTime.UtcNow;
+                var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+
+                var items = await fetchFunc(scope, existingItems);
+
+                stopwatch.Stop();
+                this._logger.LogInformation("Fetched {Count} items from {Source}", items.Count, source);
+
+                var fetchHistory = new FetchHistory
+                {
+                    Source = source,
+                    ExecutionStartTime = startTime,
+                    ExecutionDuration = stopwatch.Elapsed,
+                    ItemsRetrieved = items.Count,
+                    NewItems = 0,
+                    UpdatedItems = 0
+                };
+                dbContext.FetchHistories.Add(fetchHistory);
+                dbContext.Entry(fetchHistory).State = EntityState.Added;
+                fetchHistoryTrackerItems.Add(source, fetchHistory);
+
+                allItems.AddRange(items);
             }
-
-            var existingItems = await dbContext.Items
-                .Where(i => i.Source == source)
-                .ToListAsync(cancellationToken);
-
-            this._logger.LogInformation("Fetching data from {Source}", source);
-            var startTime = DateTime.UtcNow;
-            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
-
-            var items = await fetchFunc(scope, existingItems);
-
-            stopwatch.Stop();
-            this._logger.LogInformation("Fetched {Count} items from {Source}", items.Count, source);
-
-            var fetchHistory = new FetchHistory
+            catch (Exception ex)
             {
-                Source = source,
-                ExecutionStartTime = startTime,
-                ExecutionDuration = stopwatch.Elapsed,
-                ItemsRetrieved = items.Count,
-                NewItems = 0,
-                UpdatedItems = 0
-            };
-            dbContext.FetchHistories.Add(fetchHistory);
-            dbContext.Entry(fetchHistory).State = EntityState.Added;
-            fetchHistoryTrackerItems.Add(source, fetchHistory);
-
-            allItems.AddRange(items);
+                this._logger.LogError(ex, "Error fetching items from source {Source}", source);
+            }
         }
 
         var allFetchedItems = allItems;
