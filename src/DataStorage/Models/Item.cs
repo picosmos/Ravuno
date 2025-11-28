@@ -1,7 +1,10 @@
-﻿namespace DataStorage.Models;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace DataStorage.Models;
 
 public class Item
 {
+    [Key]
     public long Id { get; set; }
 
     public ItemSource Source { get; set; }

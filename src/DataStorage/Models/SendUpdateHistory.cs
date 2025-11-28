@@ -1,8 +1,11 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace DataStorage.Models;
 
 public class SendUpdateHistory
 {
-    public int Id { get; set; }
+    [Key]
+    public long Id { get; set; }
 
     public required string QueryTitle { get; set; }
 

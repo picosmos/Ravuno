@@ -16,11 +16,12 @@ public class DataStorageContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        ArgumentNullException.ThrowIfNull(modelBuilder);
         base.OnModelCreating(modelBuilder);
 
         modelBuilder.Entity<Item>(entity =>
         {
-            entity.HasKey(e => new { e.Source, e.RetrievedAt, e.Url });
+            entity.HasKey(e => e.Id);
 
             entity.Property(e => e.Source)
                 .IsRequired()

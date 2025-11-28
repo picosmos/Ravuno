@@ -1,7 +1,10 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace DataStorage.Models;
 
 public class FetchHistory
 {
+    [Key]
     public int Id { get; set; }
 
     public ItemSource Source { get; set; }

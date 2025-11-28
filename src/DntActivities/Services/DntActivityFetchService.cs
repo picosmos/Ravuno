@@ -28,6 +28,7 @@ public class DntActivityFetchService : IDntActivityFetchService
         var allItems = new List<Item>();
         var pageNumber = 1;
         var hasMorePages = true;
+        var failCount = 0;
 
         while (hasMorePages)
         {
@@ -74,7 +75,7 @@ public class DntActivityFetchService : IDntActivityFetchService
                         }
 
                         var detailedItem = await this.FetchEventDetailsAsync(eventId);
-                        if (detailedItem != null)
+                        if (detailedItem != null && allItems.TrueForAll(x => x.Id != detailedItem.Id))
                         {
                             allItems.Add(detailedItem);
 
@@ -86,6 +87,7 @@ public class DntActivityFetchService : IDntActivityFetchService
                 }
 
                 pageNumber++;
+                failCount = 0;
 
                 if (hasMorePages)
                 {
@@ -94,9 +96,13 @@ public class DntActivityFetchService : IDntActivityFetchService
             }
             catch (Exception ex)
             {
-                // todo: in an error case here, does it try again forever? Should we limit retries?
-                // what happens with items already added to allItems, then trying the same page again?
                 this._logger?.LogError(ex, "Error fetching page {PageNumber} from DNT API", pageNumber);
+                failCount++;
+                if (failCount > 5)
+                {
+                    this._logger?.LogError(ex, "Retried for 5 times, terminating dnt fetch");
+                    return allItems;
+                }
                 throw;
             }
         }
