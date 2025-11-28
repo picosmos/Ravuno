@@ -69,6 +69,7 @@ public class DntActivityFetchService : IDntActivityFetchService
                         }
                         if (!fetchDetailsForExisting && existingItems.Any(i => i.SourceId == eventId))
                         {
+                            this._logger?.LogInformation("Activity with ID {EventId} already exists, skipping detail fetch", eventId);
                             continue;
                         }
 
@@ -93,6 +94,8 @@ public class DntActivityFetchService : IDntActivityFetchService
             }
             catch (Exception ex)
             {
+                // todo: in an error case here, does it try again forever? Should we limit retries?
+                // what happens with items already added to allItems, then trying the same page again?
                 this._logger?.LogError(ex, "Error fetching page {PageNumber} from DNT API", pageNumber);
                 throw;
             }
