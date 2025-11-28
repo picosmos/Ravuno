@@ -106,6 +106,7 @@ public partial class FetchAndSendHostedService : BackgroundService
                 UpdatedItems = 0
             };
             dbContext.FetchHistories.Add(teknaFetchHistory);
+            dbContext.Entry(teknaFetchHistory).State = EntityState.Added;
         }
         else
         {
@@ -142,6 +143,7 @@ public partial class FetchAndSendHostedService : BackgroundService
                 UpdatedItems = 0
             };
             dbContext.FetchHistories.Add(dntFetchHistory);
+            dbContext.Entry(dntFetchHistory).State = EntityState.Added;
         }
         else
         {
