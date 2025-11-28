@@ -61,7 +61,7 @@ builder.Services.AddHostedService<ItemCleanupService>();
 
 builder.Services.AddRateLimiter(options =>
 {
-    options.AddPolicy("DntApi", context =>
+    options.AddPolicy("RavunoApi", context =>
         RateLimitPartition.GetFixedWindowLimiter(
             partitionKey: context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
             factory: _ => new FixedWindowRateLimiterOptions
@@ -104,9 +104,6 @@ else
 app.ApplyDatabaseMigrations();
 
 app.UseForwardedHeaders();
-
-app.UseSwagger();
-app.UseSwaggerUI();
 
 app.UseRateLimiter();
 
