@@ -44,8 +44,8 @@ builder.Services.Configure<FetchAndSendSettings>(builder.Configuration.GetSectio
             : true;
     }, "EnabledSources must only contain valid ItemSource values")
     .ValidateOnStart();
-builder.Services.Configure<TeknaSettings>(builder.Configuration.GetSection("TeknaSettings"));
-builder.Services.Configure<DntActivitiesSettings>(builder.Configuration.GetSection("DntActivitiesSettings"));
+builder.Services.Configure<TeknaSettings>(builder.Configuration.GetSection("FetcherSettings:Tekna"));
+builder.Services.Configure<DntActivitiesSettings>(builder.Configuration.GetSection("FetcherSettings:DntActivities"));
 builder.Services.Configure<CleanupSettings>(builder.Configuration.GetSection("CleanupSettings"))
     .AddOptions<CleanupSettings>()
     .Bind(builder.Configuration.GetSection("CleanupSettings"))
