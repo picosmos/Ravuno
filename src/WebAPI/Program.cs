@@ -12,6 +12,7 @@ using Tekna.Settings;
 using WebAPI.Extensions;
 using WebAPI.Services;
 using WebAPI.Services.Contracts;
+using WebAPI.Settings;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -37,6 +38,13 @@ builder.Services.Configure<TeknaSettings>(builder.Configuration.GetSection("Tekn
 // Configure DNT Activities settings
 builder.Services.Configure<DntActivitiesSettings>(builder.Configuration.GetSection("DntActivities"));
 
+// Configure Cleanup settings
+builder.Services.Configure<CleanupSettings>(builder.Configuration.GetSection("CleanupSettings"))
+    .AddOptions<CleanupSettings>()
+    .Bind(builder.Configuration.GetSection("CleanupSettings"))
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
+
 // Configure Tekna service
 builder.Services.AddHttpClient<ITeknaFetchService, TeknaFetchService>();
 
@@ -54,6 +62,9 @@ builder.Services.AddScoped<IUpdateConfigurationService, UpdateConfigurationServi
 
 // Add Hosted Service for fetching and sending
 builder.Services.AddHostedService<FetchAndSendHostedService>();
+
+// Add Hosted Service for item cleanup
+builder.Services.AddHostedService<ItemCleanupService>();
 
 // Add rate limiting
 builder.Services.AddRateLimiter(options =>
