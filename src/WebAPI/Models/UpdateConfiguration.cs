@@ -1,4 +1,4 @@
-namespace WebAPI.Models;
+namespace Ravuno.WebAPI.Models;
 
 public class UpdateConfiguration
 {

@@ -11,9 +11,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Email", "src\Email\Email.cs
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataStorage", "src\DataStorage\DataStorage.csproj", "{B2C3D4E5-F6G7-8901-BCDE-F12345678901}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tekna", "src\Tekna\Tekna.csproj", "{C3D4E5F6-G7H8-9012-CDEF-123456789012}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tekna", "src\Fetcher.Tekna\Fetcher.Tekna.csproj", "{C3D4E5F6-G7H8-9012-CDEF-123456789012}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DntActivities", "src\DntActivities\DntActivities.csproj", "{D4E5F6G7-H8I9-0123-DEFG-234567890123}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DntActivities", "src\Fetcher.DntActivities\Fetcher.DntActivities.csproj", "{D4E5F6G7-H8I9-0123-DEFG-234567890123}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

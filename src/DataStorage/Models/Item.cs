@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace DataStorage.Models;
+namespace Ravuno.DataStorage.Models;
 
 public class Item
 {

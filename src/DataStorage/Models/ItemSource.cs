@@ -1,4 +1,4 @@
-namespace DataStorage.Models;
+namespace Ravuno.DataStorage.Models;
 
 public enum ItemSource
 {

@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace WebAPI.Settings;
+namespace Ravuno.WebAPI.Settings;
 
 public class FetchAndSendSettings
 {

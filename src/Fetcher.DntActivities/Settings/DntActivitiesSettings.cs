@@ -1,4 +1,4 @@
-namespace DntActivities.Settings;
+namespace Ravuno.Fetcher.DntActivities.Settings;
 
 public class DntActivitiesSettings
 {

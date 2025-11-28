@@ -2,13 +2,13 @@ using System.Globalization;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
-using DataStorage.Models;
-using DntActivities.Services.Contracts;
-using DntActivities.Settings;
+using Ravuno.DataStorage.Models;
+using Ravuno.Fetcher.DntActivities.Services.Contracts;
+using Ravuno.Fetcher.DntActivities.Settings;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace DntActivities.Services;
+namespace Ravuno.Fetcher.DntActivities.Services;
 
 public class DntActivityFetchService : IDntActivityFetchService
 {

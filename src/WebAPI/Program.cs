@@ -1,18 +1,18 @@
 using System.Threading.RateLimiting;
-using DntActivities.Services;
-using DntActivities.Services.Contracts;
-using DntActivities.Settings;
-using Email.Services;
-using Email.Services.Contracts;
-using Email.Settings;
+using Ravuno.Fetcher.DntActivities.Services;
+using Ravuno.Fetcher.DntActivities.Services.Contracts;
+using Ravuno.Fetcher.DntActivities.Settings;
+using Ravuno.Email.Services;
+using Ravuno.Email.Services.Contracts;
+using Ravuno.Email.Settings;
 using Microsoft.AspNetCore.HttpOverrides;
-using Tekna.Services;
-using Tekna.Services.Contracts;
-using Tekna.Settings;
-using WebAPI.Extensions;
-using WebAPI.Services;
-using WebAPI.Services.Contracts;
-using WebAPI.Settings;
+using Ravuno.Fetcher.Tekna.Services;
+using Ravuno.Fetcher.Tekna.Services.Contracts;
+using Ravuno.Fetcher.Tekna.Settings;
+using Ravuno.WebAPI.Extensions;
+using Ravuno.WebAPI.Services;
+using Ravuno.WebAPI.Services.Contracts;
+using Ravuno.WebAPI.Settings;
 
 var builder = WebApplication.CreateBuilder(args);
 

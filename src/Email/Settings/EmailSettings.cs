@@ -1,4 +1,4 @@
-namespace Email.Settings;
+namespace Ravuno.Email.Settings;
 
 public class EmailSettings
 {

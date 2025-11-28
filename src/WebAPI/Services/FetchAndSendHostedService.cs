@@ -1,17 +1,17 @@
 using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
-using DataStorage;
-using DataStorage.Models;
-using DntActivities.Services.Contracts;
-using Email.Services.Contracts;
+using Ravuno.DataStorage;
+using Ravuno.DataStorage.Models;
+using Ravuno.Fetcher.DntActivities.Services.Contracts;
+using Ravuno.Email.Services.Contracts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using Tekna.Services.Contracts;
-using WebAPI.Services.Contracts;
-using WebAPI.Settings;
+using Ravuno.Fetcher.Tekna.Services.Contracts;
+using Ravuno.WebAPI.Services.Contracts;
+using Ravuno.WebAPI.Settings;
 
-namespace WebAPI.Services;
+namespace Ravuno.WebAPI.Services;
 
 public partial class FetchAndSendHostedService : BackgroundService
 {

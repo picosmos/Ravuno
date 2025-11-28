@@ -1,12 +1,12 @@
 using System.Globalization;
 using System.Text.Json;
-using DataStorage.Models;
+using Ravuno.DataStorage.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Tekna.Services.Contracts;
-using Tekna.Settings;
+using Ravuno.Fetcher.Tekna.Services.Contracts;
+using Ravuno.Fetcher.Tekna.Settings;
 
-namespace Tekna.Services;
+namespace Ravuno.Fetcher.Tekna.Services;
 
 //cspell:ignore searchtargetgroup, fieldsofstudy, pricegroup, regiondigital
 

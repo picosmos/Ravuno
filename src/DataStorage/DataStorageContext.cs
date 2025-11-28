@@ -1,7 +1,7 @@
-using DataStorage.Models;
+using Ravuno.DataStorage.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace DataStorage;
+namespace Ravuno.DataStorage;
 
 public class DataStorageContext : DbContext
 {

@@ -1,21 +1,21 @@
 using System.Net;
 using System.Net.Mail;
-using Email.Services.Contracts;
-using Email.Settings;
+using Ravuno.Email.Services.Contracts;
+using Ravuno.Email.Settings;
 using Microsoft.Extensions.Options;
 
-namespace Email.Services;
+namespace Ravuno.Email.Services;
 
 public class EmailService(IOptions<EmailSettings> emailSettings) : IEmailService
 {
     private readonly EmailSettings _emailSettings = emailSettings.Value;
 
-    public async Task SendEmailAsync(string to, string subject, string body)
+    public async Task SendEmailAsync(string receiver, string subject, string body)
     {
-        await this.SendEmailAsync(to, subject, body, false);
+        await this.SendEmailAsync(receiver, subject, body, false);
     }
 
-    public async Task SendEmailAsync(string to, string subject, string body, bool isHtml)
+    public async Task SendEmailAsync(string receiver, string subject, string body, bool isHtml)
     {
         using var smtpClient = new SmtpClient(this._emailSettings.SmtpHost, this._emailSettings.SmtpPort)
         {
@@ -23,7 +23,7 @@ public class EmailService(IOptions<EmailSettings> emailSettings) : IEmailService
             Credentials = new NetworkCredential(this._emailSettings.SmtpUsername, this._emailSettings.SmtpPassword)
         };
 
-        var mailMessage = new MailMessage
+        using var mailMessage = new MailMessage
         {
             From = new MailAddress(this._emailSettings.FromEmail, this._emailSettings.FromName),
             Subject = subject,
@@ -31,7 +31,7 @@ public class EmailService(IOptions<EmailSettings> emailSettings) : IEmailService
             IsBodyHtml = isHtml
         };
 
-        mailMessage.To.Add(to);
+        mailMessage.To.Add(receiver);
 
         await smtpClient.SendMailAsync(mailMessage);
     }

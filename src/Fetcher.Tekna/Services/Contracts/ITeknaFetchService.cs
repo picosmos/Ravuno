@@ -1,6 +1,6 @@
-using DataStorage.Models;
+using Ravuno.DataStorage.Models;
 
-namespace Tekna.Services.Contracts;
+namespace Ravuno.Fetcher.Tekna.Services.Contracts;
 
 public interface ITeknaFetchService
 {

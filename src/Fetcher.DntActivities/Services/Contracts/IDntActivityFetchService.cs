@@ -1,6 +1,6 @@
-using DataStorage.Models;
+using Ravuno.DataStorage.Models;
 
-namespace DntActivities.Services.Contracts;
+namespace Ravuno.Fetcher.DntActivities.Services.Contracts;
 
 public interface IDntActivityFetchService
 {

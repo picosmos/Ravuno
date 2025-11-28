@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace DataStorage.Migrations;
+namespace Ravuno.DataStorage.Migrations;
 
 /// <inheritdoc />
 public partial class InitialCreate : Migration

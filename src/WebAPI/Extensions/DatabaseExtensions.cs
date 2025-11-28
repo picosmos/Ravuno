@@ -1,7 +1,7 @@
-using DataStorage;
+using Ravuno.DataStorage;
 using Microsoft.EntityFrameworkCore;
 
-namespace WebAPI.Extensions;
+namespace Ravuno.WebAPI.Extensions;
 
 public static class DatabaseExtensions
 {

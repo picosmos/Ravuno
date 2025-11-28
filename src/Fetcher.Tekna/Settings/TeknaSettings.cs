@@ -1,4 +1,4 @@
-namespace Tekna.Settings;
+namespace Ravuno.Fetcher.Tekna.Settings;
 
 public class TeknaSettings
 {

@@ -1,9 +1,9 @@
-using DataStorage;
+using Ravuno.DataStorage;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using WebAPI.Settings;
+using Ravuno.WebAPI.Settings;
 
-namespace WebAPI.Services;
+namespace Ravuno.WebAPI.Services;
 
 public class ItemCleanupService : BackgroundService
 {

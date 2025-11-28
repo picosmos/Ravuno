@@ -1,7 +1,7 @@
-using WebAPI.Models;
-using WebAPI.Services.Contracts;
+using Ravuno.WebAPI.Models;
+using Ravuno.WebAPI.Services.Contracts;
 
-namespace WebAPI.Services;
+namespace Ravuno.WebAPI.Services;
 
 public class UpdateConfigurationService : IUpdateConfigurationService
 {

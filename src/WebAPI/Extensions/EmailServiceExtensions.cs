@@ -1,8 +1,8 @@
 using System.Globalization;
 using System.Text;
-using Email.Services.Contracts;
+using Ravuno.Email.Services.Contracts;
 
-namespace WebAPI.Extensions;
+namespace Ravuno.WebAPI.Extensions;
 
 public static class EmailServiceExtensions
 {
@@ -29,7 +29,7 @@ public static class EmailServiceExtensions
         }
 
         await emailService.SendEmailAsync(
-            to: receiver,
+            receiver: receiver,
             subject: $"[ERROR] {title}",
             body: body.ToString(),
             isHtml: true
