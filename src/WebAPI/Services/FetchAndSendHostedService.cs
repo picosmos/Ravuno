@@ -475,7 +475,7 @@ public partial class FetchAndSendHostedService : BackgroundService
 
                 sb.AppendLine("<tr>");
                 sb.AppendLine(CultureInfo.InvariantCulture, $"<td><a href=\"{item.Url}\">{item.Title}</a></td>");
-                sb.AppendLine(CultureInfo.InvariantCulture, $"<td>{item.EventStartDateTime:yyyy-MM-dd HH:mm} to<br/>{item.EventEndDateTime:yyyy-MM-dd HH:mm}<br/>({item.EnrollmentDeadline:yyyy-MM-dd})</td>");
+                sb.AppendLine(CultureInfo.InvariantCulture, $"<td>{item.EventStartDateTime:ddd, yyyy-MM-dd HH:mm} to<br/>{item.EventEndDateTime:ddd, yyyy-MM-dd HH:mm}<br/>({item.EnrollmentDeadline:ddd, yyyy-MM-dd HH:mm})</td>");
                 sb.AppendLine(CultureInfo.InvariantCulture, $"<td>{item.Location?.Replace("\n", "<br/>")}</td>");
                 sb.AppendLine(CultureInfo.InvariantCulture, $"<td>{item.Price?.Replace("\n", "<br/>")}</td>");
                 sb.AppendLine("</tr>");
