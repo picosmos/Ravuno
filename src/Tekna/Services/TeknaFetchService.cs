@@ -90,14 +90,14 @@ public class TeknaFetchService : ITeknaFetchService
                                 RetrievedAt = DateTime.UtcNow,
                                 Title = this.GetStringProperty(courseItem, "Title") ?? "No title",
                                 Description = this.GetStringProperty(courseItem, "Ingress") + "\n" + this.GetStringProperty(courseItem, "Description"),
-                                Location = string.Join("\n",
-                                new[]{
+                                Location = string.Join("\n", new[] {
                                         this.GetStringProperty(courseItem, "VenueDetail"),
                                         this.GetStringProperty(courseItem, "VenueName"),
                                         this.GetStringProperty(courseItem, "VenueTown") ,
-                                      this.GetStringProperty(courseItem, "Region"),
-                            this.GetStringProperty(courseItem, "District"),
-                            this.GetStringProperty(courseItem, "County")}.Where(s => !string.IsNullOrEmpty(s))),
+                                        this.GetStringProperty(courseItem, "Region"),
+                                        this.GetStringProperty(courseItem, "District"),
+                                        this.GetStringProperty(courseItem, "County")
+                                }.Where(s => !string.IsNullOrEmpty(s))),
                                 Organizer = fullOrganizerName,
                                 Url = this.GetStringProperty(courseItem, "PublicUrl") ?? "",
                                 Price = this.ExtractPrice(courseItem),
@@ -245,9 +245,9 @@ public class TeknaFetchService : ITeknaFetchService
         var tags = new List<string>();
 
         // Extract regiondigital (Region/District/County hierarchy)
-        var region = this.GetStringProperty(courseItem, "Region");
-        var district = this.GetStringProperty(courseItem, "District");
-        var county = this.GetStringProperty(courseItem, "County");
+        var region = this.GetStringProperty(courseItem, "Region")?.Trim();
+        var district = this.GetStringProperty(courseItem, "District")?.Trim();
+        var county = this.GetStringProperty(courseItem, "County")?.Trim();
 
         var regionParts = new List<string>();
         if (!string.IsNullOrEmpty(region))
