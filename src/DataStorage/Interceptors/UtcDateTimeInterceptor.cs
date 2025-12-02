@@ -67,7 +67,7 @@ public class UtcDateTimeInterceptor : SaveChangesInterceptor
                 var propertyName = property.Metadata.Name;
                 var dateTime = (DateTime?)property.CurrentValue;
 
-                if (!dateTime.HasValue)
+                if (!dateTime.HasValue || dateTime == DateTime.MaxValue || dateTime == DateTime.MinValue)
                 {
                     continue;
                 }
