@@ -1,4 +1,4 @@
-using Ravuno.Fetcher.Contracts;
+using Ravuno.Core.Contracts;
 
 namespace Ravuno.Fetcher.DntActivities.Services.Contracts;
 

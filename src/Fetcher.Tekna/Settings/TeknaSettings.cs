@@ -1,5 +1,5 @@
 using System.ComponentModel.DataAnnotations;
-using Ravuno.Fetcher.Validation;
+using Ravuno.Core.Validation;
 
 namespace Ravuno.Fetcher.Tekna.Settings;
 

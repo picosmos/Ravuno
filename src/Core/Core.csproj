@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <RootNamespace>Ravuno.Fetcher</RootNamespace>
+    <RootNamespace>Ravuno.Core</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\DataStorage\DataStorage.csproj" />

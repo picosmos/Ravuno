@@ -5,7 +5,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DataStorage\DataStorage.csproj" />
-    <ProjectReference Include="..\Fetcher\Fetcher.csproj" />
+    <ProjectReference Include="..\Core\Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,6 +1,6 @@
 ﻿using Ravuno.DataStorage.Models;
 
-namespace Ravuno.Fetcher.Contracts;
+namespace Ravuno.Core.Contracts;
 
 public interface IFetcherService
 {
