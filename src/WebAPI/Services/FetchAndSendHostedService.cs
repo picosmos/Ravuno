@@ -56,17 +56,19 @@ public partial class FetchAndSendHostedService : BackgroundService
                 await fetchAndSendService.ProcessFetchAndSendAsync(detailed: isDetailed, stoppingToken);
 
                 this._logger.LogInformation(
-                    "Fetch operation #{RunNumber} completed successfully (detailed: {IsDetailed})",
+                    "Fetch operation #{RunNumber} completed successfully (detailed: {IsDetailed}). Next run expected at {NextRun}",
                     runCounter + 1,
-                    isDetailed);
+                    isDetailed,
+                    nextRunTime);
             }
             catch (Exception ex)
             {
                 this._logger.LogError(
                     ex,
-                    "Error occurred during fetch operation #{RunNumber} (detailed: {IsDetailed})",
+                    "Error occurred during fetch operation #{RunNumber} (detailed: {IsDetailed}). Next run expected at {NextRun}",
                     runCounter + 1,
-                    isDetailed);
+                    isDetailed,
+                    nextRunTime);
             }
 
             runCounter++;

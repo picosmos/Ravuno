@@ -158,7 +158,7 @@ public class DntActivityFetchService : IDntActivityFetchService
                 if (jsonDocument?.RootElement.TryGetProperty("message", out var messageElement) == true)
                 {
                     var message = messageElement.GetString();
-                    if (message == "Can't get this event. It doesn't exist, inactive or not published")
+                    if (message == "Can't get this event. It doesn't exist, inactive or not published.")
                     {
                         this._logger.LogInformation("Event with ID {EventId} does not exist or is inactive/published, skipping", eventId);
                         return null;
