@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Ravuno.DataStorage;
+using Ravuno.DataStorage.Interceptors;
 
 namespace Ravuno.WebAPI.Extensions;
 
@@ -10,8 +11,14 @@ public static class DataStorageServiceExtensions
         var connectionString = configuration.GetConnectionString("DataStorage")
             ?? "Data Source=ravuno.db";
 
-        services.AddDbContext<DataStorageContext>(options =>
-            options.UseSqlite(connectionString));
+        services.AddSingleton<UtcDateTimeInterceptor>();
+
+        services.AddDbContext<DataStorageContext>((serviceProvider, options) =>
+        {
+            var interceptor = serviceProvider.GetRequiredService<UtcDateTimeInterceptor>();
+            options.UseSqlite(connectionString)
+                   .AddInterceptors(interceptor);
+        });
 
         return services;
     }
