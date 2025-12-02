@@ -25,7 +25,7 @@ if (builder.Environment.IsDevelopment())
     builder.Logging.AddDebug();
 }
 
-builder.Services.ConfigureAndValidateEmailLoggerSettings(builder.Configuration, "EmailLogProviderSettings");
+builder.Services.ConfigureAndValidateEmailLoggerSettings(builder.Configuration, "Logging:Email");
 builder.Logging.AddEmailLogger();
 
 builder.Services.ConfigureAndValidateSettings<EmailSettings>(builder.Configuration, "EmailSettings");
