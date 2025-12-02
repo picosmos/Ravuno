@@ -62,9 +62,9 @@ public partial class FetchAndSendService
                     config.QueryTitle, beforeResults.Count);
             }
 
-            var enabledFetchers = ItemFetcher.Select(kvp => this._serviceProvider.GetService(kvp.Value) as IFetcherService)
-                    .Where(fetcher => fetcher != null && fetcher.IsEnabled)
-                    .ToDictionary(fetcher => ItemFetcher.First(kv => kv.Value == fetcher!.GetType()).Key, fetcher => fetcher!);
+            var enabledFetchers = ItemFetcher.Select(kvp => (kvp.Key, this._serviceProvider.GetService(kvp.Value) as IFetcherService))
+                    .Where(fetcher => fetcher.Item2 != null && fetcher.Item2.IsEnabled)
+                    .ToDictionary(fetcher => fetcher.Key, fetcher => fetcher.Item2!);
 
             var allItems = new List<Item>();
             var fetchHistoryTrackerItems = new Dictionary<ItemSource, FetchHistory>();
