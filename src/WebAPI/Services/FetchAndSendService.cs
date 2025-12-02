@@ -1,18 +1,17 @@
-using System.Globalization;
-using System.Text;
-using System.Text.RegularExpressions;
 using Microsoft.EntityFrameworkCore;
 using Ravuno.Core.Contracts;
+using Ravuno.Core.Extensions;
 using Ravuno.DataStorage;
 using Ravuno.DataStorage.Models;
 using Ravuno.Email.Services.Contracts;
 using Ravuno.Fetcher.DntActivities.Services.Contracts;
 using Ravuno.Fetcher.Tekna.Services.Contracts;
+using Ravuno.WebAPI.Extensions;
 using Ravuno.WebAPI.Services.Contracts;
 
 namespace Ravuno.WebAPI.Services;
 
-public partial class FetchAndSendService
+public class FetchAndSendService
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<FetchAndSendService> _logger;
@@ -178,7 +177,7 @@ public partial class FetchAndSendService
         List<Item> updatedDelta;
 
         if (lastSendHistory == null && beforeResults.Count == afterResults.Count &&
-            beforeResults.TrueForAll(before => afterResults.Exists(after => AreItemsEqual(before, after))))
+            beforeResults.TrueForAll(before => afterResults.Exists(after => before.IsEqualTo(after))))
         {
             // Never sent before and before/after match - send all as new
             this._logger.LogInformation("First time sending for {QueryTitle} with no changes detected - sending all {Count} items as new",
@@ -191,11 +190,11 @@ public partial class FetchAndSendService
             // Calculate deltas normally
             newDelta = [.. afterResults
                 .Where(after => !beforeResults.Exists(before =>
-                    AreItemsEqual(before, after)))];
+                    before.IsEqualTo(after)))];
 
             updatedDelta = [.. afterResults
                 .Where(after => beforeResults.Exists(before =>
-                    AreItemsEqual(before, after) && !AreItemsFullyEqual(before, after)))];
+                    before.IsEqualTo(after) && !before.IsFullyEqualTo(after)))];
 
             this._logger.LogInformation("Delta: {NewCount} new, {UpdatedCount} updated",
                 newDelta.Count, updatedDelta.Count);
@@ -204,8 +203,11 @@ public partial class FetchAndSendService
         // Send email if there are changes
         if (newDelta.Count > 0 || updatedDelta.Count > 0)
         {
-            var emailBody = this.BuildEmailBody([.. newDelta.OrderBy(item => item.EventStartDateTime)], [.. updatedDelta.OrderBy(item => item.EventStartDateTime)]);
-            await this._emailService.SendEmailAsync(config.EmailReceiverAddress, $"[Ravuno] {config.QueryTitle} ({newDelta.Count} new, {updatedDelta.Count} updated)", emailBody, isHtml: true);
+            await this._emailService.SendItemUpdateEmailAsync(
+                config.EmailReceiverAddress,
+                config.QueryTitle,
+                newDelta,
+                updatedDelta);
             this._logger.LogInformation("Email sent to {Email} for {QueryTitle}",
                 config.EmailReceiverAddress, config.QueryTitle);
 
@@ -310,126 +312,4 @@ public partial class FetchAndSendService
             .AsNoTracking()
             .ToListAsync(cancellationToken);
     }
-
-    private static bool AreItemsEqual(Item item1, Item item2)
-    {
-        return item1.Source == item2.Source &&
-               item1.Title == item2.Title &&
-               item1.EventEndDateTime.Date == item2.EventEndDateTime.Date &&
-               item1.EventStartDateTime.Date == item2.EventStartDateTime.Date &&
-               item1.SourceId == item2.SourceId;
-    }
-
-    private static bool AreItemsFullyEqual(Item item1, Item item2)
-    {
-        return AreItemsEqual(item1, item2) &&
-               item1.EventStartDateTime == item2.EventStartDateTime &&
-               item1.EventEndDateTime == item2.EventEndDateTime &&
-               item1.Price == item2.Price &&
-               item1.Description == item2.Description &&
-               item1.Location == item2.Location &&
-               item1.EnrollmentDeadline.Date == item2.EnrollmentDeadline.Date &&
-               item1.Url == item2.Url;
-    }
-
-    private string StripHtmlTags(string html)
-    {
-        try
-        {
-            if (string.IsNullOrEmpty(html))
-            {
-                return string.Empty;
-            }
-
-            var htmlWithLinebreaks = HtmlLineBreaksRegex().Replace(html.Replace("\r", "").Replace("\n", ""), "\n");
-            var text = HtmlTagsRegex().Replace(htmlWithLinebreaks, string.Empty);
-            text = System.Net.WebUtility.HtmlDecode(text);
-            return MultipleLineBreaksRegex().Replace(text, "\n").Trim();
-        }
-        catch (Exception ex)
-        {
-            this._logger.LogError(ex, "Failed to strip HTML tags from text.");
-            return html;
-        }
-    }
-
-    private string BuildEmailBody(List<Item> newItems, List<Item> updatedItems)
-    {
-        void RenderTable(StringBuilder sb, string heading, List<Item> items)
-        {
-            if (items.Count == 0)
-            {
-                return;
-            }
-
-            sb.AppendLine(CultureInfo.InvariantCulture, $"<h2>{heading}</h2>");
-            sb.AppendLine("<table>");
-            sb.AppendLine("<tr>");
-            sb.AppendLine("<th style=\"min-width: 20em;\">Title</th>");
-            sb.AppendLine("<th style=\"min-width: 5em;\">When?<br/>(Enrollment Deadline)</th>");
-            sb.AppendLine("<th style=\"min-width: 5em;\">Location</th>");
-            sb.AppendLine("<th style=\"min-width: 5em;\">Price</th>");
-            sb.AppendLine("</tr>");
-
-            foreach (var item in items)
-            {
-                var description = this.StripHtmlTags(item.Description ?? "");
-                if (description.Length > 2500)
-                {
-                    description = string.Concat(description.AsSpan(0, 2500), "...");
-                }
-
-                description = description.Replace("\n", "<br/>");
-                var tags = item.Tags != null ? string.Join(", ", item.Tags) : "";
-
-                sb.AppendLine("<tr>");
-                sb.AppendLine(CultureInfo.InvariantCulture, $"<td><a href=\"{item.Url}\">{item.Title}</a></td>");
-                sb.AppendLine(CultureInfo.InvariantCulture, $"<td>{item.EventStartDateTime:ddd, yyyy-MM-dd HH:mm} to<br/>{item.EventEndDateTime:ddd, yyyy-MM-dd HH:mm}<br/>({item.EnrollmentDeadline:ddd, yyyy-MM-dd HH:mm})</td>");
-                sb.AppendLine(CultureInfo.InvariantCulture, $"<td>{item.Location?.Replace("\n", "<br/>")}</td>");
-                sb.AppendLine(CultureInfo.InvariantCulture, $"<td>{item.Price?.Replace("\n", "<br/>")}</td>");
-                sb.AppendLine("</tr>");
-                sb.AppendLine("<tr>");
-                sb.AppendLine(CultureInfo.InvariantCulture, $"<td colspan=\"5\" class=\"description\">{description}<br/>{tags}</td>");
-                sb.AppendLine("</tr>");
-            }
-
-            sb.AppendLine("</table>");
-        }
-
-        var sb = new StringBuilder();
-        sb.AppendLine("<!DOCTYPE html>");
-        sb.AppendLine("<html>");
-        sb.AppendLine("<head>");
-        sb.AppendLine("<style>");
-        sb.AppendLine("body { font-family: 'Trebuchet MS', Arial, sans-serif; }");
-        sb.AppendLine("h2 { color: #333; }");
-        sb.AppendLine("table { border-collapse: collapse; min-width: 100%; margin-bottom: 20px; }");
-        sb.AppendLine("th, td { border: 1px solid #ddd; padding: 2px 6px 2px 6px; text-align: left; vertical-align: top; }");
-        sb.AppendLine("th { background-color: #4CAF50; color: white; }");
-        sb.AppendLine("tr:nth-child(even) { background-color: #f2f2f2; }");
-        sb.AppendLine("a { color: #1a73e8; text-decoration: none; }");
-        sb.AppendLine(".description { font-size: 0.9em; padding-bottom: 8px; color: #555; }");
-        sb.AppendLine(".tags { font-size: 0.85em; margin-top: 4px; color: #777; font-style: italic; }");
-        sb.AppendLine("</style>");
-        sb.AppendLine("</head>");
-        sb.AppendLine("<body>");
-        sb.AppendLine("<p><em>All timestamps are given as provided by the data sources. Usually local time.</em></p>");
-
-        RenderTable(sb, "New Items", newItems);
-        RenderTable(sb, "Updated Items", updatedItems);
-
-        sb.AppendLine("</body>");
-        sb.AppendLine("</html>");
-
-        return sb.ToString();
-    }
-
-    [GeneratedRegex(@"<.*?>")]
-    private static partial Regex HtmlTagsRegex();
-
-    [GeneratedRegex(@"<(/?)(br|p)[^>]*>")]
-    private static partial Regex HtmlLineBreaksRegex();
-
-    [GeneratedRegex(@"(\n\s*)+")]
-    private static partial Regex MultipleLineBreaksRegex();
 }
