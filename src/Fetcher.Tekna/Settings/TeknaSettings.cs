@@ -1,10 +1,14 @@
+using System.ComponentModel.DataAnnotations;
+using Ravuno.Fetcher.Validation;
+
 namespace Ravuno.Fetcher.Tekna.Settings;
 
 public class TeknaSettings
 {
+    [Required]
+    [Url]
+    [FormatString(1)]
     public string CoursesApiUrl { get; set; } = string.Empty;
 
     public bool IsEnabled { get; set; } = true;
-
-    public bool IsDetailedEnabled { get; set; } = true;
 }

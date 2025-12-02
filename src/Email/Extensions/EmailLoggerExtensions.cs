@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Ravuno.Email.Logging;
@@ -21,15 +22,19 @@ public static class EmailLoggerExtensions
     }
 
     /// <summary>
-    /// Configures and validates the email log provider settings from configuration.
-    /// Call this before AddEmailLogger.
+    /// Configures and validates the email log provider settings with custom validation logic.
     /// </summary>
-    public static IServiceCollection ConfigureEmailLoggerSettings(
+    public static IServiceCollection ConfigureAndValidateEmailLoggerSettings(
         this IServiceCollection services,
-        Action<EmailLogProviderSettings> configureOptions)
+        IConfiguration configuration,
+        string sectionName)
     {
-        services.Configure(configureOptions);
+        ArgumentNullException.ThrowIfNull(services);
+        ArgumentNullException.ThrowIfNull(configuration);
+
+        services.Configure<EmailLogProviderSettings>(configuration.GetSection(sectionName));
         services.AddOptions<EmailLogProviderSettings>()
+            .Bind(configuration.GetSection(sectionName))
             .ValidateDataAnnotations()
             .Validate(settings =>
             {

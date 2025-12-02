@@ -24,25 +24,16 @@ if (builder.Environment.IsDevelopment())
     builder.Logging.AddDebug();
 }
 
-builder.Services.ConfigureEmailLoggerSettings(settings =>
-    builder.Configuration.GetSection("EmailLogProviderSettings").Bind(settings));
+builder.Services.ConfigureAndValidateEmailLoggerSettings(builder.Configuration, "EmailLogProviderSettings");
 builder.Logging.AddEmailLogger();
 
-builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
+builder.Services.ConfigureAndValidateSettings<EmailSettings>(builder.Configuration, "EmailSettings");
 builder.Services.AddSingleton<IEmailService, EmailService>();
 
-builder.Services.Configure<FetchAndSendSettings>(builder.Configuration.GetSection("FetchAndSendSettings"))
-    .AddOptions<FetchAndSendSettings>()
-    .Bind(builder.Configuration.GetSection("FetchAndSendSettings"))
-    .ValidateDataAnnotations()
-    .ValidateOnStart();
-builder.Services.Configure<TeknaSettings>(builder.Configuration.GetSection("FetcherSettings:Tekna"));
-builder.Services.Configure<DntActivitiesSettings>(builder.Configuration.GetSection("FetcherSettings:DntActivities"));
-builder.Services.Configure<CleanupSettings>(builder.Configuration.GetSection("CleanupSettings"))
-    .AddOptions<CleanupSettings>()
-    .Bind(builder.Configuration.GetSection("CleanupSettings"))
-    .ValidateDataAnnotations()
-    .ValidateOnStart();
+builder.Services.ConfigureAndValidateSettings<FetchAndSendSettings>(builder.Configuration, "FetchAndSendSettings");
+builder.Services.ConfigureAndValidateSettings<TeknaSettings>(builder.Configuration, "FetcherSettings:Tekna");
+builder.Services.ConfigureAndValidateSettings<DntActivitiesSettings>(builder.Configuration, "FetcherSettings:DntActivities");
+builder.Services.ConfigureAndValidateSettings<CleanupSettings>(builder.Configuration, "CleanupSettings");
 
 builder.Services.AddHttpClient<ITeknaFetchService, TeknaFetchService>();
 builder.Services.AddHttpClient<IDntActivityFetchService, DntActivityFetchService>();
