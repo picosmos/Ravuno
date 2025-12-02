@@ -1,8 +1,7 @@
-using Ravuno.DataStorage.Models;
+using Ravuno.Fetcher.Contracts;
 
 namespace Ravuno.Fetcher.DntActivities.Services.Contracts;
 
-public interface IDntActivityFetchService
+public interface IDntActivityFetchService : IFetcherService
 {
-    Task<List<Item>> FetchItemsAsync(IReadOnlyCollection<Item> existingItems, bool fetchDetailsForExisting = false);
 }

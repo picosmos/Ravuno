@@ -16,6 +16,8 @@ public class TeknaFetchService : ITeknaFetchService
     private readonly ILogger<TeknaFetchService>? _logger;
     private readonly TeknaSettings _settings;
 
+    public bool IsEnabled => this._settings.IsEnabled;
+
     public TeknaFetchService(HttpClient httpClient, IOptions<TeknaSettings> settings, ILogger<TeknaFetchService>? logger = null)
     {
         this._httpClient = httpClient;
@@ -23,7 +25,7 @@ public class TeknaFetchService : ITeknaFetchService
         this._settings = settings?.Value ?? throw new ArgumentNullException(nameof(settings));
     }
 
-    public async Task<List<Item>> FetchItemsAsync()
+    public async Task<IReadOnlyList<Item>> FetchAsync(IReadOnlyCollection<Item> alreadyFetched, bool detailed, CancellationToken cancellationToken)
     {
         var allItems = new List<Item>();
         var pageNumber = 1;
@@ -36,10 +38,10 @@ public class TeknaFetchService : ITeknaFetchService
                 this._logger?.LogInformation("Fetching Tekna courses page {PageNumber}", pageNumber);
 
                 var url = string.Format(CultureInfo.InvariantCulture, this._settings.CoursesApiUrl, pageNumber);
-                var response = await this._httpClient.GetAsync(url);
+                var response = await this._httpClient.GetAsync(url, cancellationToken);
                 response.EnsureSuccessStatusCode();
 
-                var content = await response.Content.ReadAsStringAsync();
+                var content = await response.Content.ReadAsStringAsync(cancellationToken);
                 var jsonDoc = JsonDocument.Parse(content);
 
                 // Check if Courses section exists
@@ -125,7 +127,7 @@ public class TeknaFetchService : ITeknaFetchService
                 // Add a small delay to be respectful to the API
                 if (hasMorePages)
                 {
-                    await Task.Delay(100);
+                    await Task.Delay(100, cancellationToken);
                 }
             }
             catch (Exception ex)

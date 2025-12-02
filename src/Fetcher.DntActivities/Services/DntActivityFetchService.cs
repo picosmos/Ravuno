@@ -23,7 +23,9 @@ public class DntActivityFetchService : IDntActivityFetchService
         this._settings = settings?.Value ?? throw new ArgumentNullException(nameof(settings));
     }
 
-    public async Task<List<Item>> FetchItemsAsync(IReadOnlyCollection<Item> existingItems, bool fetchDetailsForExisting = false)
+    public bool IsEnabled => this._settings.IsEnabled;
+
+    public async Task<IReadOnlyList<Item>> FetchAsync(IReadOnlyCollection<Item> alreadyFetched, bool detailed, CancellationToken cancellationToken)
     {
         var allItems = new List<Item>();
         var pageNumber = 1;
@@ -37,10 +39,10 @@ public class DntActivityFetchService : IDntActivityFetchService
                 this._logger.LogInformation("Fetching DNT activities page {PageNumber}", pageNumber);
 
                 var url = string.Format(CultureInfo.InvariantCulture, this._settings.ActivitiesApiUrl, pageNumber);
-                var response = await this._httpClient.GetAsync(url);
+                var response = await this._httpClient.GetAsync(url, cancellationToken);
                 response.EnsureSuccessStatusCode();
 
-                var content = await response.Content.ReadAsStringAsync();
+                var content = await response.Content.ReadAsStringAsync(cancellationToken);
                 var jsonDoc = JsonDocument.Parse(content);
 
                 // Get page count and check if more pages
@@ -68,7 +70,7 @@ public class DntActivityFetchService : IDntActivityFetchService
                             this._logger.LogWarning("Activity item has no ID, skipping");
                             continue;
                         }
-                        if (!fetchDetailsForExisting && existingItems.Any(i => i.SourceId == eventId))
+                        if (!detailed && alreadyFetched.Any(i => i.SourceId == eventId))
                         {
                             this._logger.LogInformation("Activity with ID {EventId} already exists, skipping detail fetch", eventId);
                             continue;
@@ -79,7 +81,7 @@ public class DntActivityFetchService : IDntActivityFetchService
                         {
                             allItems.Add(detailedItem);
 
-                            await Task.Delay(50); // Add a small delay between detail requests
+                            await Task.Delay(50, cancellationToken); // Add a small delay between detail requests
                         }
                     }
 
@@ -91,7 +93,7 @@ public class DntActivityFetchService : IDntActivityFetchService
 
                 if (hasMorePages)
                 {
-                    await Task.Delay(100); // Add a small delay to be respectful to the API
+                    await Task.Delay(100, cancellationToken); // Add a small delay to be respectful to the API
                 }
             }
             catch (Exception ex)

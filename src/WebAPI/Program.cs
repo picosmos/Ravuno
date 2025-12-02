@@ -29,22 +29,12 @@ builder.Services.ConfigureEmailLoggerSettings(settings =>
 builder.Logging.AddEmailLogger();
 
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
-builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddSingleton<IEmailService, EmailService>();
 
 builder.Services.Configure<FetchAndSendSettings>(builder.Configuration.GetSection("FetchAndSendSettings"))
     .AddOptions<FetchAndSendSettings>()
     .Bind(builder.Configuration.GetSection("FetchAndSendSettings"))
     .ValidateDataAnnotations()
-    .Validate(settings =>
-    {
-        var validSources = Enum.GetValues<Ravuno.DataStorage.Models.ItemSource>();
-        var invalidSources = settings.EnabledSources.Except(validSources).ToList();
-        return invalidSources.Count > 0
-            ? throw new InvalidOperationException(
-                $"Invalid sources configured: {string.Join(", ", invalidSources)}. " +
-                $"Valid sources are: {string.Join(", ", validSources)}")
-            : true;
-    }, "EnabledSources must only contain valid ItemSource values")
     .ValidateOnStart();
 builder.Services.Configure<TeknaSettings>(builder.Configuration.GetSection("FetcherSettings:Tekna"));
 builder.Services.Configure<DntActivitiesSettings>(builder.Configuration.GetSection("FetcherSettings:DntActivities"));
@@ -61,6 +51,7 @@ builder.Services.AddMemoryCache();
 builder.Services.AddDataStorage(builder.Configuration);
 
 builder.Services.AddScoped<IUpdateConfigurationService, UpdateConfigurationService>();
+builder.Services.AddScoped<FetchAndSendService>();
 builder.Services.AddHostedService<FetchAndSendHostedService>();
 builder.Services.AddHostedService<ItemCleanupService>();
 

@@ -9,6 +9,8 @@ public class FetchHistory
 
     public ItemSource Source { get; set; }
 
+    public bool IsDetailed { get; set; }
+
     public DateTime ExecutionStartTime { get; set; }
 
     public TimeSpan ExecutionDuration { get; set; }
