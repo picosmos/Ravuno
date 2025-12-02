@@ -38,7 +38,7 @@ public partial class FetchAndSendHostedService : BackgroundService
         await this.WaitUntilFetchIntervalExpiredAfterLastRun();
 
         var runCounter = 0;
-        while (await timer.WaitForNextTickAsync(stoppingToken))
+        do
         {
             var isDetailed = this._settings.FetchDetailedEvery > 0 && runCounter % this._settings.FetchDetailedEvery == 0;
             var nextRunTime = DateTime.UtcNow.Add(this._settings.FetchInterval);
@@ -70,7 +70,7 @@ public partial class FetchAndSendHostedService : BackgroundService
             }
 
             runCounter++;
-        }
+        } while (await timer.WaitForNextTickAsync(stoppingToken));
     }
 
     private async Task WaitUntilFetchIntervalExpiredAfterLastRun()
