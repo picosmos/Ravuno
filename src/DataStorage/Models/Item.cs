@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Ravuno.DataStorage.Attributes;
 
 namespace Ravuno.DataStorage.Models;
 
@@ -15,8 +16,10 @@ public class Item
 
     public DateTime RetrievedAt { get; set; }
 
+    [LocalTime]
     public DateTime EventStartDateTime { get; set; }
 
+    [LocalTime]
     public DateTime EventEndDateTime { get; set; }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1819:Properties should not return arrays", Justification = "Raw data tags")]
@@ -35,5 +38,6 @@ public class Item
 
     public string? Price { get; set; }
 
+    [LocalTime]
     public DateTime EnrollmentDeadline { get; set; }
 }

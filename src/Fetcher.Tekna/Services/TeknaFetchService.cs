@@ -168,8 +168,9 @@ public class TeknaFetchService : ITeknaFetchService
     private DateTime? GetDateTimeProperty(JsonElement element, string propertyName)
     {
         var stringValue = this.GetStringProperty(element, propertyName);
+        // Tekna API returns local times without timezone info - assume they are in Norwegian local time and store them as local.
         return DateTime.TryParse(stringValue, CultureInfo.InvariantCulture, out var dateTime)
-            ? dateTime
+            ? DateTime.SpecifyKind(dateTime, DateTimeKind.Local)
             : null;
     }
 

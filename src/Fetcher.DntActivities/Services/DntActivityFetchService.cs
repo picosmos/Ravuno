@@ -368,9 +368,20 @@ public class DntActivityFetchService : IDntActivityFetchService
     private static DateTime? GetDateTimePropertyFromRoot(JsonElement element, string propertyName)
     {
         var stringValue = GetStringProperty(element, propertyName);
-        return DateTime.TryParse(stringValue, CultureInfo.InvariantCulture, out var dateTime)
-            ? dateTime
-            : null;
+        if (string.IsNullOrEmpty(stringValue))
+        {
+            return null;
+        }
+
+        // DNT specifies the DateTimes including the timezone offset
+        // e.g., "2024-08-15T10:00:00+02:00"
+        // since we are storing the local time as DateTimeKind.Local, we ignore the timezone offset here.
+        if (DateTimeOffset.TryParse(stringValue, CultureInfo.InvariantCulture, DateTimeStyles.None, out var dateTimeOffset))
+        {
+            return DateTime.SpecifyKind(dateTimeOffset.DateTime, DateTimeKind.Local);
+        }
+
+        return null;
     }
 
     private static string? GetStringProperty(JsonElement element, string propertyName)

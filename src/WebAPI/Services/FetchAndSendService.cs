@@ -413,6 +413,7 @@ public partial class FetchAndSendService
         sb.AppendLine("</style>");
         sb.AppendLine("</head>");
         sb.AppendLine("<body>");
+        sb.AppendLine("<p><em>All timestamps are given as provided by the data sources. Usually local time.</em></p>");
 
         RenderTable(sb, "New Items", newItems);
         RenderTable(sb, "Updated Items", updatedItems);

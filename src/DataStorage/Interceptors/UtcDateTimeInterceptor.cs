@@ -1,12 +1,14 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Logging;
+using Ravuno.DataStorage.Attributes;
 
 namespace Ravuno.DataStorage.Interceptors;
 
 /// <summary>
 /// Interceptor that ensures all DateTime properties are stored as UTC in the database.
 /// Logs warnings when non-UTC DateTime values are detected and automatically converts them to UTC.
+/// Properties marked with <see cref="LocalTimeAttribute"/> will skip UTC conversion and log a warning if the DateTime.Kind is not Local.
 /// </summary>
 public class UtcDateTimeInterceptor : SaveChangesInterceptor
 {
@@ -53,6 +55,8 @@ public class UtcDateTimeInterceptor : SaveChangesInterceptor
 
         foreach (var entry in entries)
         {
+            var entityName = entry.Metadata.ClrType.Name;
+
             foreach (var property in entry.Properties)
             {
                 if (property.Metadata.ClrType != typeof(DateTime))
@@ -60,15 +64,36 @@ public class UtcDateTimeInterceptor : SaveChangesInterceptor
                     continue;
                 }
 
+                var propertyName = property.Metadata.Name;
                 var dateTime = (DateTime?)property.CurrentValue;
 
-                if (!dateTime.HasValue || dateTime.Value.Kind == DateTimeKind.Utc)
+                if (!dateTime.HasValue)
                 {
                     continue;
                 }
 
-                var entityName = entry.Metadata.ClrType.Name;
-                var propertyName = property.Metadata.Name;
+                // Check if property has [LocalTime] attribute - skip conversion if it does
+                var clrProperty = entry.Entity.GetType().GetProperty(propertyName);
+                if (clrProperty?.GetCustomAttributes(typeof(LocalTimeAttribute), inherit: true).Length > 0)
+                {
+                    if (dateTime.Value.Kind != DateTimeKind.Local)
+                    {
+                        this._logger?.LogWarning(
+                            "[LocalTime] attribute found on {EntityName}.{PropertyName}, but DateTime has Kind={Kind}. " +
+                            "Expected DateTimeKind.Local for properties marked with [LocalTime]. " +
+                            "Value will be stored as-is without conversion.",
+                            entityName,
+                            propertyName,
+                            dateTime.Value.Kind);
+                    }
+
+                    continue;
+                }
+
+                if (dateTime.Value.Kind == DateTimeKind.Utc)
+                {
+                    continue;
+                }
 
                 if (dateTime.Value.Kind == DateTimeKind.Local)
                 {
@@ -94,7 +119,6 @@ public class UtcDateTimeInterceptor : SaveChangesInterceptor
                         dateTime.Value);
 
                     property.CurrentValue = DateTime.SpecifyKind(dateTime.Value, DateTimeKind.Utc);
-
                 }
             }
         }
