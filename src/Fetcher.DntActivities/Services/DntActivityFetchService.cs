@@ -13,10 +13,10 @@ namespace Ravuno.Fetcher.DntActivities.Services;
 public class DntActivityFetchService : IDntActivityFetchService
 {
     private readonly HttpClient _httpClient;
-    private readonly ILogger<DntActivityFetchService>? _logger;
+    private readonly ILogger<DntActivityFetchService> _logger;
     private readonly DntActivitiesSettings _settings;
 
-    public DntActivityFetchService(HttpClient httpClient, IOptions<DntActivitiesSettings> settings, ILogger<DntActivityFetchService>? logger = null)
+    public DntActivityFetchService(HttpClient httpClient, IOptions<DntActivitiesSettings> settings, ILogger<DntActivityFetchService> logger)
     {
         this._httpClient = httpClient;
         this._logger = logger;
@@ -34,7 +34,7 @@ public class DntActivityFetchService : IDntActivityFetchService
         {
             try
             {
-                this._logger?.LogInformation("Fetching DNT activities page {PageNumber}", pageNumber);
+                this._logger.LogInformation("Fetching DNT activities page {PageNumber}", pageNumber);
 
                 var url = string.Format(CultureInfo.InvariantCulture, this._settings.ActivitiesApiUrl, pageNumber);
                 var response = await this._httpClient.GetAsync(url);
@@ -47,7 +47,7 @@ public class DntActivityFetchService : IDntActivityFetchService
                 if (jsonDoc.RootElement.TryGetProperty("pageCount", out var pageCountElement))
                 {
                     var totalPages = pageCountElement.GetInt32();
-                    this._logger?.LogInformation("Processing page {CurrentPage} of {TotalPages}", pageNumber, totalPages);
+                    this._logger.LogInformation("Processing page {CurrentPage} of {TotalPages}", pageNumber, totalPages);
                     hasMorePages = pageNumber < totalPages;
                 }
                 else
@@ -65,12 +65,12 @@ public class DntActivityFetchService : IDntActivityFetchService
                         var eventId = GetStringProperty(activityItem, "id");
                         if (string.IsNullOrEmpty(eventId))
                         {
-                            this._logger?.LogWarning("Activity item has no ID, skipping");
+                            this._logger.LogWarning("Activity item has no ID, skipping");
                             continue;
                         }
                         if (!fetchDetailsForExisting && existingItems.Any(i => i.SourceId == eventId))
                         {
-                            this._logger?.LogInformation("Activity with ID {EventId} already exists, skipping detail fetch", eventId);
+                            this._logger.LogInformation("Activity with ID {EventId} already exists, skipping detail fetch", eventId);
                             continue;
                         }
 
@@ -83,7 +83,7 @@ public class DntActivityFetchService : IDntActivityFetchService
                         }
                     }
 
-                    this._logger?.LogInformation("Retrieved {Count} items from page {PageNumber}", pageHitsElement.GetArrayLength(), pageNumber);
+                    this._logger.LogInformation("Retrieved {Count} items from page {PageNumber}", pageHitsElement.GetArrayLength(), pageNumber);
                 }
 
                 pageNumber++;
@@ -96,34 +96,36 @@ public class DntActivityFetchService : IDntActivityFetchService
             }
             catch (Exception ex)
             {
-                this._logger?.LogError(ex, "Error fetching page {PageNumber} from DNT API", pageNumber);
+                this._logger.LogError(ex, "Error fetching page {PageNumber} from DNT API", pageNumber);
                 failCount++;
                 if (failCount > 5)
                 {
-                    this._logger?.LogError(ex, "Retried for 5 times, terminating dnt fetch");
+                    this._logger.LogError(ex, "Retried for 5 times, terminating dnt fetch");
                     return allItems;
                 }
                 throw;
             }
         }
 
-        this._logger?.LogInformation("Total items retrieved from DNT: {Count}", allItems.Count);
+        this._logger.LogInformation("Total items retrieved from DNT: {Count}", allItems.Count);
         return allItems;
     }
 
     private async Task<Item?> FetchEventDetailsAsync(string eventId)
     {
+        string? content = null;
+        JsonDocument? jsonDocument = null;
         try
         {
-            this._logger?.LogInformation("Fetching event details for ID {EventId}", eventId);
+            this._logger.LogInformation("Fetching event details for ID {EventId}", eventId);
 
             var url = string.Format(CultureInfo.InvariantCulture, this._settings.EventDetailApiUrl, eventId);
             var response = await this._httpClient.GetAsync(url);
-            response.EnsureSuccessStatusCode();
 
-            var content = await response.Content.ReadAsStringAsync();
-            var eventDetail = JsonDocument.Parse(content);
-            var root = eventDetail.RootElement;
+            content = await response.Content.ReadAsStringAsync();
+            jsonDocument = JsonDocument.Parse(content);
+            response.EnsureSuccessStatusCode();
+            var root = jsonDocument.RootElement;
 
             var item = new Item
             {
@@ -147,9 +149,33 @@ public class DntActivityFetchService : IDntActivityFetchService
 
             return item;
         }
+        catch (HttpRequestException httpEx)
+        {
+            try
+            {
+                if (jsonDocument?.RootElement.TryGetProperty("message", out var messageElement) == true)
+                {
+                    var msg = messageElement.GetProperty("message").GetString();
+                    if (msg == "Can't get this event. It doesn't exist, inactive or not published")
+                    {
+                        this._logger.LogInformation("Event with ID {EventId} does not exist or is inactive/published, skipping", eventId);
+                        return null;
+                    }
+                }
+            }
+            catch
+            {
+                // aboves try-block just tries to eliminate 4xx-errors due to messy data from the API.
+                // We had it once to get an activity ID from a page response which was not published 
+                // anymore/yet or inactive causing a 4xx error.
+            }
+
+            this._logger.LogError(httpEx, "HTTP error fetching event details for ID {EventId}. Response content: {Content}", eventId, content);
+            return null;
+        }
         catch (Exception ex)
         {
-            this._logger?.LogError(ex, "Error fetching event details for ID {EventId}", eventId);
+            this._logger.LogError(ex, "Error fetching event details for ID {EventId}", eventId);
             return null;
         }
     }
