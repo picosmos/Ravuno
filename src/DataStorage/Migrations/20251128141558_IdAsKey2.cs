@@ -70,7 +70,7 @@ namespace Ravuno.DataStorage.Migrations
             migrationBuilder.AddPrimaryKey(
                 name: "PK_Items",
                 table: "Items",
-                columns: new[] { "Source", "RetrievedAt", "Url" });
+                columns: ["Source", "RetrievedAt", "Url"]);
         }
     }
 }
