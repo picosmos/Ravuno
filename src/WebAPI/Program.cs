@@ -1,5 +1,6 @@
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.HttpOverrides;
+using Ravuno.Email.Extensions;
 using Ravuno.Email.Services;
 using Ravuno.Email.Services.Contracts;
 using Ravuno.Email.Settings;
@@ -22,6 +23,10 @@ if (builder.Environment.IsDevelopment())
 {
     builder.Logging.AddDebug();
 }
+
+builder.Services.ConfigureEmailLoggerSettings(settings =>
+    builder.Configuration.GetSection("EmailLogProviderSettings").Bind(settings));
+builder.Logging.AddEmailLogger();
 
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 builder.Services.AddScoped<IEmailService, EmailService>();
