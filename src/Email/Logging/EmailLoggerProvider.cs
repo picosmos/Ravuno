@@ -172,7 +172,7 @@ public sealed class EmailLoggerProvider : ILoggerProvider
             .ToList();
 
         var levelCountsText = levelCounts.Count > 0 ? string.Join(", ", levelCounts) : "None";
-        sb.AppendLine(CultureInfo.InvariantCulture, $"Total Entries: {logs.Count} ({levelCountsText} for minimum log level {this.Settings.MinimumLogLevelToSend})");
+        sb.AppendLine(CultureInfo.InvariantCulture, $"Total Entries: {logs.Count} ({levelCountsText}, for minimum log level {this.Settings.MinimumLogLevelToSend})");
         sb.AppendLine(CultureInfo.InvariantCulture, $"Time Range: {logs[0].Timestamp:yyyy-MM-dd HH:mm:ss} UTC to {logs[^1].Timestamp:yyyy-MM-dd HH:mm:ss} UTC");
         sb.AppendLine();
         sb.AppendLine(new string('=', 80));
