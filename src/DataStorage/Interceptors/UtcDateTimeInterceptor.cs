@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Logging;
@@ -48,6 +49,33 @@ public class UtcDateTimeInterceptor : SaveChangesInterceptor
         return base.SavingChangesAsync(eventData, result, cancellationToken);
     }
 
+    private static string? GetEntityIdentifier(object entity)
+    {
+        var entityType = entity.GetType();
+
+        // First, check for properties with [Key] attribute
+        var keyProperties = entityType.GetProperties()
+            .Where(p => p.GetCustomAttributes(typeof(KeyAttribute), inherit: true).Length > 0)
+            .ToList();
+
+        if (keyProperties.Count > 0)
+        {
+            var keyPairs = keyProperties
+                .Select(p => $"{p.Name}={p.GetValue(entity)}");
+            return string.Join(", ", keyPairs);
+        }
+
+        // Fallback to property named "Id"
+        var idProperty = entityType.GetProperty("Id");
+        if (idProperty != null)
+        {
+            var idValue = idProperty.GetValue(entity);
+            return $"Id={idValue}";
+        }
+
+        return null;
+    }
+
     private void ConvertDateTimesToUtc(DbContext context)
     {
         var entries = context.ChangeTracker.Entries()
@@ -78,13 +106,17 @@ public class UtcDateTimeInterceptor : SaveChangesInterceptor
                 {
                     if (dateTime.Value.Kind != DateTimeKind.Local)
                     {
+                        var entityId = GetEntityIdentifier(entry.Entity);
+
+                        this._logger?.LogDebug("Entity: {@Entity}", entry.Entity);
                         this._logger?.LogWarning(
                             "[LocalTime] attribute found on {EntityName}.{PropertyName}, but DateTime has Kind={Kind}. " +
                             "Expected DateTimeKind.Local for properties marked with [LocalTime]. " +
-                            "Value will be stored as-is without conversion.",
+                            "Value will be stored as-is without conversion. Affected entity key/id: {EntityId}",
                             entityName,
                             propertyName,
-                            dateTime.Value.Kind);
+                            dateTime.Value.Kind,
+                            entityId);
                     }
 
                     continue;
@@ -97,26 +129,34 @@ public class UtcDateTimeInterceptor : SaveChangesInterceptor
 
                 if (dateTime.Value.Kind == DateTimeKind.Local)
                 {
+                    var entityId = GetEntityIdentifier(entry.Entity);
+
+                    this._logger?.LogDebug("Entity: {@Entity}", entry.Entity);
                     this._logger?.LogWarning(
                         "Local DateTime detected for {EntityName}.{PropertyName}. " +
                         "Converting from {LocalTime} to UTC {UtcTime}. " +
-                        "Please ensure DateTime values are assigned as UTC to avoid ambiguity.",
+                        "Please ensure DateTime values are assigned as UTC to avoid ambiguity. Affected entity key/id: {EntityId}",
                         entityName,
                         propertyName,
                         dateTime.Value,
-                        dateTime.Value.ToUniversalTime());
+                        dateTime.Value.ToUniversalTime(),
+                        entityId);
 
                     property.CurrentValue = dateTime.Value.ToUniversalTime();
                 }
                 else // DateTimeKind.Unspecified
                 {
+                    var entityId = GetEntityIdentifier(entry.Entity);
+
+                    this._logger?.LogDebug("Entity: {@Entity}", entry.Entity);
                     this._logger?.LogWarning(
                         "Unspecified DateTime detected for {EntityName}.{PropertyName}. " +
                         "Treating {DateTime} as UTC. " +
-                        "Please use DateTime.SpecifyKind or assign values with DateTimeKind.Utc to avoid ambiguity.",
+                        "Please use DateTime.SpecifyKind or assign values with DateTimeKind.Utc to avoid ambiguity. Affected entity key/id: {EntityId}",
                         entityName,
                         propertyName,
-                        dateTime.Value);
+                        dateTime.Value,
+                        entityId);
 
                     property.CurrentValue = DateTime.SpecifyKind(dateTime.Value, DateTimeKind.Utc);
                 }
