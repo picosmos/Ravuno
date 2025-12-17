@@ -1,5 +1,6 @@
 services:
   ravuno:
+    container_name: ravuno
     build:
       dockerfile: Dockerfile
     ports:
