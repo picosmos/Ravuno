@@ -376,12 +376,9 @@ public class DntActivityFetchService : IDntActivityFetchService
         // DNT specifies the DateTimes including the timezone offset
         // e.g., "2024-08-15T10:00:00+02:00"
         // since we are storing the local time as DateTimeKind.Local, we ignore the timezone offset here.
-        if (DateTimeOffset.TryParse(stringValue, CultureInfo.InvariantCulture, DateTimeStyles.None, out var dateTimeOffset))
-        {
-            return DateTime.SpecifyKind(dateTimeOffset.DateTime, DateTimeKind.Local);
-        }
-
-        return null;
+        return DateTime.TryParse(stringValue, CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out var dateTime)
+            ? dateTime
+            : null;
     }
 
     private static string? GetStringProperty(JsonElement element, string propertyName)
