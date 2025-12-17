@@ -168,10 +168,22 @@ public class TeknaFetchService : ITeknaFetchService
     private DateTime? GetDateTimeProperty(JsonElement element, string propertyName)
     {
         var stringValue = this.GetStringProperty(element, propertyName);
+        if (string.IsNullOrWhiteSpace(stringValue))
+        {
+            return null;
+        }
+
         // Tekna API returns local times without timezone info - assume they are in Norwegian local time and store them as local.
-        return DateTime.TryParse(stringValue, CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out var dateTime)
-            ? dateTime
-            : null;
+        if (DateTime.TryParse(stringValue, CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out var dateTime))
+        {
+            // Ensure Kind is explicitly set to Local
+            var localDateTime = DateTime.SpecifyKind(dateTime, DateTimeKind.Local);
+            this._logger?.LogDebug("Parsed DateTime for {PropertyName}: {DateTime}, Kind: {Kind}", propertyName, localDateTime, localDateTime.Kind);
+            return localDateTime;
+        }
+
+        this._logger?.LogWarning("Failed to parse DateTime from property {PropertyName} with value: {Value}", propertyName, stringValue);
+        return null;
     }
 
     private string ExtractPrice(JsonElement courseItem)
