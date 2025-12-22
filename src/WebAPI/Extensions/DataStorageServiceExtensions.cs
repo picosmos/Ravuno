@@ -11,11 +11,11 @@ public static class DataStorageServiceExtensions
         var connectionString = configuration.GetConnectionString("DataStorage")
             ?? "Data Source=ravuno.db";
 
-        services.AddSingleton<UtcDateTimeInterceptor>();
+        services.AddSingleton<DateTimeKindInterceptor>();
 
         services.AddDbContext<DataStorageContext>((serviceProvider, options) =>
         {
-            var interceptor = serviceProvider.GetRequiredService<UtcDateTimeInterceptor>();
+            var interceptor = serviceProvider.GetRequiredService<DateTimeKindInterceptor>();
             options.UseSqlite(connectionString)
                    .AddInterceptors(interceptor);
         });
