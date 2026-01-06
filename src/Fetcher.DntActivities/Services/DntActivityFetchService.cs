@@ -125,8 +125,22 @@ public class DntActivityFetchService : IDntActivityFetchService
             var response = await this._httpClient.GetAsync(url);
 
             content = await response.Content.ReadAsStringAsync();
+
+            if(!response.IsSuccessStatusCode)
+            {
+                // We do not validate the existence of the API here, we assume a bad ID was supplied. 
+                // This happened before, either by just returning a 400 without content or a 400 with a status-json.
+                this._logger.LogInformation("Fetching data for event with ID {EventId} returned status code {StatusCode}. Content: {Content}", eventId, response.StatusCode, content?.Substring(0, Math.Min(500, content.Length)));
+                return null;
+            }
+
+            if(string.IsNullOrEmpty(content))
+            {
+                this._logger.LogInformation("Fetching data for event with ID {EventId} returned empty content.", eventId);
+                return null;
+            }
+            
             jsonDocument = JsonDocument.Parse(content);
-            response.EnsureSuccessStatusCode();
             var root = jsonDocument.RootElement;
 
             var item = new Item
@@ -153,25 +167,6 @@ public class DntActivityFetchService : IDntActivityFetchService
         }
         catch (HttpRequestException httpEx)
         {
-            try
-            {
-                if (jsonDocument?.RootElement.TryGetProperty("message", out var messageElement) == true)
-                {
-                    var message = messageElement.GetString();
-                    if (message == "Can't get this event. It doesn't exist, inactive or not published.")
-                    {
-                        this._logger.LogInformation("Event with ID {EventId} does not exist or is inactive/published, skipping", eventId);
-                        return null;
-                    }
-                }
-            }
-            catch
-            {
-                // aboves try-block just tries to eliminate 4xx-errors due to messy data from the API.
-                // We had it once to get an activity ID from a page response which was not published 
-                // anymore/yet or inactive causing a 4xx error.
-            }
-
             this._logger.LogError(httpEx, "HTTP error fetching event details for ID {EventId}. Response content: {Content}", eventId, content);
             return null;
         }
