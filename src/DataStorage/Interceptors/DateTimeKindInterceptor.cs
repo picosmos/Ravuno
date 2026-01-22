@@ -23,7 +23,7 @@ public class DateTimeKindInterceptor : SaveChangesInterceptor, IMaterializationI
 {
     private readonly ILogger<DateTimeKindInterceptor>? _logger;
     private static readonly ConcurrentDictionary<Type, PropertyInfo[]> KeyPropertiesCache = new();
-    private record DateTimePropertyInfo(PropertyInfo Property, bool HasLocalTimeAttribute);
+    private sealed record DateTimePropertyInfo(PropertyInfo Property, bool HasLocalTimeAttribute);
     private static readonly ConcurrentDictionary<Type, DateTimePropertyInfo[]> PropertyCache = new();
 
     public DateTimeKindInterceptor(ILogger<DateTimeKindInterceptor>? logger = null)
@@ -189,52 +189,41 @@ public class DateTimeKindInterceptor : SaveChangesInterceptor, IMaterializationI
         return entity;
     }
 
-    public ValueTask<object> CreatedInstanceAsync(MaterializationInterceptionData materializationData, object entity, CancellationToken cancellationToken = default)
-    {
-        return new ValueTask<object>(entity);
-    }
-
     public object InitializedInstance(MaterializationInterceptionData materializationData, object entity)
     {
+        ArgumentNullException.ThrowIfNull(entity);
         this._logger?.LogDebug("InitializedInstance called for entity type: {EntityType}", entity.GetType().Name);
         this.SetDateTimeKinds(entity);
         return entity;
     }
 
-    public ValueTask<object> InitializedInstanceAsync(MaterializationInterceptionData materializationData, object entity, CancellationToken cancellationToken = default)
-    {
-        this._logger?.LogDebug("InitializedInstanceAsync called for entity type: {EntityType}", entity.GetType().Name);
-        this.SetDateTimeKinds(entity);
-        return new ValueTask<object>(entity);
-    }
-
     private void SetDateTimeKinds(object entity)
     {
         var entityType = entity.GetType();
-        
+
         // Cache property metadata lookup
         var dateTimeProperties = PropertyCache.GetOrAdd(entityType, type =>
         {
-            return type.GetProperties()
-                .Where(p => (p.PropertyType == typeof(DateTime) || Nullable.GetUnderlyingType(p.PropertyType) == typeof(DateTime)) 
+            return [.. type.GetProperties()
+                .Where(p => (p.PropertyType == typeof(DateTime) || Nullable.GetUnderlyingType(p.PropertyType) == typeof(DateTime))
                          && p.CanRead && p.CanWrite)
                 .Select(p => new DateTimePropertyInfo(
                     p,
-                    p.GetCustomAttributes(typeof(LocalTimeAttribute), inherit: true).Length > 0))
-                .ToArray();
+                    p.GetCustomAttributes(typeof(LocalTimeAttribute), inherit: true).Length > 0))];
+
         });
 
         foreach (var propInfo in dateTimeProperties)
         {
             var dateTime = (DateTime?)propInfo.Property.GetValue(entity);
-            
+
             if (!dateTime.HasValue || dateTime == DateTime.MaxValue || dateTime == DateTime.MinValue)
             {
                 continue;
             }
 
             var targetKind = propInfo.HasLocalTimeAttribute ? DateTimeKind.Local : DateTimeKind.Utc;
-            
+
             if (dateTime.Value.Kind != targetKind)
             {
                 this._logger?.LogDebug(
@@ -244,7 +233,7 @@ public class DateTimeKindInterceptor : SaveChangesInterceptor, IMaterializationI
                     dateTime.Value.Kind,
                     targetKind,
                     dateTime.Value);
-                    
+
                 propInfo.Property.SetValue(entity, DateTime.SpecifyKind(dateTime.Value, targetKind));
             }
         }

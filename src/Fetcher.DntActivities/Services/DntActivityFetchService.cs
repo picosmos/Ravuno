@@ -116,7 +116,6 @@ public class DntActivityFetchService : IDntActivityFetchService
     private async Task<Item?> FetchEventDetailsAsync(string eventId)
     {
         string? content = null;
-        JsonDocument? jsonDocument = null;
         try
         {
             this._logger.LogInformation("Fetching event details for ID {EventId}", eventId);
@@ -126,21 +125,21 @@ public class DntActivityFetchService : IDntActivityFetchService
 
             content = await response.Content.ReadAsStringAsync();
 
-            if(!response.IsSuccessStatusCode)
+            if (!response.IsSuccessStatusCode)
             {
                 // We do not validate the existence of the API here, we assume a bad ID was supplied. 
                 // This happened before, either by just returning a 400 without content or a 400 with a status-json.
-                this._logger.LogInformation("Fetching data for event with ID {EventId} returned status code {StatusCode}. Content: {Content}", eventId, response.StatusCode, content?.Substring(0, Math.Min(500, content.Length)));
+                this._logger.LogInformation("Fetching data for event with ID {EventId} returned status code {StatusCode}. Content: {Content}", eventId, response.StatusCode, content?[..Math.Min(500, content.Length)]);
                 return null;
             }
 
-            if(string.IsNullOrEmpty(content))
+            if (string.IsNullOrEmpty(content))
             {
                 this._logger.LogInformation("Fetching data for event with ID {EventId} returned empty content.", eventId);
                 return null;
             }
-            
-            jsonDocument = JsonDocument.Parse(content);
+
+            var jsonDocument = JsonDocument.Parse(content);
             var root = jsonDocument.RootElement;
 
             var item = new Item
