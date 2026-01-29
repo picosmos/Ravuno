@@ -1,0 +1,35 @@
+@{
+    ViewData["Title"] = "Home - Route List";
+    Layout = "_Layout";
+}
+
+<h2>Available Routes</h2>
+
+<div class="info">
+    <strong>Welcome to the Ravuno Statistics Portal</strong>
+</div>
+
+<ul>
+    <li>
+        <a href="/stats/fetchhistory">/stats/fetchhistory</a><br />
+        <em style="font-size: 0.9em;">Fetch history records</em>
+    </li>
+    <li>
+        <a href="/stats/sendupdatehistory">/stats/sendupdatehistory</a><br />
+        <em style="font-size: 0.9em;">Send update history records</em>
+    </li>
+    <li>
+        <a href="/stats/items">/stats/items</a><br />
+        <em style="font-size: 0.9em;">Items</em>
+    </li>
+    @if (ViewBag.QueryTitles != null && ((List<string>)ViewBag.QueryTitles).Count > 0)
+    {
+        @foreach (var queryTitle in (List<string>)ViewBag.QueryTitles)
+        {
+            <li>
+                <a href="/stats/viewsql/@Uri.EscapeDataString(queryTitle)">/stats/viewsql/@Uri.EscapeDataString(queryTitle)</a><br />
+                <em style="font-size: 0.9em;">SQL Query: @queryTitle</em>
+            </li>
+        }
+    }
+</ul>

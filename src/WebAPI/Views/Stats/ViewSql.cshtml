@@ -1,0 +1,20 @@
+@{
+    ViewData["Title"] = "SQL Query - " + ViewBag.QueryTitle;
+    Layout = "_Layout";
+}
+
+<h2>SQL Query Configuration</h2>
+
+<div class="info">
+    <strong>Query Title:</strong> @ViewBag.QueryTitle<br />
+    <strong>Email Receiver:</strong> @ViewBag.EmailReceiver
+</div>
+
+<h2>SQL Query</h2>
+
+<pre>@ViewBag.SqlQuery</pre>
+
+<p>
+    <a href="/stats/sendupdatehistory">&laquo; Back to Send Update History</a> |
+    <a href="/">Home</a>
+</p>

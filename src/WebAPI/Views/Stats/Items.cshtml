@@ -1,0 +1,88 @@
+@model List<Ravuno.DataStorage.Models.Item>
+@{
+    ViewData["Title"] = "Items";
+    Layout = "_Layout";
+}
+
+<h2>Items</h2>
+
+<div class="info">
+    <strong>Total Records:</strong> @ViewBag.TotalCount | 
+    <strong>Page:</strong> @ViewBag.CurrentPage of @ViewBag.TotalPages
+</div>
+
+@if (Model.Count == 0)
+{
+    <p>No items found.</p>
+}
+else
+{
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Source</th>
+                <th>Source ID</th>
+                <th>Title</th>
+                <th>Organizer</th>
+                <th>Location</th>
+                <th>Event Start</th>
+                <th>Event End</th>
+                <th>Retrieved At</th>
+                <th>URL</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Id</td>
+                    <td>@item.Source</td>
+                    <td>@item.SourceId</td>
+                    <td>@(item.Title ?? "(no title)")</td>
+                    <td>@(item.Organizer ?? "-")</td>
+                    <td>@(item.Location ?? "-")</td>
+                    <td>@item.EventStartDateTime.ToString("yyyy-MM-dd HH:mm")</td>
+                    <td>@item.EventEndDateTime.ToString("yyyy-MM-dd HH:mm")</td>
+                    <td>@item.RetrievedAt.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                    <td>
+                        @if (!string.IsNullOrEmpty(item.Url))
+                        {
+                            <a href="@item.Url" target="_blank">Link</a>
+                        }
+                        else
+                        {
+                            <text>-</text>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <div class="pagination">
+        @if (ViewBag.CurrentPage > 1)
+        {
+            <a href="/stats/items?page=1&pageSize=@ViewBag.PageSize">&laquo; First</a>
+            <a href="/stats/items?page=@(ViewBag.CurrentPage - 1)&pageSize=@ViewBag.PageSize">&lt; Previous</a>
+        }
+        
+        @for (int i = Math.Max(1, ViewBag.CurrentPage - 5); i <= Math.Min(ViewBag.TotalPages, ViewBag.CurrentPage + 5); i++)
+        {
+            if (i == ViewBag.CurrentPage)
+            {
+                <span class="current">@i</span>
+            }
+            else
+            {
+                <a href="/stats/items?page=@i&pageSize=@ViewBag.PageSize">@i</a>
+            }
+        }
+        
+        @if (ViewBag.CurrentPage < ViewBag.TotalPages)
+        {
+            <a href="/stats/items?page=@(ViewBag.CurrentPage + 1)&pageSize=@ViewBag.PageSize">Next &gt;</a>
+            <a href="/stats/items?page=@ViewBag.TotalPages&pageSize=@ViewBag.PageSize">Last &raquo;</a>
+        }
+    </div>
+}

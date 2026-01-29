@@ -1,0 +1,75 @@
+@model List<Ravuno.DataStorage.Models.SendUpdateHistory>
+@{
+    ViewData["Title"] = "Send Update History";
+    Layout = "_Layout";
+}
+
+<h2>Send Update History</h2>
+
+<div class="info">
+    <strong>Total Records:</strong> @ViewBag.TotalCount | 
+    <strong>Page:</strong> @ViewBag.CurrentPage of @ViewBag.TotalPages
+</div>
+
+@if (Model.Count == 0)
+{
+    <p>No send update history records found.</p>
+}
+else
+{
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Query Title</th>
+                <th>Email Receiver</th>
+                <th>Sent At</th>
+                <th>New Items</th>
+                <th>Updated Items</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Id</td>
+                    <td>
+                        <a href="/stats/viewsql/@Uri.EscapeDataString(item.QueryTitle)">
+                            @item.QueryTitle
+                        </a>
+                    </td>
+                    <td>@item.EmailReceiverAddress</td>
+                    <td>@item.SentAt.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                    <td>@item.NewItemsCount</td>
+                    <td>@item.UpdatedItemsCount</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <div class="pagination">
+        @if (ViewBag.CurrentPage > 1)
+        {
+            <a href="/stats/sendupdatehistory?page=1&pageSize=@ViewBag.PageSize">&laquo; First</a>
+            <a href="/stats/sendupdatehistory?page=@(ViewBag.CurrentPage - 1)&pageSize=@ViewBag.PageSize">&lt; Previous</a>
+        }
+        
+        @for (int i = Math.Max(1, ViewBag.CurrentPage - 5); i <= Math.Min(ViewBag.TotalPages, ViewBag.CurrentPage + 5); i++)
+        {
+            if (i == ViewBag.CurrentPage)
+            {
+                <span class="current">@i</span>
+            }
+            else
+            {
+                <a href="/stats/sendupdatehistory?page=@i&pageSize=@ViewBag.PageSize">@i</a>
+            }
+        }
+        
+        @if (ViewBag.CurrentPage < ViewBag.TotalPages)
+        {
+            <a href="/stats/sendupdatehistory?page=@(ViewBag.CurrentPage + 1)&pageSize=@ViewBag.PageSize">Next &gt;</a>
+            <a href="/stats/sendupdatehistory?page=@ViewBag.TotalPages&pageSize=@ViewBag.PageSize">Last &raquo;</a>
+        }
+    </div>
+}

@@ -5,4 +5,5 @@ namespace Ravuno.WebAPI.Services.Contracts;
 public interface IUpdateConfigurationService
 {
     Task<List<UpdateConfiguration>> GetUpdateConfigurationsAsync();
+    Task<UpdateConfiguration?> GetUpdateConfigurationByTitleAsync(string queryTitle);
 }

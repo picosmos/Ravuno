@@ -74,4 +74,10 @@ public class UpdateConfigurationService : IUpdateConfigurationService
 
         return configurations;
     }
+
+    public async Task<UpdateConfiguration?> GetUpdateConfigurationByTitleAsync(string queryTitle)
+    {
+        var configurations = await this.GetUpdateConfigurationsAsync();
+        return configurations.Find(c => c.QueryTitle.Equals(queryTitle, StringComparison.OrdinalIgnoreCase));
+    }
 }

@@ -47,6 +47,8 @@ builder.Services.AddScoped<FetchAndSendService>();
 builder.Services.AddHostedService<FetchAndSendHostedService>();
 builder.Services.AddHostedService<ItemCleanupService>();
 
+builder.Services.AddControllersWithViews();
+
 builder.Services.AddRateLimiter(options =>
 {
     options.AddPolicy("RavunoApi", context =>
@@ -96,5 +98,9 @@ app.UseForwardedHeaders();
 app.UseRateLimiter();
 
 app.UseCors();
+
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Stats}/{action=FetchHistory}/{id?}");
 
 app.Run();
