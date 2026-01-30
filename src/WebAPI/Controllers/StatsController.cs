@@ -98,32 +98,7 @@ public class StatsController : Controller
     }
 
     [HttpGet("viewsql/{queryTitle}")]
-    public async Task<IActionResult> ViewSql(string queryTitle)
-    {
-        try
-        {
-            var config = await this._updateConfigService.GetUpdateConfigurationByTitleAsync(queryTitle);
-
-            if (config == null)
-            {
-                return this.NotFound();
-            }
-
-            this.ViewBag.QueryTitle = config.QueryTitle;
-            this.ViewBag.SqlQuery = config.SqlQuery;
-            this.ViewBag.EmailReceiver = config.EmailReceiverAddress;
-
-            return this.View();
-        }
-        catch (Exception ex)
-        {
-            this._logger.LogError(ex, "Error retrieving SQL for query title: {QueryTitle}", queryTitle);
-            return this.StatusCode(500);
-        }
-    }
-
-    [HttpGet("viewsqlresults")]
-    public async Task<IActionResult> ViewSqlResults(string queryTitle, int page = 1, int pageSize = 100)
+    public async Task<IActionResult> ViewSql(string queryTitle, int page = 1, int pageSize = 100)
     {
         if (page < 1)
         {
@@ -152,6 +127,7 @@ public class StatsController : Controller
 
             this.ViewBag.QueryTitle = config.QueryTitle;
             this.ViewBag.SqlQuery = config.SqlQuery;
+            this.ViewBag.EmailReceiver = config.EmailReceiverAddress;
             this.ViewBag.CurrentPage = page;
             this.ViewBag.TotalPages = totalPages;
             this.ViewBag.PageSize = pageSize;
@@ -161,7 +137,7 @@ public class StatsController : Controller
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error executing SQL query for: {QueryTitle}", queryTitle);
+            this._logger.LogError(ex, "Error retrieving SQL for query title: {QueryTitle}", queryTitle);
             return this.StatusCode(500);
         }
     }
