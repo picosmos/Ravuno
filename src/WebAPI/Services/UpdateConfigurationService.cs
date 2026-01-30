@@ -1,3 +1,6 @@
+using Microsoft.EntityFrameworkCore;
+using Ravuno.DataStorage;
+using Ravuno.DataStorage.Models;
 using Ravuno.WebAPI.Models;
 using Ravuno.WebAPI.Services.Contracts;
 
@@ -7,12 +10,17 @@ public class UpdateConfigurationService : IUpdateConfigurationService
 {
     private readonly string _configurationFolderPath;
     private readonly ILogger<UpdateConfigurationService> _logger;
+    private readonly DataStorageContext _dbContext;
 
-    public UpdateConfigurationService(IConfiguration configuration, ILogger<UpdateConfigurationService> logger)
+    public UpdateConfigurationService(
+        IConfiguration configuration,
+        ILogger<UpdateConfigurationService> logger,
+        DataStorageContext dbContext)
     {
         ArgumentNullException.ThrowIfNull(configuration);
         this._configurationFolderPath = configuration["UpdateConfigurationsPath"] ?? "/app/config/updates";
         this._logger = logger;
+        this._dbContext = dbContext;
 
         // Ensure the configuration folder exists
         if (!Directory.Exists(this._configurationFolderPath))
@@ -79,5 +87,12 @@ public class UpdateConfigurationService : IUpdateConfigurationService
     {
         var configurations = await this.GetUpdateConfigurationsAsync();
         return configurations.Find(c => c.QueryTitle.Equals(queryTitle, StringComparison.OrdinalIgnoreCase));
+    }
+
+    public async Task<List<Item>> ExecuteSqlQueryAsync(string sqlQuery, CancellationToken cancellationToken = default)
+    {
+        return await this._dbContext.Database.SqlQueryRaw<Item>(sqlQuery)
+            .AsNoTracking()
+            .ToListAsync(cancellationToken);
     }
 }

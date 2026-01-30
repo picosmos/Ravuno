@@ -308,8 +308,6 @@ public class FetchAndSendService
         string sqlQuery,
         CancellationToken cancellationToken)
     {
-        return await this._dbContext.Database.SqlQueryRaw<Item>(sqlQuery)
-            .AsNoTracking()
-            .ToListAsync(cancellationToken);
+        return await this._configService.ExecuteSqlQueryAsync(sqlQuery, cancellationToken);
     }
 }

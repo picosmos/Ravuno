@@ -121,4 +121,48 @@ public class StatsController : Controller
             return this.StatusCode(500);
         }
     }
+
+    [HttpGet("viewsqlresults")]
+    public async Task<IActionResult> ViewSqlResults(string queryTitle, int page = 1, int pageSize = 100)
+    {
+        if (page < 1)
+        {
+            page = 1;
+        }
+
+        try
+        {
+            var config = await this._updateConfigService.GetUpdateConfigurationByTitleAsync(queryTitle);
+
+            if (config == null)
+            {
+                return this.NotFound();
+            }
+
+            // Execute SQL query
+            var allResults = await this._updateConfigService.ExecuteSqlQueryAsync(config.SqlQuery, HttpContext.RequestAborted);
+
+            var totalCount = allResults.Count;
+            var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+
+            var items = allResults
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            this.ViewBag.QueryTitle = config.QueryTitle;
+            this.ViewBag.SqlQuery = config.SqlQuery;
+            this.ViewBag.CurrentPage = page;
+            this.ViewBag.TotalPages = totalPages;
+            this.ViewBag.PageSize = pageSize;
+            this.ViewBag.TotalCount = totalCount;
+
+            return this.View(items);
+        }
+        catch (Exception ex)
+        {
+            this._logger.LogError(ex, "Error executing SQL query for: {QueryTitle}", queryTitle);
+            return this.StatusCode(500);
+        }
+    }
 }
