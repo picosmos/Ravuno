@@ -1,4 +1,5 @@
 using System.Threading.RateLimiting;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.HttpOverrides;
 using Ravuno.Email.Extensions;
 using Ravuno.Email.Services;
@@ -41,6 +42,11 @@ builder.Services.AddHttpClient<IDntActivityFetchService, DntActivityFetchService
 
 builder.Services.AddMemoryCache();
 builder.Services.AddDataStorage(builder.Configuration);
+
+// Configure data protection to persist keys for future non-readonly features
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(new DirectoryInfo("/app/data/keys"))
+    .SetApplicationName("Ravuno");
 
 builder.Services.AddScoped<IUpdateConfigurationService, UpdateConfigurationService>();
 builder.Services.AddScoped<FetchAndSendService>();
