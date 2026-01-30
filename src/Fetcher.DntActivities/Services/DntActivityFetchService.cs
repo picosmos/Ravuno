@@ -77,7 +77,7 @@ public class DntActivityFetchService : IDntActivityFetchService
                         }
 
                         var detailedItem = await this.FetchEventDetailsAsync(eventId);
-                        if (detailedItem != null && allItems.TrueForAll(x => x.Id != detailedItem.Id))
+                        if (detailedItem != null && allItems.TrueForAll(x => x.SourceId != detailedItem.SourceId))
                         {
                             allItems.Add(detailedItem);
 
