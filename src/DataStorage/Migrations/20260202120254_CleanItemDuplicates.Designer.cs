@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Ravuno.DataStorage;
 
@@ -10,9 +11,11 @@ using Ravuno.DataStorage;
 namespace Ravuno.DataStorage.Migrations
 {
     [DbContext(typeof(DataStorageContext))]
-    partial class DataStorageContextModelSnapshot : ModelSnapshot
+    [Migration("20260202120254_CleanItemDuplicates")]
+    partial class CleanItemDuplicates
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.0");
@@ -105,9 +108,6 @@ namespace Ravuno.DataStorage.Migrations
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("Source", "SourceId")
-                        .IsUnique();
 
                     b.ToTable("Items");
                 });

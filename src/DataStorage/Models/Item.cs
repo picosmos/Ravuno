@@ -1,17 +1,22 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.EntityFrameworkCore;
 using Ravuno.DataStorage.Attributes;
 
 namespace Ravuno.DataStorage.Models;
 
+// Ensure unique constraint on (Source, SourceId)
+[Index(nameof(Source), nameof(SourceId), IsUnique = true)]
 public class Item
 {
     [Key]
     public long Id { get; set; }
 
+    [Required]
     public ItemSource Source { get; set; }
 
     public string? RawData { get; set; }
 
+    [Required]
     public string SourceId { get; set; } = string.Empty;
 
     public DateTime RetrievedAt { get; set; }

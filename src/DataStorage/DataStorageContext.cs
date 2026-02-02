@@ -44,6 +44,8 @@ public class DataStorageContext : DbContext
 
             entity.Property(e => e.Price)
                 .HasMaxLength(100);
+
+            entity.HasIndex(e => new { e.Source, e.SourceId }).IsUnique();
         });
 
         modelBuilder.Entity<FetchHistory>(entity =>
