@@ -241,13 +241,11 @@ public class FetchAndSendService
 
         foreach (var fetchedItem in fetchedItems)
         {
-            // Find existing item by source, title, and event date
+            // Find existing item by source and source ID
             var existingItem = await this._dbContext.Items
                 .FirstOrDefaultAsync(i =>
                     i.Source == fetchedItem.Source &&
-                    i.Title == fetchedItem.Title &&
-                    i.EventStartDateTime == fetchedItem.EventStartDateTime &&
-                    i.EventEndDateTime == fetchedItem.EventEndDateTime,
+                    i.SourceId == fetchedItem.SourceId,
                     cancellationToken);
 
             if (existingItem == null)
