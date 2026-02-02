@@ -111,7 +111,15 @@ public class TeknaFetchService : ITeknaFetchService
                                 Tags = this.ExtractTags(courseItem, refinerMappings)
                             };
 
-                            allItems.Add(item);
+                            // Only add if not already in the list (deduplication within current fetch cycle)
+                            if (allItems.TrueForAll(x => x.SourceId != item.SourceId))
+                            {
+                                allItems.Add(item);
+                            }
+                            else
+                            {
+                                this._logger?.LogDebug("Duplicate course with SourceId {SourceId} detected in current fetch cycle, skipping", item.SourceId);
+                            }
                         }
                         catch (Exception ex)
                         {
