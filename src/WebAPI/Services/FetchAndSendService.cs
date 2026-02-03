@@ -289,6 +289,12 @@ public class FetchAndSendService
                     hasChanges = true;
                 }
 
+                if (!(existingItem.Tags?.SequenceEqual(fetchedItem.Tags ?? []) ?? (fetchedItem.Tags == null)))
+                {
+                    existingItem.Tags = fetchedItem.Tags;
+                    hasChanges = true;
+                }
+
                 if (hasChanges)
                 {
                     existingItem.RetrievedAt = fetchedItem.RetrievedAt;
