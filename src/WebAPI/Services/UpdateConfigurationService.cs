@@ -86,7 +86,17 @@ public class UpdateConfigurationService : IUpdateConfigurationService
     public async Task<UpdateConfiguration?> GetUpdateConfigurationByTitleAsync(string queryTitle)
     {
         var configurations = await this.GetUpdateConfigurationsAsync();
-        return configurations.Find(c => c.QueryTitle.Equals(queryTitle, StringComparison.OrdinalIgnoreCase));
+        static string Normalize(string s)
+        {
+            s = s.Trim();
+            if (s.EndsWith(".sql", StringComparison.OrdinalIgnoreCase))
+            {
+                s = s[..^4];
+            }
+            return s.ToLowerInvariant();
+        }
+        var normalizedQueryTitle = Normalize(queryTitle);
+        return configurations.Find(c => Normalize(c.QueryTitle) == normalizedQueryTitle);
     }
 
     public async Task<List<Item>> ExecuteSqlQueryAsync(string sqlQuery, CancellationToken cancellationToken = default)
