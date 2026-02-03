@@ -115,7 +115,7 @@ public class StatsController : Controller
             }
 
             // Execute SQL query
-            var allResults = await this._updateConfigService.ExecuteSqlQueryAsync(config.SqlQuery, HttpContext.RequestAborted);
+            var allResults = await this._updateConfigService.ExecuteSqlQueryAsync(config.SqlQuery, this.HttpContext.RequestAborted);
 
             var totalCount = allResults.Count;
             var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
