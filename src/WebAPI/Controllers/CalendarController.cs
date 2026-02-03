@@ -1,7 +1,7 @@
 using System.Text;
 using Microsoft.AspNetCore.Mvc;
 using Ravuno.DataStorage.Models;
-using Ravuno.WebAPI.Services;
+using Ravuno.WebAPI.Services.Contracts;
 
 namespace Ravuno.WebAPI.Controllers;
 
@@ -9,9 +9,9 @@ namespace Ravuno.WebAPI.Controllers;
 [Route("calendar")]
 public class CalendarController : ControllerBase
 {
-    private readonly UpdateConfigurationService _updateConfigService;
+    private readonly IUpdateConfigurationService _updateConfigService;
 
-    public CalendarController(UpdateConfigurationService updateConfigService)
+    public CalendarController(IUpdateConfigurationService updateConfigService)
     {
         this._updateConfigService = updateConfigService;
     }
