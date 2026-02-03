@@ -27,8 +27,9 @@
         @foreach (var queryTitle in (List<string>)ViewBag.QueryTitles)
         {
             <li>
-                <a href="/stats/viewsql/@Uri.EscapeDataString(queryTitle)">/stats/viewsql/@Uri.EscapeDataString(queryTitle)</a><br />
-                <em style="font-size: 0.9em;">SQL Query: @queryTitle</em>
+                <strong>@queryTitle</strong><br />
+                Show content: <a href="/stats/viewsql/@Uri.EscapeDataString(queryTitle)">/stats/viewsql/@Uri.EscapeDataString(queryTitle)</a><br />
+                Calendar feed: <a href="/calendar/@Uri.EscapeDataString(queryTitle)">/calendar/@Uri.EscapeDataString(queryTitle)</a>
             </li>
         }
     }
