@@ -30,6 +30,7 @@ else
                 <th>Event End</th>
                 <th>Retrieved At</th>
                 <th>URL</th>
+                <th>Tags</th>
             </tr>
         </thead>
         <tbody>
@@ -54,6 +55,9 @@ else
                         {
                             <text>-</text>
                         }
+                    </td>
+                    <td>
+                        @(item.Tags != null && item.Tags.Length > 0 ? string.Join(", ", item.Tags) : "-")
                     </td>
                 </tr>
             }
