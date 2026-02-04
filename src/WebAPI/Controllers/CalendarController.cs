@@ -42,7 +42,8 @@ public class CalendarController : ControllerBase
             sb.AppendLine(string.Format(System.Globalization.CultureInfo.InvariantCulture, "UID:{0}-{1}@ravuno", item.Source, item.SourceId));
             sb.AppendLine(string.Format(System.Globalization.CultureInfo.InvariantCulture, "DTSTART:{0:yyyyMMddTHHmmssZ}", item.EventStartDateTime.ToUniversalTime()));
             sb.AppendLine(string.Format(System.Globalization.CultureInfo.InvariantCulture, "DTEND:{0:yyyyMMddTHHmmssZ}", item.EventEndDateTime.ToUniversalTime()));
-            sb.AppendLine(string.Format(System.Globalization.CultureInfo.InvariantCulture, "SUMMARY:{0}", EscapeIcs(item.Title)));
+            sb.AppendLine("TRANSP:TRANSPARENT"); // Mark as "not busy" - informational only
+            sb.AppendLine(System.Globalization.CultureInfo.InvariantCulture, $"SUMMARY:{0}", EscapeIcs(item.Title));
             var organizer = string.IsNullOrWhiteSpace(item.Organizer) ? "Ravuno" : $"Ravuno: {item.Organizer}";
             sb.AppendLine(string.Format(System.Globalization.CultureInfo.InvariantCulture, "ORGANIZER;CN={0}:MAILTO:no-reply@ravuno.local", EscapeIcs(organizer)));
             sb.AppendLine(string.Format(System.Globalization.CultureInfo.InvariantCulture, "LOCATION:{0}", EscapeIcs(item.Location)));
