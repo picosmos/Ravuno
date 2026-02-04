@@ -39,14 +39,14 @@ public class CalendarController : ControllerBase
         foreach (var item in items)
         {
             sb.AppendLine("BEGIN:VEVENT");
-            sb.AppendLine(string.Format(System.Globalization.CultureInfo.InvariantCulture, "UID:{0}-{1}@ravuno", item.Source, item.SourceId));
-            sb.AppendLine(string.Format(System.Globalization.CultureInfo.InvariantCulture, "DTSTART:{0:yyyyMMddTHHmmssZ}", item.EventStartDateTime.ToUniversalTime()));
-            sb.AppendLine(string.Format(System.Globalization.CultureInfo.InvariantCulture, "DTEND:{0:yyyyMMddTHHmmssZ}", item.EventEndDateTime.ToUniversalTime()));
+            sb.AppendLine(System.Globalization.CultureInfo.InvariantCulture, $"UID:{item.Source}-{item.SourceId}@ravuno");
+            sb.AppendLine(System.Globalization.CultureInfo.InvariantCulture, $"DTSTART:{item.EventStartDateTime.ToUniversalTime():yyyyMMddTHHmmssZ}");
+            sb.AppendLine(System.Globalization.CultureInfo.InvariantCulture, $"DTEND:{item.EventEndDateTime.ToUniversalTime():yyyyMMddTHHmmssZ}");
             sb.AppendLine("TRANSP:TRANSPARENT"); // Mark as "not busy" - informational only
-            sb.AppendLine(System.Globalization.CultureInfo.InvariantCulture, $"SUMMARY:{0}", EscapeIcs(item.Title));
+            sb.AppendLine(System.Globalization.CultureInfo.InvariantCulture, $"SUMMARY:{EscapeIcs(item.Title)}");
             var organizer = string.IsNullOrWhiteSpace(item.Organizer) ? "Ravuno" : $"Ravuno: {item.Organizer}";
-            sb.AppendLine(string.Format(System.Globalization.CultureInfo.InvariantCulture, "ORGANIZER;CN={0}:MAILTO:no-reply@ravuno.local", EscapeIcs(organizer)));
-            sb.AppendLine(string.Format(System.Globalization.CultureInfo.InvariantCulture, "LOCATION:{0}", EscapeIcs(item.Location)));
+            sb.AppendLine(System.Globalization.CultureInfo.InvariantCulture, $"ORGANIZER;CN={EscapeIcs(organizer)}:MAILTO:no-reply@ravuno.local");
+            sb.AppendLine(System.Globalization.CultureInfo.InvariantCulture, $"LOCATION:{EscapeIcs(item.Location)}");
             var description = new StringBuilder();
             if (!string.IsNullOrWhiteSpace(item.Url))
             {
@@ -58,7 +58,7 @@ public class CalendarController : ControllerBase
                 description.AppendLine(item.Description);
             }
 
-            sb.AppendLine(string.Format(System.Globalization.CultureInfo.InvariantCulture, "DESCRIPTION:{0}", EscapeIcs(description.ToString())));
+            sb.AppendLine(System.Globalization.CultureInfo.InvariantCulture, $"DESCRIPTION:{EscapeIcs(description.ToString())}");
             sb.AppendLine("END:VEVENT");
         }
         sb.AppendLine("END:VCALENDAR");
