@@ -169,7 +169,7 @@ public class FetchAndSendService
 
         // Check if this query has been sent before
         var lastSendHistory = await this._dbContext.SendUpdateHistories
-            .Where(sh => sh.QueryTitle == config.QueryTitle && sh.EmailReceiverAddress == config.EmailReceiverAddress)
+            .Where(sh => sh.QueryTitle == config.QueryTitle && config.EmailReceiverAddresses.Contains(sh.EmailReceiverAddress))
             .OrderByDescending(sh => sh.SentAt)
             .FirstOrDefaultAsync(cancellationToken);
 
@@ -203,28 +203,35 @@ public class FetchAndSendService
         // Send email if there are changes
         if (newDelta.Count > 0 || updatedDelta.Count > 0)
         {
-            await this._emailService.SendItemUpdateEmailAsync(
-                config.EmailReceiverAddress,
-                config.QueryTitle,
-                newDelta,
-                updatedDelta);
-            this._logger.LogInformation("Email sent to {Email} for {QueryTitle}",
-                config.EmailReceiverAddress, config.QueryTitle);
-
-            // Record send history
-            var sendHistory = new SendUpdateHistory
+            foreach (var receiver in config.EmailReceiverAddresses)
             {
-                QueryTitle = config.QueryTitle,
-                EmailReceiverAddress = config.EmailReceiverAddress,
-                SentAt = DateTime.UtcNow,
-                NewItemsCount = newDelta.Count,
-                UpdatedItemsCount = updatedDelta.Count
-            };
-            this._dbContext.SendUpdateHistories.Add(sendHistory);
-            await this._dbContext.SaveChangesAsync(cancellationToken);
+                try
+                {
+                    await this._emailService.SendItemUpdateEmailAsync(
+                        receiver,
+                        config.QueryTitle,
+                        newDelta,
+                        updatedDelta);
+                    this._logger.LogInformation("Email sent to {Email} for {QueryTitle}", receiver, config.QueryTitle);
 
-            this._logger.LogInformation("Recorded send history for {QueryTitle}: {NewCount} new, {UpdatedCount} updated",
-                config.QueryTitle, newDelta.Count, updatedDelta.Count);
+                    var sendHistory = new SendUpdateHistory
+                    {
+                        QueryTitle = config.QueryTitle,
+                        EmailReceiverAddress = receiver,
+                        SentAt = DateTime.UtcNow,
+                        NewItemsCount = newDelta.Count,
+                        UpdatedItemsCount = updatedDelta.Count
+                    };
+                    this._dbContext.SendUpdateHistories.Add(sendHistory);
+                    await this._dbContext.SaveChangesAsync(cancellationToken);
+                    this._logger.LogInformation("Recorded send history for {QueryTitle} and {Email}: {NewCount} new, {UpdatedCount} updated",
+                        config.QueryTitle, receiver, newDelta.Count, updatedDelta.Count);
+                }
+                catch (Exception ex)
+                {
+                    this._logger.LogError(ex, "Error sending email or recording history for {QueryTitle} to {Email}", config.QueryTitle, receiver);
+                }
+            }
         }
         else
         {

@@ -55,10 +55,19 @@ public class UpdateConfigurationService : IUpdateConfigurationService
                 }
 
                 var queryTitle = lines[0].Trim().TrimStart('-').Trim();
-                var emailAddress = lines[1].Trim().TrimStart('-').Trim();
+                var emailLine = lines[1].Trim();
+                List<string> emailAddresses;
+                if (emailLine == "--" || string.IsNullOrWhiteSpace(emailLine))
+                {
+                    emailAddresses = [];
+                }
+                else
+                {
+                    emailAddresses = [.. emailLine.TrimStart('-').Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)];
+                }
                 var sqlQuery = string.Join(Environment.NewLine, lines.Skip(2)).Trim();
 
-                if (string.IsNullOrWhiteSpace(emailAddress) || string.IsNullOrWhiteSpace(queryTitle) || string.IsNullOrWhiteSpace(sqlQuery))
+                if (string.IsNullOrWhiteSpace(queryTitle) || string.IsNullOrWhiteSpace(sqlQuery))
                 {
                     this._logger.LogWarning("Configuration file {File} has empty required fields", file);
                     continue;
@@ -66,7 +75,7 @@ public class UpdateConfigurationService : IUpdateConfigurationService
 
                 configurations.Add(new UpdateConfiguration
                 {
-                    EmailReceiverAddress = emailAddress,
+                    EmailReceiverAddresses = emailAddresses,
                     QueryTitle = queryTitle,
                     SqlQuery = sqlQuery,
                     FilePath = file

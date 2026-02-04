@@ -9,7 +9,7 @@ public class SendUpdateHistory
 
     public required string QueryTitle { get; set; }
 
-    public required string EmailReceiverAddress { get; set; }
+    public required string EmailReceiverAddress { get; set; } // Each history is for one address
 
     public DateTime SentAt { get; set; }
 

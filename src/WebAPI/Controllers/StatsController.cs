@@ -127,7 +127,7 @@ public class StatsController : Controller
 
             this.ViewBag.QueryTitle = config.QueryTitle;
             this.ViewBag.SqlQuery = config.SqlQuery;
-            this.ViewBag.EmailReceiver = config.EmailReceiverAddress;
+            this.ViewBag.EmailReceiver = string.Join(", ", config.EmailReceiverAddresses);
             this.ViewBag.CurrentPage = page;
             this.ViewBag.TotalPages = totalPages;
             this.ViewBag.PageSize = pageSize;
