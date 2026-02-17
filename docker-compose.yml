@@ -9,7 +9,6 @@ services:
       - ASPNETCORE_ENVIRONMENT=Production
       - ConnectionStrings__DataStorage=Data Source=/app/data/ravuno.db
       - FetchAndSendSettings__Interval=1.00:00:00
-      - UpdateConfigurationsPath=/app/config/updates
       - EmailSettings__SmtpHost=your.smtp.server
       - EmailSettings__SmtpPort=587
       - EmailSettings__SmtpUsername=your-username
