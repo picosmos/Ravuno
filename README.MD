@@ -17,7 +17,7 @@ Ensure `docker-compose.yml` is properly configured with your settings.
 
 ## Custom Data Filters
 
-Copy `.sql` files into `/app/config/updates` of the docker container to define custom data filters and email recipients.
+SQL scripts for custom data filters and email recipients are now stored in the database. Use the API to manage them.
 
 ### Example Filter
 

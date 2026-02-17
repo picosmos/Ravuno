@@ -18,7 +18,7 @@ FROM base AS final
 WORKDIR /app
 
 # Create directories for persistent data and configuration
-RUN mkdir -p /app/data /app/config/updates && chown -R app:app /app/data /app/config
+RUN mkdir -p /app/data /app/config && chown -R app:app /app/data /app/config
 
 COPY --from=publish /app/publish .
 
