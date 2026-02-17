@@ -10,17 +10,17 @@ namespace Ravuno.DataStorage.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropPrimaryKey(
-                name: "PK_Items",
-                table: "Items");
+            migrationBuilder.DropPrimaryKey(name: "PK_Items", table: "Items");
 
-            migrationBuilder.AlterColumn<long>(
-                name: "Id",
-                table: "Items",
-                type: "INTEGER",
-                nullable: false,
-                oldClrType: typeof(long),
-                oldType: "INTEGER")
+            migrationBuilder
+                .AlterColumn<long>(
+                    name: "Id",
+                    table: "Items",
+                    type: "INTEGER",
+                    nullable: false,
+                    oldClrType: typeof(long),
+                    oldType: "INTEGER"
+                )
                 .Annotation("Sqlite:Autoincrement", true);
 
             migrationBuilder.AlterColumn<string>(
@@ -31,20 +31,16 @@ namespace Ravuno.DataStorage.Migrations
                 nullable: true,
                 oldClrType: typeof(string),
                 oldType: "TEXT",
-                oldMaxLength: 2000);
+                oldMaxLength: 2000
+            );
 
-            migrationBuilder.AddPrimaryKey(
-                name: "PK_Items",
-                table: "Items",
-                column: "Id");
+            migrationBuilder.AddPrimaryKey(name: "PK_Items", table: "Items", column: "Id");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropPrimaryKey(
-                name: "PK_Items",
-                table: "Items");
+            migrationBuilder.DropPrimaryKey(name: "PK_Items", table: "Items");
 
             migrationBuilder.AlterColumn<string>(
                 name: "Url",
@@ -56,21 +52,25 @@ namespace Ravuno.DataStorage.Migrations
                 oldClrType: typeof(string),
                 oldType: "TEXT",
                 oldMaxLength: 2000,
-                oldNullable: true);
+                oldNullable: true
+            );
 
-            migrationBuilder.AlterColumn<long>(
-                name: "Id",
-                table: "Items",
-                type: "INTEGER",
-                nullable: false,
-                oldClrType: typeof(long),
-                oldType: "INTEGER")
+            migrationBuilder
+                .AlterColumn<long>(
+                    name: "Id",
+                    table: "Items",
+                    type: "INTEGER",
+                    nullable: false,
+                    oldClrType: typeof(long),
+                    oldType: "INTEGER"
+                )
                 .OldAnnotation("Sqlite:Autoincrement", true);
 
             migrationBuilder.AddPrimaryKey(
                 name: "PK_Items",
                 table: "Items",
-                columns: ["Source", "RetrievedAt", "Url"]);
+                columns: ["Source", "RetrievedAt", "Url"]
+            );
         }
     }
 }

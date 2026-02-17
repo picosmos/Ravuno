@@ -16,7 +16,11 @@ public class DntActivityFetchService : IDntActivityFetchService
     private readonly ILogger<DntActivityFetchService> _logger;
     private readonly DntActivitiesSettings _settings;
 
-    public DntActivityFetchService(HttpClient httpClient, IOptions<DntActivitiesSettings> settings, ILogger<DntActivityFetchService> logger)
+    public DntActivityFetchService(
+        HttpClient httpClient,
+        IOptions<DntActivitiesSettings> settings,
+        ILogger<DntActivityFetchService> logger
+    )
     {
         this._httpClient = httpClient;
         this._logger = logger;
@@ -25,7 +29,11 @@ public class DntActivityFetchService : IDntActivityFetchService
 
     public bool IsEnabled => this._settings.IsEnabled;
 
-    public async Task<IReadOnlyList<Item>> FetchAsync(IReadOnlyCollection<Item> alreadyFetched, bool detailed, CancellationToken cancellationToken)
+    public async Task<IReadOnlyList<Item>> FetchAsync(
+        IReadOnlyCollection<Item> alreadyFetched,
+        bool detailed,
+        CancellationToken cancellationToken
+    )
     {
         var allItems = new List<Item>();
         var pageNumber = 1;
@@ -36,9 +44,16 @@ public class DntActivityFetchService : IDntActivityFetchService
         {
             try
             {
-                this._logger.LogInformation("Fetching DNT activities page {PageNumber}", pageNumber);
+                this._logger.LogInformation(
+                    "Fetching DNT activities page {PageNumber}",
+                    pageNumber
+                );
 
-                var url = string.Format(CultureInfo.InvariantCulture, this._settings.ActivitiesApiUrl, pageNumber);
+                var url = string.Format(
+                    CultureInfo.InvariantCulture,
+                    this._settings.ActivitiesApiUrl,
+                    pageNumber
+                );
                 var response = await this._httpClient.GetAsync(url, cancellationToken);
                 response.EnsureSuccessStatusCode();
 
@@ -49,7 +64,11 @@ public class DntActivityFetchService : IDntActivityFetchService
                 if (jsonDoc.RootElement.TryGetProperty("pageCount", out var pageCountElement))
                 {
                     var totalPages = pageCountElement.GetInt32();
-                    this._logger.LogInformation("Processing page {CurrentPage} of {TotalPages}", pageNumber, totalPages);
+                    this._logger.LogInformation(
+                        "Processing page {CurrentPage} of {TotalPages}",
+                        pageNumber,
+                        totalPages
+                    );
                     hasMorePages = pageNumber < totalPages;
                 }
                 else
@@ -58,8 +77,10 @@ public class DntActivityFetchService : IDntActivityFetchService
                 }
 
                 // Get page hits (activities)
-                if (jsonDoc.RootElement.TryGetProperty("pageHits", out var pageHitsElement) &&
-                    pageHitsElement.ValueKind == JsonValueKind.Array)
+                if (
+                    jsonDoc.RootElement.TryGetProperty("pageHits", out var pageHitsElement)
+                    && pageHitsElement.ValueKind == JsonValueKind.Array
+                )
                 {
                     foreach (var activityItem in pageHitsElement.EnumerateArray())
                     {
@@ -72,12 +93,18 @@ public class DntActivityFetchService : IDntActivityFetchService
                         }
                         if (!detailed && alreadyFetched.Any(i => i.SourceId == eventId))
                         {
-                            this._logger.LogInformation("Activity with ID {EventId} already exists, skipping detail fetch", eventId);
+                            this._logger.LogInformation(
+                                "Activity with ID {EventId} already exists, skipping detail fetch",
+                                eventId
+                            );
                             continue;
                         }
 
                         var detailedItem = await this.FetchEventDetailsAsync(eventId);
-                        if (detailedItem != null && allItems.TrueForAll(x => x.SourceId != detailedItem.SourceId))
+                        if (
+                            detailedItem != null
+                            && allItems.TrueForAll(x => x.SourceId != detailedItem.SourceId)
+                        )
                         {
                             allItems.Add(detailedItem);
 
@@ -85,7 +112,11 @@ public class DntActivityFetchService : IDntActivityFetchService
                         }
                     }
 
-                    this._logger.LogInformation("Retrieved {Count} items from page {PageNumber}", pageHitsElement.GetArrayLength(), pageNumber);
+                    this._logger.LogInformation(
+                        "Retrieved {Count} items from page {PageNumber}",
+                        pageHitsElement.GetArrayLength(),
+                        pageNumber
+                    );
                 }
 
                 pageNumber++;
@@ -98,7 +129,11 @@ public class DntActivityFetchService : IDntActivityFetchService
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error fetching page {PageNumber} from DNT API", pageNumber);
+                this._logger.LogError(
+                    ex,
+                    "Error fetching page {PageNumber} from DNT API",
+                    pageNumber
+                );
                 failCount++;
                 if (failCount > 5)
                 {
@@ -120,22 +155,34 @@ public class DntActivityFetchService : IDntActivityFetchService
         {
             this._logger.LogInformation("Fetching event details for ID {EventId}", eventId);
 
-            var url = string.Format(CultureInfo.InvariantCulture, this._settings.EventDetailApiUrl, eventId);
+            var url = string.Format(
+                CultureInfo.InvariantCulture,
+                this._settings.EventDetailApiUrl,
+                eventId
+            );
             var response = await this._httpClient.GetAsync(url);
 
             content = await response.Content.ReadAsStringAsync();
 
             if (!response.IsSuccessStatusCode)
             {
-                // We do not validate the existence of the API here, we assume a bad ID was supplied. 
+                // We do not validate the existence of the API here, we assume a bad ID was supplied.
                 // This happened before, either by just returning a 400 without content or a 400 with a status-json.
-                this._logger.LogInformation("Fetching data for event with ID {EventId} returned status code {StatusCode}. Content: {Content}", eventId, response.StatusCode, content?[..Math.Min(500, content.Length)]);
+                this._logger.LogInformation(
+                    "Fetching data for event with ID {EventId} returned status code {StatusCode}. Content: {Content}",
+                    eventId,
+                    response.StatusCode,
+                    content?[..Math.Min(500, content.Length)]
+                );
                 return null;
             }
 
             if (string.IsNullOrEmpty(content))
             {
-                this._logger.LogInformation("Fetching data for event with ID {EventId} returned empty content.", eventId);
+                this._logger.LogInformation(
+                    "Fetching data for event with ID {EventId} returned empty content.",
+                    eventId
+                );
                 return null;
             }
 
@@ -154,19 +201,27 @@ public class DntActivityFetchService : IDntActivityFetchService
                 Location = ExtractFullLocation(root),
                 Url = $"https://aktiviteter.dnt.no/register/{eventId}",
                 Price = ExtractPricesFromDetail(root),
-                EventStartDateTime = GetDateTimePropertyFromRoot(root, "startDate") ?? DateTime.MinValue,
-                EventEndDateTime = GetDateTimePropertyFromRoot(root, "endDate") ?? DateTime.MinValue,
-                EnrollmentDeadline = GetDateTimePropertyFromRoot(root, "registrationEndDate")
-                                   ?? GetDateTimePropertyFromRoot(root, "startDate")
-                                   ?? DateTime.MinValue,
-                Tags = ExtractTags(root)
+                EventStartDateTime =
+                    GetDateTimePropertyFromRoot(root, "startDate") ?? DateTime.MinValue,
+                EventEndDateTime =
+                    GetDateTimePropertyFromRoot(root, "endDate") ?? DateTime.MinValue,
+                EnrollmentDeadline =
+                    GetDateTimePropertyFromRoot(root, "registrationEndDate")
+                    ?? GetDateTimePropertyFromRoot(root, "startDate")
+                    ?? DateTime.MinValue,
+                Tags = ExtractTags(root),
             };
 
             return item;
         }
         catch (HttpRequestException httpEx)
         {
-            this._logger.LogError(httpEx, "HTTP error fetching event details for ID {EventId}. Response content: {Content}", eventId, content);
+            this._logger.LogError(
+                httpEx,
+                "HTTP error fetching event details for ID {EventId}. Response content: {Content}",
+                eventId,
+                content
+            );
             return null;
         }
         catch (Exception ex)
@@ -245,9 +300,11 @@ public class DntActivityFetchService : IDntActivityFetchService
     {
         var currency = GetStringProperty(root, "currency") ?? "NOK";
 
-        if (root.TryGetProperty("prices", out var pricesElement) &&
-            pricesElement.ValueKind == JsonValueKind.Array &&
-            pricesElement.GetArrayLength() > 0)
+        if (
+            root.TryGetProperty("prices", out var pricesElement)
+            && pricesElement.ValueKind == JsonValueKind.Array
+            && pricesElement.GetArrayLength() > 0
+        )
         {
             var prices = new List<string>();
             foreach (var price in pricesElement.EnumerateArray())
@@ -289,8 +346,10 @@ public class DntActivityFetchService : IDntActivityFetchService
         var tagsList = new List<string>();
 
         // Get mainTags
-        if (root.TryGetProperty("mainTags", out var mainTagsElement) &&
-            mainTagsElement.ValueKind == JsonValueKind.Array)
+        if (
+            root.TryGetProperty("mainTags", out var mainTagsElement)
+            && mainTagsElement.ValueKind == JsonValueKind.Array
+        )
         {
             foreach (var mainTag in mainTagsElement.EnumerateArray())
             {
@@ -315,8 +374,10 @@ public class DntActivityFetchService : IDntActivityFetchService
 
                 // Find related sub-tags
                 var subTags = new List<string>();
-                if (root.TryGetProperty("tags", out var tagsElement) &&
-                    tagsElement.ValueKind == JsonValueKind.Array)
+                if (
+                    root.TryGetProperty("tags", out var tagsElement)
+                    && tagsElement.ValueKind == JsonValueKind.Array
+                )
                 {
                     foreach (var tag in tagsElement.EnumerateArray())
                     {
@@ -370,7 +431,12 @@ public class DntActivityFetchService : IDntActivityFetchService
         // DNT specifies the DateTimes including the timezone offset
         // e.g., "2024-08-15T10:00:00+02:00"
         // since we are storing the local time as DateTimeKind.Local, we ignore the timezone offset here.
-        return DateTime.TryParse(stringValue, CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out var dateTime)
+        return DateTime.TryParse(
+            stringValue,
+            CultureInfo.InvariantCulture,
+            DateTimeStyles.AssumeLocal,
+            out var dateTime
+        )
             ? dateTime
             : null;
     }

@@ -15,10 +15,12 @@ public class UpdateConfigurationService : IUpdateConfigurationService
     public UpdateConfigurationService(
         IConfiguration configuration,
         ILogger<UpdateConfigurationService> logger,
-        DataStorageContext dbContext)
+        DataStorageContext dbContext
+    )
     {
         ArgumentNullException.ThrowIfNull(configuration);
-        this._configurationFolderPath = configuration["UpdateConfigurationsPath"] ?? "/app/config/updates";
+        this._configurationFolderPath =
+            configuration["UpdateConfigurationsPath"] ?? "/app/config/updates";
         this._logger = logger;
         this._dbContext = dbContext;
 
@@ -26,7 +28,10 @@ public class UpdateConfigurationService : IUpdateConfigurationService
         if (!Directory.Exists(this._configurationFolderPath))
         {
             Directory.CreateDirectory(this._configurationFolderPath);
-            this._logger.LogInformation("Created update configurations folder: {Path}", this._configurationFolderPath);
+            this._logger.LogInformation(
+                "Created update configurations folder: {Path}",
+                this._configurationFolderPath
+            );
         }
     }
 
@@ -36,7 +41,10 @@ public class UpdateConfigurationService : IUpdateConfigurationService
 
         if (!Directory.Exists(this._configurationFolderPath))
         {
-            this._logger.LogWarning("Update configurations folder does not exist: {Path}", this._configurationFolderPath);
+            this._logger.LogWarning(
+                "Update configurations folder does not exist: {Path}",
+                this._configurationFolderPath
+            );
             return configurations;
         }
 
@@ -50,7 +58,10 @@ public class UpdateConfigurationService : IUpdateConfigurationService
 
                 if (lines.Length < 3)
                 {
-                    this._logger.LogWarning("Configuration file {File} does not have enough lines (minimum 3 required)", file);
+                    this._logger.LogWarning(
+                        "Configuration file {File} does not have enough lines (minimum 3 required)",
+                        file
+                    );
                     continue;
                 }
 
@@ -63,25 +74,43 @@ public class UpdateConfigurationService : IUpdateConfigurationService
                 }
                 else
                 {
-                    emailAddresses = [.. emailLine.TrimStart('-').Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)];
+                    emailAddresses =
+                    [
+                        .. emailLine
+                            .TrimStart('-')
+                            .Split(
+                                (char[]?)null,
+                                StringSplitOptions.RemoveEmptyEntries
+                                    | StringSplitOptions.TrimEntries
+                            ),
+                    ];
                 }
                 var sqlQuery = string.Join(Environment.NewLine, lines.Skip(2)).Trim();
 
                 if (string.IsNullOrWhiteSpace(queryTitle) || string.IsNullOrWhiteSpace(sqlQuery))
                 {
-                    this._logger.LogWarning("Configuration file {File} has empty required fields", file);
+                    this._logger.LogWarning(
+                        "Configuration file {File} has empty required fields",
+                        file
+                    );
                     continue;
                 }
 
-                configurations.Add(new UpdateConfiguration
-                {
-                    EmailReceiverAddresses = emailAddresses,
-                    QueryTitle = queryTitle,
-                    SqlQuery = sqlQuery,
-                    FilePath = file
-                });
+                configurations.Add(
+                    new UpdateConfiguration
+                    {
+                        EmailReceiverAddresses = emailAddresses,
+                        QueryTitle = queryTitle,
+                        SqlQuery = sqlQuery,
+                        FilePath = file,
+                    }
+                );
 
-                this._logger.LogInformation("Loaded update configuration from {File}: {Title}", file, queryTitle);
+                this._logger.LogInformation(
+                    "Loaded update configuration from {File}: {Title}",
+                    file,
+                    queryTitle
+                );
             }
             catch (Exception ex)
             {
@@ -95,12 +124,18 @@ public class UpdateConfigurationService : IUpdateConfigurationService
     public async Task<UpdateConfiguration?> GetUpdateConfigurationByTitleAsync(string queryTitle)
     {
         var configurations = await this.GetUpdateConfigurationsAsync();
-        return configurations.Find(c => c.QueryTitle.Equals(queryTitle, StringComparison.OrdinalIgnoreCase));
+        return configurations.Find(c =>
+            c.QueryTitle.Equals(queryTitle, StringComparison.OrdinalIgnoreCase)
+        );
     }
 
-    public async Task<List<Item>> ExecuteSqlQueryAsync(string sqlQuery, CancellationToken cancellationToken = default)
+    public async Task<List<Item>> ExecuteSqlQueryAsync(
+        string sqlQuery,
+        CancellationToken cancellationToken = default
+    )
     {
-        return await this._dbContext.Database.SqlQueryRaw<Item>(sqlQuery)
+        return await this
+            ._dbContext.Database.SqlQueryRaw<Item>(sqlQuery)
             .AsNoTracking()
             .ToListAsync(cancellationToken);
     }

@@ -26,7 +26,8 @@ public sealed class EmailLoggerProvider : ILoggerProvider
 
     public EmailLoggerProvider(
         IEmailService emailService,
-        IOptions<EmailLogProviderSettings> settings)
+        IOptions<EmailLogProviderSettings> settings
+    )
     {
         ArgumentNullException.ThrowIfNull(emailService);
         ArgumentNullException.ThrowIfNull(settings);
@@ -74,7 +75,9 @@ public sealed class EmailLoggerProvider : ILoggerProvider
     {
         try
         {
-            while (await this._periodicTimer.WaitForNextTickAsync(this._cancellationTokenSource.Token))
+            while (
+                await this._periodicTimer.WaitForNextTickAsync(this._cancellationTokenSource.Token)
+            )
             {
                 await this.CheckAndSendLogsAsync();
             }
@@ -156,7 +159,9 @@ public sealed class EmailLoggerProvider : ILoggerProvider
 
         if (isDueToMaxWait)
         {
-            sb.AppendLine("⚠️ WARNING: High volume of logs detected. This email contains logs that accumulated over the maximum wait time.");
+            sb.AppendLine(
+                "⚠️ WARNING: High volume of logs detected. This email contains logs that accumulated over the maximum wait time."
+            );
             sb.AppendLine("This may indicate ongoing issues that require immediate attention.");
             sb.AppendLine();
             sb.AppendLine(new string('=', 80));
@@ -172,8 +177,14 @@ public sealed class EmailLoggerProvider : ILoggerProvider
             .ToList();
 
         var levelCountsText = levelCounts.Count > 0 ? string.Join(", ", levelCounts) : "None";
-        sb.AppendLine(CultureInfo.InvariantCulture, $"Total Entries: {logs.Count} ({levelCountsText}, for minimum log level {this.Settings.MinimumLogLevelToSend})");
-        sb.AppendLine(CultureInfo.InvariantCulture, $"Time Range: {logs[0].Timestamp:yyyy-MM-dd HH:mm:ss} UTC to {logs[^1].Timestamp:yyyy-MM-dd HH:mm:ss} UTC");
+        sb.AppendLine(
+            CultureInfo.InvariantCulture,
+            $"Total Entries: {logs.Count} ({levelCountsText}, for minimum log level {this.Settings.MinimumLogLevelToSend})"
+        );
+        sb.AppendLine(
+            CultureInfo.InvariantCulture,
+            $"Time Range: {logs[0].Timestamp:yyyy-MM-dd HH:mm:ss} UTC to {logs[^1].Timestamp:yyyy-MM-dd HH:mm:ss} UTC"
+        );
         sb.AppendLine();
         sb.AppendLine(new string('=', 80));
         sb.AppendLine();
@@ -192,7 +203,8 @@ public sealed class EmailLoggerProvider : ILoggerProvider
             await this._emailService.SendEmailAsync(
                 this.Settings.AdminEmailReceiver,
                 $"Application Logs - {logs.Count} entries ({logs[0].Timestamp:yyyy-MM-dd HH:mm:ss} UTC to {logs[^1].Timestamp:yyyy-MM-dd HH:mm:ss} UTC)",
-                sb.ToString());
+                sb.ToString()
+            );
 
             this._firstLogTime = null; // Reset for next batch
         }
@@ -201,7 +213,9 @@ public sealed class EmailLoggerProvider : ILoggerProvider
             // IMPORTANT: Cannot use ILogger here as it would create circular dependency during startup.
             // Writing to Console.Error ensures the error is visible in Docker logs and hosting environments.
             // This is the standard approach for logging infrastructure failures.
-            await Console.Error.WriteLineAsync($"[EmailLoggerProvider] Failed to send log email to {this.Settings.AdminEmailReceiver}: {ex.Message}");
+            await Console.Error.WriteLineAsync(
+                $"[EmailLoggerProvider] Failed to send log email to {this.Settings.AdminEmailReceiver}: {ex.Message}"
+            );
         }
     }
 
@@ -237,7 +251,9 @@ public sealed class EmailLoggerProvider : ILoggerProvider
             }
             catch (Exception ex)
             {
-                Console.Error.WriteLine($"[EmailLoggerProvider] Failed to send remaining logs during disposal: {ex.Message}");
+                Console.Error.WriteLine(
+                    $"[EmailLoggerProvider] Failed to send remaining logs during disposal: {ex.Message}"
+                );
             }
         }
 

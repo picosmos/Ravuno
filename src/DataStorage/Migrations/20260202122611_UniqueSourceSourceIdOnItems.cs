@@ -14,15 +14,14 @@ namespace Ravuno.DataStorage.Migrations
                 name: "IX_Items_Source_SourceId",
                 table: "Items",
                 columns: ["Source", "SourceId"],
-                unique: true);
+                unique: true
+            );
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropIndex(
-                name: "IX_Items_Source_SourceId",
-                table: "Items");
+            migrationBuilder.DropIndex(name: "IX_Items_Source_SourceId", table: "Items");
         }
     }
 }

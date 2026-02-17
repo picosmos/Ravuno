@@ -18,14 +18,22 @@ public class TeknaFetchService : ITeknaFetchService
 
     public bool IsEnabled => this._settings.IsEnabled;
 
-    public TeknaFetchService(HttpClient httpClient, IOptions<TeknaSettings> settings, ILogger<TeknaFetchService>? logger = null)
+    public TeknaFetchService(
+        HttpClient httpClient,
+        IOptions<TeknaSettings> settings,
+        ILogger<TeknaFetchService>? logger = null
+    )
     {
         this._httpClient = httpClient;
         this._logger = logger;
         this._settings = settings?.Value ?? throw new ArgumentNullException(nameof(settings));
     }
 
-    public async Task<IReadOnlyList<Item>> FetchAsync(IReadOnlyCollection<Item> alreadyFetched, bool detailed, CancellationToken cancellationToken)
+    public async Task<IReadOnlyList<Item>> FetchAsync(
+        IReadOnlyCollection<Item> alreadyFetched,
+        bool detailed,
+        CancellationToken cancellationToken
+    )
     {
         var allItems = new List<Item>();
         var pageNumber = 1;
@@ -35,9 +43,16 @@ public class TeknaFetchService : ITeknaFetchService
         {
             try
             {
-                this._logger?.LogInformation("Fetching Tekna courses page {PageNumber}", pageNumber);
+                this._logger?.LogInformation(
+                    "Fetching Tekna courses page {PageNumber}",
+                    pageNumber
+                );
 
-                var url = string.Format(CultureInfo.InvariantCulture, this._settings.CoursesApiUrl, pageNumber);
+                var url = string.Format(
+                    CultureInfo.InvariantCulture,
+                    this._settings.CoursesApiUrl,
+                    pageNumber
+                );
                 var response = await this._httpClient.GetAsync(url, cancellationToken);
                 response.EnsureSuccessStatusCode();
 
@@ -57,7 +72,11 @@ public class TeknaFetchService : ITeknaFetchService
                     var currentPage = pagingElement.GetProperty("PageNumber").GetInt32();
                     var totalPages = pagingElement.GetProperty("NumPages").GetInt32();
 
-                    this._logger?.LogInformation("Processing page {CurrentPage} of {TotalPages}", currentPage, totalPages);
+                    this._logger?.LogInformation(
+                        "Processing page {CurrentPage} of {TotalPages}",
+                        currentPage,
+                        totalPages
+                    );
 
                     hasMorePages = currentPage < totalPages;
                 }
@@ -79,10 +98,21 @@ public class TeknaFetchService : ITeknaFetchService
                         try
                         {
                             var organizerItem = courseItem.GetProperty("Organizer");
-                            var organizer = organizerItem.ValueKind == JsonValueKind.Null ? null : this.GetStringProperty(organizerItem, "Name") ?? null;
+                            var organizer =
+                                organizerItem.ValueKind == JsonValueKind.Null
+                                    ? null
+                                    : this.GetStringProperty(organizerItem, "Name") ?? null;
                             var subOrganizerItem = courseItem.GetProperty("SubOrganizer");
-                            var subOrganizer = subOrganizerItem.ValueKind == JsonValueKind.Null ? null : this.GetStringProperty(subOrganizerItem, "Name") ?? null;
-                            var fullOrganizerName = string.Join("\n", new[] { subOrganizer, organizer }.Where(s => !string.IsNullOrEmpty(s)));
+                            var subOrganizer =
+                                subOrganizerItem.ValueKind == JsonValueKind.Null
+                                    ? null
+                                    : this.GetStringProperty(subOrganizerItem, "Name") ?? null;
+                            var fullOrganizerName = string.Join(
+                                "\n",
+                                new[] { subOrganizer, organizer }.Where(s =>
+                                    !string.IsNullOrEmpty(s)
+                                )
+                            );
 
                             var item = new Item
                             {
@@ -91,24 +121,36 @@ public class TeknaFetchService : ITeknaFetchService
                                 SourceId = this.GetStringProperty(courseItem, "Id") ?? string.Empty,
                                 RetrievedAt = DateTime.UtcNow,
                                 Title = this.GetStringProperty(courseItem, "Title") ?? "No title",
-                                Description = this.GetStringProperty(courseItem, "Ingress") + "\n" + this.GetStringProperty(courseItem, "Description"),
-                                Location = string.Join("\n", new[] {
+                                Description =
+                                    this.GetStringProperty(courseItem, "Ingress")
+                                    + "\n"
+                                    + this.GetStringProperty(courseItem, "Description"),
+                                Location = string.Join(
+                                    "\n",
+                                    new[]
+                                    {
                                         this.GetStringProperty(courseItem, "VenueDetail"),
                                         this.GetStringProperty(courseItem, "VenueName"),
-                                        this.GetStringProperty(courseItem, "VenueTown") ,
+                                        this.GetStringProperty(courseItem, "VenueTown"),
                                         this.GetStringProperty(courseItem, "Region"),
                                         this.GetStringProperty(courseItem, "District"),
-                                        this.GetStringProperty(courseItem, "County")
-                                }.Where(s => !string.IsNullOrEmpty(s))),
+                                        this.GetStringProperty(courseItem, "County"),
+                                    }.Where(s => !string.IsNullOrEmpty(s))
+                                ),
                                 Organizer = fullOrganizerName,
                                 Url = this.GetStringProperty(courseItem, "PublicUrl") ?? "",
                                 Price = this.ExtractPrice(courseItem),
-                                EventStartDateTime = this.GetDateTimeProperty(courseItem, "StartDate") ?? DateTime.MinValue,
-                                EventEndDateTime = this.GetDateTimeProperty(courseItem, "EndDate") ?? DateTime.MinValue,
-                                EnrollmentDeadline = this.GetDateTimeProperty(courseItem, "EnrollmentDeadline")
-                                                   ?? this.GetDateTimeProperty(courseItem, "StartDate")
-                                                   ?? DateTime.MinValue,
-                                Tags = this.ExtractTags(courseItem, refinerMappings)
+                                EventStartDateTime =
+                                    this.GetDateTimeProperty(courseItem, "StartDate")
+                                    ?? DateTime.MinValue,
+                                EventEndDateTime =
+                                    this.GetDateTimeProperty(courseItem, "EndDate")
+                                    ?? DateTime.MinValue,
+                                EnrollmentDeadline =
+                                    this.GetDateTimeProperty(courseItem, "EnrollmentDeadline")
+                                    ?? this.GetDateTimeProperty(courseItem, "StartDate")
+                                    ?? DateTime.MinValue,
+                                Tags = this.ExtractTags(courseItem, refinerMappings),
                             };
 
                             // Only add if not already in the list (deduplication within current fetch cycle)
@@ -118,16 +160,27 @@ public class TeknaFetchService : ITeknaFetchService
                             }
                             else
                             {
-                                this._logger?.LogDebug("Duplicate course with SourceId {SourceId} detected in current fetch cycle, skipping", item.SourceId);
+                                this._logger?.LogDebug(
+                                    "Duplicate course with SourceId {SourceId} detected in current fetch cycle, skipping",
+                                    item.SourceId
+                                );
                             }
                         }
                         catch (Exception ex)
                         {
-                            this._logger?.LogError(ex, "Error processing course item: {CourseItem}", courseItem.GetRawText());
+                            this._logger?.LogError(
+                                ex,
+                                "Error processing course item: {CourseItem}",
+                                courseItem.GetRawText()
+                            );
                         }
                     }
 
-                    this._logger?.LogInformation("Retrieved {Count} items from page {PageNumber}", itemsElement.GetArrayLength(), pageNumber);
+                    this._logger?.LogInformation(
+                        "Retrieved {Count} items from page {PageNumber}",
+                        itemsElement.GetArrayLength(),
+                        pageNumber
+                    );
                 }
 
                 pageNumber++;
@@ -140,7 +193,11 @@ public class TeknaFetchService : ITeknaFetchService
             }
             catch (Exception ex)
             {
-                this._logger?.LogError(ex, "Error fetching page {PageNumber} from Tekna API", pageNumber);
+                this._logger?.LogError(
+                    ex,
+                    "Error fetching page {PageNumber} from Tekna API",
+                    pageNumber
+                );
                 throw;
             }
         }
@@ -167,7 +224,11 @@ public class TeknaFetchService : ITeknaFetchService
         }
         catch (Exception ex)
         {
-            this._logger?.LogError(ex, "Error getting string property {PropertyName}", propertyName);
+            this._logger?.LogError(
+                ex,
+                "Error getting string property {PropertyName}",
+                propertyName
+            );
             throw;
         }
         return string.Empty;
@@ -182,15 +243,31 @@ public class TeknaFetchService : ITeknaFetchService
         }
 
         // Tekna API returns local times without timezone info - assume they are in Norwegian local time and store them as local.
-        if (DateTime.TryParse(stringValue, CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out var dateTime))
+        if (
+            DateTime.TryParse(
+                stringValue,
+                CultureInfo.InvariantCulture,
+                DateTimeStyles.AssumeLocal,
+                out var dateTime
+            )
+        )
         {
             // Ensure Kind is explicitly set to Local
             var localDateTime = DateTime.SpecifyKind(dateTime, DateTimeKind.Local);
-            this._logger?.LogDebug("Parsed DateTime for {PropertyName}: {DateTime}, Kind: {Kind}", propertyName, localDateTime, localDateTime.Kind);
+            this._logger?.LogDebug(
+                "Parsed DateTime for {PropertyName}: {DateTime}, Kind: {Kind}",
+                propertyName,
+                localDateTime,
+                localDateTime.Kind
+            );
             return localDateTime;
         }
 
-        this._logger?.LogWarning("Failed to parse DateTime from property {PropertyName} with value: {Value}", propertyName, stringValue);
+        this._logger?.LogWarning(
+            "Failed to parse DateTime from property {PropertyName} with value: {Value}",
+            propertyName,
+            stringValue
+        );
         return null;
     }
 
@@ -200,9 +277,11 @@ public class TeknaFetchService : ITeknaFetchService
         var priceGroup = this.GetStringProperty(courseItem, "PriceGroup");
 
         // Try to get prices from Prices array
-        if (courseItem.TryGetProperty("Prices", out var pricesElement) &&
-            pricesElement.ValueKind == JsonValueKind.Array &&
-            pricesElement.GetArrayLength() > 0)
+        if (
+            courseItem.TryGetProperty("Prices", out var pricesElement)
+            && pricesElement.ValueKind == JsonValueKind.Array
+            && pricesElement.GetArrayLength() > 0
+        )
         {
             var prices = new List<string>();
             foreach (var price in pricesElement.EnumerateArray())
@@ -211,7 +290,13 @@ public class TeknaFetchService : ITeknaFetchService
                 {
                     var priceValue = amount.ToString();
                     var priceType = this.GetStringProperty(price, "Name") ?? "";
-                    var hasMvaString = bool.TryParse(this.GetStringProperty(price, "HasMva") ?? "false", out var hasMva) && hasMva ? "med mva" : "uten mva";
+                    var hasMvaString =
+                        bool.TryParse(
+                            this.GetStringProperty(price, "HasMva") ?? "false",
+                            out var hasMva
+                        ) && hasMva
+                            ? "med mva"
+                            : "uten mva";
 
                     prices.Add($"{priceType}: {priceValue} NOK ({hasMvaString})");
                 }
@@ -223,12 +308,18 @@ public class TeknaFetchService : ITeknaFetchService
             }
         }
 
-        return !string.IsNullOrEmpty(priceGroup) && priceGroup != "0" ? $"Price group: {priceGroup}" : "Price not available";
+        return !string.IsNullOrEmpty(priceGroup) && priceGroup != "0"
+            ? $"Price group: {priceGroup}"
+            : "Price not available";
     }
 
-    private Dictionary<string, Dictionary<string, string>> BuildRefinerMappings(JsonElement coursesElement)
+    private Dictionary<string, Dictionary<string, string>> BuildRefinerMappings(
+        JsonElement coursesElement
+    )
     {
-        var mappings = new Dictionary<string, Dictionary<string, string>>(StringComparer.OrdinalIgnoreCase);
+        var mappings = new Dictionary<string, Dictionary<string, string>>(
+            StringComparer.OrdinalIgnoreCase
+        );
 
         if (!coursesElement.TryGetProperty("Refiners", out var refinersElement))
         {
@@ -263,7 +354,10 @@ public class TeknaFetchService : ITeknaFetchService
         return mappings;
     }
 
-    private string[] ExtractTags(JsonElement courseItem, Dictionary<string, Dictionary<string, string>> refinerMappings)
+    private string[] ExtractTags(
+        JsonElement courseItem,
+        Dictionary<string, Dictionary<string, string>> refinerMappings
+    )
     {
         var tags = new List<string>();
 
@@ -294,30 +388,39 @@ public class TeknaFetchService : ITeknaFetchService
         // Extract searchtargetgroup
         if (courseItem.TryGetProperty("SearchTargetGroup", out var searchTargetGroupElement))
         {
-            var searchTargetGroupValue = searchTargetGroupElement.ValueKind == JsonValueKind.Number
-                ? searchTargetGroupElement.GetInt32().ToString(CultureInfo.InvariantCulture)
-                : this.GetStringProperty(courseItem, "SearchTargetGroup");
+            var searchTargetGroupValue =
+                searchTargetGroupElement.ValueKind == JsonValueKind.Number
+                    ? searchTargetGroupElement.GetInt32().ToString(CultureInfo.InvariantCulture)
+                    : this.GetStringProperty(courseItem, "SearchTargetGroup");
 
-            if (!string.IsNullOrEmpty(searchTargetGroupValue) &&
-                refinerMappings.TryGetValue("searchtargetgroup", out var targetGroupMap) &&
-                targetGroupMap.TryGetValue(searchTargetGroupValue, out var targetGroupLabel))
+            if (
+                !string.IsNullOrEmpty(searchTargetGroupValue)
+                && refinerMappings.TryGetValue("searchtargetgroup", out var targetGroupMap)
+                && targetGroupMap.TryGetValue(searchTargetGroupValue, out var targetGroupLabel)
+            )
             {
                 tags.Add($"searchtargetgroup={targetGroupLabel}");
             }
         }
 
         // Extract fieldsofstudy
-        if (courseItem.TryGetProperty("FieldsOfStudy", out var fieldsOfStudyElement) &&
-            fieldsOfStudyElement.ValueKind == JsonValueKind.Array &&
-            refinerMappings.TryGetValue("fieldsofstudy", out var fieldsMap))
+        if (
+            courseItem.TryGetProperty("FieldsOfStudy", out var fieldsOfStudyElement)
+            && fieldsOfStudyElement.ValueKind == JsonValueKind.Array
+            && refinerMappings.TryGetValue("fieldsofstudy", out var fieldsMap)
+        )
         {
             foreach (var fieldId in fieldsOfStudyElement.EnumerateArray())
             {
-                var fieldIdString = fieldId.ValueKind == JsonValueKind.String
-                    ? fieldId.GetString()
-                    : fieldId.ToString();
+                var fieldIdString =
+                    fieldId.ValueKind == JsonValueKind.String
+                        ? fieldId.GetString()
+                        : fieldId.ToString();
 
-                if (!string.IsNullOrEmpty(fieldIdString) && fieldsMap.TryGetValue(fieldIdString, out var fieldLabel))
+                if (
+                    !string.IsNullOrEmpty(fieldIdString)
+                    && fieldsMap.TryGetValue(fieldIdString, out var fieldLabel)
+                )
                 {
                     tags.Add($"fieldsofstudy={fieldLabel}");
                 }
@@ -326,9 +429,11 @@ public class TeknaFetchService : ITeknaFetchService
 
         // Extract pricegroup
         var priceGroup = this.GetStringProperty(courseItem, "PriceGroup");
-        if (!string.IsNullOrEmpty(priceGroup) &&
-            refinerMappings.TryGetValue("pricegroup", out var priceGroupMap) &&
-            priceGroupMap.TryGetValue(priceGroup, out var priceGroupLabel))
+        if (
+            !string.IsNullOrEmpty(priceGroup)
+            && refinerMappings.TryGetValue("pricegroup", out var priceGroupMap)
+            && priceGroupMap.TryGetValue(priceGroup, out var priceGroupLabel)
+        )
         {
             tags.Add($"pricegroup={priceGroupLabel}");
         }
@@ -336,13 +441,16 @@ public class TeknaFetchService : ITeknaFetchService
         // Extract language
         if (courseItem.TryGetProperty("Language", out var languageElement))
         {
-            var languageValue = languageElement.ValueKind == JsonValueKind.Number
-                ? languageElement.GetInt32().ToString(CultureInfo.InvariantCulture)
-                : this.GetStringProperty(courseItem, "Language");
+            var languageValue =
+                languageElement.ValueKind == JsonValueKind.Number
+                    ? languageElement.GetInt32().ToString(CultureInfo.InvariantCulture)
+                    : this.GetStringProperty(courseItem, "Language");
 
-            if (!string.IsNullOrEmpty(languageValue) &&
-                refinerMappings.TryGetValue("language", out var languageMap) &&
-                languageMap.TryGetValue(languageValue, out var languageLabel))
+            if (
+                !string.IsNullOrEmpty(languageValue)
+                && refinerMappings.TryGetValue("language", out var languageMap)
+                && languageMap.TryGetValue(languageValue, out var languageLabel)
+            )
             {
                 tags.Add($"language={languageLabel}");
             }

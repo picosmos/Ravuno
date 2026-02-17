@@ -23,8 +23,11 @@ public class DateTimeKindInterceptor : SaveChangesInterceptor, IMaterializationI
 {
     private readonly ILogger<DateTimeKindInterceptor>? _logger;
     private static readonly ConcurrentDictionary<Type, PropertyInfo[]> KeyPropertiesCache = new();
+
     private sealed record DateTimePropertyInfo(PropertyInfo Property, bool HasLocalTimeAttribute);
-    private static readonly ConcurrentDictionary<Type, DateTimePropertyInfo[]> PropertyCache = new();
+
+    private static readonly ConcurrentDictionary<Type, DateTimePropertyInfo[]> PropertyCache =
+        new();
 
     public DateTimeKindInterceptor(ILogger<DateTimeKindInterceptor>? logger = null)
     {
@@ -33,7 +36,8 @@ public class DateTimeKindInterceptor : SaveChangesInterceptor, IMaterializationI
 
     public override InterceptionResult<int> SavingChanges(
         DbContextEventData eventData,
-        InterceptionResult<int> result)
+        InterceptionResult<int> result
+    )
     {
         ArgumentNullException.ThrowIfNull(eventData);
 
@@ -48,7 +52,8 @@ public class DateTimeKindInterceptor : SaveChangesInterceptor, IMaterializationI
     public override ValueTask<InterceptionResult<int>> SavingChangesAsync(
         DbContextEventData eventData,
         InterceptionResult<int> result,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default
+    )
     {
         ArgumentNullException.ThrowIfNull(eventData);
 
@@ -65,22 +70,27 @@ public class DateTimeKindInterceptor : SaveChangesInterceptor, IMaterializationI
         var entityType = entity.GetType();
 
         // Cache key properties lookup
-        var keyProperties = KeyPropertiesCache.GetOrAdd(entityType, type =>
-        {
-            // First, check for properties with [Key] attribute
-            var keysWithAttribute = type.GetProperties()
-                .Where(p => p.GetCustomAttributes(typeof(KeyAttribute), inherit: true).Length > 0)
-                .ToArray();
-
-            if (keysWithAttribute.Length > 0)
+        var keyProperties = KeyPropertiesCache.GetOrAdd(
+            entityType,
+            type =>
             {
-                return keysWithAttribute;
-            }
+                // First, check for properties with [Key] attribute
+                var keysWithAttribute = type.GetProperties()
+                    .Where(p =>
+                        p.GetCustomAttributes(typeof(KeyAttribute), inherit: true).Length > 0
+                    )
+                    .ToArray();
 
-            // Fallback to property named "Id"
-            var idProperty = type.GetProperty("Id");
-            return idProperty != null ? [idProperty] : [];
-        });
+                if (keysWithAttribute.Length > 0)
+                {
+                    return keysWithAttribute;
+                }
+
+                // Fallback to property named "Id"
+                var idProperty = type.GetProperty("Id");
+                return idProperty != null ? [idProperty] : [];
+            }
+        );
 
         if (keyProperties.Length > 0)
         {
@@ -93,7 +103,8 @@ public class DateTimeKindInterceptor : SaveChangesInterceptor, IMaterializationI
 
     private void ConvertDateTimesToUtc(DbContext context)
     {
-        var entries = context.ChangeTracker.Entries()
+        var entries = context
+            .ChangeTracker.Entries()
             .Where(e => e.State is EntityState.Added or EntityState.Modified);
 
         foreach (var entry in entries)
@@ -102,7 +113,10 @@ public class DateTimeKindInterceptor : SaveChangesInterceptor, IMaterializationI
 
             foreach (var property in entry.Properties)
             {
-                if (property.Metadata.ClrType != typeof(DateTime) && Nullable.GetUnderlyingType(property.Metadata.ClrType) != typeof(DateTime))
+                if (
+                    property.Metadata.ClrType != typeof(DateTime)
+                    && Nullable.GetUnderlyingType(property.Metadata.ClrType) != typeof(DateTime)
+                )
                 {
                     continue;
                 }
@@ -110,14 +124,22 @@ public class DateTimeKindInterceptor : SaveChangesInterceptor, IMaterializationI
                 var propertyName = property.Metadata.Name;
                 var dateTime = (DateTime?)property.CurrentValue;
 
-                if (!dateTime.HasValue || dateTime == DateTime.MaxValue || dateTime == DateTime.MinValue)
+                if (
+                    !dateTime.HasValue
+                    || dateTime == DateTime.MaxValue
+                    || dateTime == DateTime.MinValue
+                )
                 {
                     continue;
                 }
 
                 // Check if property has [LocalTime] attribute - skip conversion if it does
                 var clrProperty = entry.Entity.GetType().GetProperty(propertyName);
-                if (clrProperty?.GetCustomAttributes(typeof(LocalTimeAttribute), inherit: true).Length > 0)
+                if (
+                    clrProperty
+                        ?.GetCustomAttributes(typeof(LocalTimeAttribute), inherit: true)
+                        .Length > 0
+                )
                 {
                     if (dateTime.Value.Kind != DateTimeKind.Local)
                     {
@@ -125,15 +147,16 @@ public class DateTimeKindInterceptor : SaveChangesInterceptor, IMaterializationI
 
                         this._logger?.LogDebug("Entity: {@Entity}", entry.Entity);
                         this._logger?.LogWarning(
-                            "[LocalTime] attribute found on {EntityName}.{PropertyName}, but DateTime has Kind={Kind}. " +
-                            "Expected DateTimeKind.Local for properties marked with [LocalTime]. " +
-                            "Value will be stored as-is without conversion. Affected entity key/id: {EntityId}, Value: {DateTime}, Entity State: {EntityState}",
+                            "[LocalTime] attribute found on {EntityName}.{PropertyName}, but DateTime has Kind={Kind}. "
+                                + "Expected DateTimeKind.Local for properties marked with [LocalTime]. "
+                                + "Value will be stored as-is without conversion. Affected entity key/id: {EntityId}, Value: {DateTime}, Entity State: {EntityState}",
                             entityName,
                             propertyName,
                             dateTime.Value.Kind,
                             entityId,
                             dateTime.Value,
-                            entry.State);
+                            entry.State
+                        );
                     }
 
                     continue;
@@ -150,16 +173,17 @@ public class DateTimeKindInterceptor : SaveChangesInterceptor, IMaterializationI
 
                     this._logger?.LogDebug("Entity: {@Entity}", entry.Entity);
                     this._logger?.LogWarning(
-                        "Local DateTime detected for {EntityName}.{PropertyName}. " +
-                        "Converting from {LocalTime} to UTC {UtcTime}. " +
-                        "Please ensure DateTime values are assigned as UTC to avoid ambiguity. Affected entity key/id: {EntityId}, Value: {DateTime}, Entity State: {EntityState}",
+                        "Local DateTime detected for {EntityName}.{PropertyName}. "
+                            + "Converting from {LocalTime} to UTC {UtcTime}. "
+                            + "Please ensure DateTime values are assigned as UTC to avoid ambiguity. Affected entity key/id: {EntityId}, Value: {DateTime}, Entity State: {EntityState}",
                         entityName,
                         propertyName,
                         dateTime.Value,
                         dateTime.Value.ToUniversalTime(),
                         entityId,
                         dateTime.Value,
-                        entry.State);
+                        entry.State
+                    );
 
                     property.CurrentValue = dateTime.Value.ToUniversalTime();
                 }
@@ -169,30 +193,40 @@ public class DateTimeKindInterceptor : SaveChangesInterceptor, IMaterializationI
 
                     this._logger?.LogDebug("Entity: {@Entity}", entry.Entity);
                     this._logger?.LogWarning(
-                        "Unspecified DateTime detected for {EntityName}.{PropertyName}. " +
-                        "Treating {DateTime} as UTC. " +
-                        "Please use DateTime.SpecifyKind or assign values with DateTimeKind.Utc to avoid ambiguity. Affected entity key/id: {EntityId}, Value: {DateTime}, Entity State: {EntityState}",
+                        "Unspecified DateTime detected for {EntityName}.{PropertyName}. "
+                            + "Treating {DateTime} as UTC. "
+                            + "Please use DateTime.SpecifyKind or assign values with DateTimeKind.Utc to avoid ambiguity. Affected entity key/id: {EntityId}, Value: {DateTime}, Entity State: {EntityState}",
                         entityName,
                         propertyName,
                         dateTime.Value,
                         entityId,
                         dateTime.Value,
-                        entry.State);
+                        entry.State
+                    );
                     property.CurrentValue = DateTime.SpecifyKind(dateTime.Value, DateTimeKind.Utc);
                 }
             }
         }
     }
 
-    public object CreatedInstance(MaterializationInterceptionData materializationData, object entity)
+    public object CreatedInstance(
+        MaterializationInterceptionData materializationData,
+        object entity
+    )
     {
         return entity;
     }
 
-    public object InitializedInstance(MaterializationInterceptionData materializationData, object entity)
+    public object InitializedInstance(
+        MaterializationInterceptionData materializationData,
+        object entity
+    )
     {
         ArgumentNullException.ThrowIfNull(entity);
-        this._logger?.LogDebug("InitializedInstance called for entity type: {EntityType}", entity.GetType().Name);
+        this._logger?.LogDebug(
+            "InitializedInstance called for entity type: {EntityType}",
+            entity.GetType().Name
+        );
         this.SetDateTimeKinds(entity);
         return entity;
     }
@@ -202,22 +236,39 @@ public class DateTimeKindInterceptor : SaveChangesInterceptor, IMaterializationI
         var entityType = entity.GetType();
 
         // Cache property metadata lookup
-        var dateTimeProperties = PropertyCache.GetOrAdd(entityType, type =>
-        {
-            return [.. type.GetProperties()
-                .Where(p => (p.PropertyType == typeof(DateTime) || Nullable.GetUnderlyingType(p.PropertyType) == typeof(DateTime))
-                         && p.CanRead && p.CanWrite)
-                .Select(p => new DateTimePropertyInfo(
-                    p,
-                    p.GetCustomAttributes(typeof(LocalTimeAttribute), inherit: true).Length > 0))];
-
-        });
+        var dateTimeProperties = PropertyCache.GetOrAdd(
+            entityType,
+            type =>
+            {
+                return
+                [
+                    .. type.GetProperties()
+                        .Where(p =>
+                            (
+                                p.PropertyType == typeof(DateTime)
+                                || Nullable.GetUnderlyingType(p.PropertyType) == typeof(DateTime)
+                            )
+                            && p.CanRead
+                            && p.CanWrite
+                        )
+                        .Select(p => new DateTimePropertyInfo(
+                            p,
+                            p.GetCustomAttributes(typeof(LocalTimeAttribute), inherit: true).Length
+                                > 0
+                        )),
+                ];
+            }
+        );
 
         foreach (var propInfo in dateTimeProperties)
         {
             var dateTime = (DateTime?)propInfo.Property.GetValue(entity);
 
-            if (!dateTime.HasValue || dateTime == DateTime.MaxValue || dateTime == DateTime.MinValue)
+            if (
+                !dateTime.HasValue
+                || dateTime == DateTime.MaxValue
+                || dateTime == DateTime.MinValue
+            )
             {
                 continue;
             }
@@ -232,9 +283,13 @@ public class DateTimeKindInterceptor : SaveChangesInterceptor, IMaterializationI
                     propInfo.Property.Name,
                     dateTime.Value.Kind,
                     targetKind,
-                    dateTime.Value);
+                    dateTime.Value
+                );
 
-                propInfo.Property.SetValue(entity, DateTime.SpecifyKind(dateTime.Value, targetKind));
+                propInfo.Property.SetValue(
+                    entity,
+                    DateTime.SpecifyKind(dateTime.Value, targetKind)
+                );
             }
         }
     }

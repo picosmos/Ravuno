@@ -15,15 +15,14 @@ namespace Ravuno.DataStorage.Migrations
                 table: "Items",
                 type: "TEXT",
                 nullable: false,
-                defaultValue: "");
+                defaultValue: ""
+            );
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "SourceId",
-                table: "Items");
+            migrationBuilder.DropColumn(name: "SourceId", table: "Items");
         }
     }
 }

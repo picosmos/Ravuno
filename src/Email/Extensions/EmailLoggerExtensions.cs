@@ -16,7 +16,9 @@ public static class EmailLoggerExtensions
     {
         ArgumentNullException.ThrowIfNull(builder);
         builder.Services.AddSingleton<EmailLoggerProvider>();
-        builder.Services.AddSingleton<ILoggerProvider>(sp => sp.GetRequiredService<EmailLoggerProvider>());
+        builder.Services.AddSingleton<ILoggerProvider>(sp =>
+            sp.GetRequiredService<EmailLoggerProvider>()
+        );
 
         return builder;
     }
@@ -27,33 +29,40 @@ public static class EmailLoggerExtensions
     public static IServiceCollection ConfigureAndValidateEmailLoggerSettings(
         this IServiceCollection services,
         IConfiguration configuration,
-        string sectionName)
+        string sectionName
+    )
     {
         ArgumentNullException.ThrowIfNull(services);
         ArgumentNullException.ThrowIfNull(configuration);
 
         services.Configure<EmailLogProviderSettings>(configuration.GetSection(sectionName));
-        services.AddOptions<EmailLogProviderSettings>()
+        services
+            .AddOptions<EmailLogProviderSettings>()
             .Bind(configuration.GetSection(sectionName))
             .ValidateDataAnnotations()
-            .Validate(settings =>
-            {
-                if (settings.IsEnabled && string.IsNullOrWhiteSpace(settings.AdminEmailReceiver))
+            .Validate(
+                settings =>
                 {
-                    return false;
-                }
+                    if (
+                        settings.IsEnabled && string.IsNullOrWhiteSpace(settings.AdminEmailReceiver)
+                    )
+                    {
+                        return false;
+                    }
 
-                if (settings.WaitIntervalBeforeSend > settings.MaxWaitTimeBeforeSend)
-                {
-                    return false;
-                }
+                    if (settings.WaitIntervalBeforeSend > settings.MaxWaitTimeBeforeSend)
+                    {
+                        return false;
+                    }
 
-                if (settings.CheckInterval > settings.WaitIntervalBeforeSend)
-                {
-                    return false;
-                }
-                return true;
-            }, "AdminEmailReceiver is required when IsEnabled is true. WaitIntervalBeforeSend must be <= MaxWaitTimeBeforeSend. CheckInterval must be <= WaitIntervalBeforeSend.")
+                    if (settings.CheckInterval > settings.WaitIntervalBeforeSend)
+                    {
+                        return false;
+                    }
+                    return true;
+                },
+                "AdminEmailReceiver is required when IsEnabled is true. WaitIntervalBeforeSend must be <= MaxWaitTimeBeforeSend. CheckInterval must be <= WaitIntervalBeforeSend."
+            )
             .ValidateOnStart();
 
         return services;

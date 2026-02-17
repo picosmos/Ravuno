@@ -15,15 +15,14 @@ namespace Ravuno.DataStorage.Migrations
                 table: "FetchHistories",
                 type: "INTEGER",
                 nullable: false,
-                defaultValue: false);
+                defaultValue: false
+            );
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "IsDetailed",
-                table: "FetchHistories");
+            migrationBuilder.DropColumn(name: "IsDetailed", table: "FetchHistories");
         }
     }
 }

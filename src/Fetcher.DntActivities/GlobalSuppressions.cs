@@ -5,4 +5,10 @@
 
 using System.Diagnostics.CodeAnalysis;
 
-[assembly: SuppressMessage("Design", "CA1056:URI-like properties should not be strings", Justification = "For URLs from configuration", Scope = "namespaceanddescendants", Target = "~N:Ravuno.Fetcher.DntActivities.Settings")]
+[assembly: SuppressMessage(
+    "Design",
+    "CA1056:URI-like properties should not be strings",
+    Justification = "For URLs from configuration",
+    Scope = "namespaceanddescendants",
+    Target = "~N:Ravuno.Fetcher.DntActivities.Settings"
+)]

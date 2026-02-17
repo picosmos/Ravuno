@@ -20,7 +20,10 @@ internal sealed class LogEntry
     public override string ToString()
     {
         var sb = new StringBuilder();
-        sb.AppendLine(CultureInfo.InvariantCulture, $"[{this.Timestamp:yyyy-MM-dd HH:mm:ss.fff} UTC] [{this.LogLevel}] {this.Category}");
+        sb.AppendLine(
+            CultureInfo.InvariantCulture,
+            $"[{this.Timestamp:yyyy-MM-dd HH:mm:ss.fff} UTC] [{this.LogLevel}] {this.Category}"
+        );
         if (this.EventId.Id != 0)
         {
             sb.AppendLine(CultureInfo.InvariantCulture, $"EventId: {this.EventId}");

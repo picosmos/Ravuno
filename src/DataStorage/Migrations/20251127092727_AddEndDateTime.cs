@@ -13,27 +13,28 @@ namespace Ravuno.DataStorage.Migrations
             migrationBuilder.RenameColumn(
                 name: "EventDateTime",
                 table: "Items",
-                newName: "EventStartDateTime");
+                newName: "EventStartDateTime"
+            );
 
             migrationBuilder.AddColumn<DateTime>(
                 name: "EventEndDateTime",
                 table: "Items",
                 type: "TEXT",
                 nullable: false,
-                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
+                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+            );
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "EventEndDateTime",
-                table: "Items");
+            migrationBuilder.DropColumn(name: "EventEndDateTime", table: "Items");
 
             migrationBuilder.RenameColumn(
                 name: "EventStartDateTime",
                 table: "Items",
-                newName: "EventDateTime");
+                newName: "EventDateTime"
+            );
         }
     }
 }

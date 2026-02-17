@@ -10,7 +10,8 @@ public class HomeController : Controller
 
     public HomeController(
         IUpdateConfigurationService updateConfigService,
-        ILogger<HomeController> logger)
+        ILogger<HomeController> logger
+    )
     {
         this._updateConfigService = updateConfigService;
         this._logger = logger;

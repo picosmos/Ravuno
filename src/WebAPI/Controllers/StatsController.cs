@@ -15,7 +15,8 @@ public class StatsController : Controller
     public StatsController(
         DataStorageContext context,
         IUpdateConfigurationService updateConfigService,
-        ILogger<StatsController> logger)
+        ILogger<StatsController> logger
+    )
     {
         this._context = context;
         this._updateConfigService = updateConfigService;
@@ -33,8 +34,8 @@ public class StatsController : Controller
         var totalCount = await this._context.FetchHistories.CountAsync();
         var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
 
-        var histories = await this._context.FetchHistories
-            .OrderByDescending(h => h.ExecutionStartTime)
+        var histories = await this
+            ._context.FetchHistories.OrderByDescending(h => h.ExecutionStartTime)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync();
@@ -58,8 +59,8 @@ public class StatsController : Controller
         var totalCount = await this._context.SendUpdateHistories.CountAsync();
         var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
 
-        var histories = await this._context.SendUpdateHistories
-            .OrderByDescending(h => h.SentAt)
+        var histories = await this
+            ._context.SendUpdateHistories.OrderByDescending(h => h.SentAt)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync();
@@ -83,8 +84,8 @@ public class StatsController : Controller
         var totalCount = await this._context.Items.CountAsync();
         var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
 
-        var items = await this._context.Items
-            .OrderByDescending(i => i.RetrievedAt)
+        var items = await this
+            ._context.Items.OrderByDescending(i => i.RetrievedAt)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync();
@@ -107,7 +108,9 @@ public class StatsController : Controller
 
         try
         {
-            var config = await this._updateConfigService.GetUpdateConfigurationByTitleAsync(queryTitle);
+            var config = await this._updateConfigService.GetUpdateConfigurationByTitleAsync(
+                queryTitle
+            );
 
             if (config == null)
             {
@@ -115,15 +118,15 @@ public class StatsController : Controller
             }
 
             // Execute SQL query
-            var allResults = await this._updateConfigService.ExecuteSqlQueryAsync(config.SqlQuery, this.HttpContext.RequestAborted);
+            var allResults = await this._updateConfigService.ExecuteSqlQueryAsync(
+                config.SqlQuery,
+                this.HttpContext.RequestAborted
+            );
 
             var totalCount = allResults.Count;
             var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
 
-            var items = allResults
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToList();
+            var items = allResults.Skip((page - 1) * pageSize).Take(pageSize).ToList();
 
             this.ViewBag.QueryTitle = config.QueryTitle;
             this.ViewBag.SqlQuery = config.SqlQuery;
@@ -137,7 +140,11 @@ public class StatsController : Controller
         }
         catch (Exception ex)
         {
-            this._logger.LogError(ex, "Error retrieving SQL for query title: {QueryTitle}", queryTitle);
+            this._logger.LogError(
+                ex,
+                "Error retrieving SQL for query title: {QueryTitle}",
+                queryTitle
+            );
             return this.StatusCode(500);
         }
     }

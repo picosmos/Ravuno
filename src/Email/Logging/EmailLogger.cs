@@ -17,7 +17,8 @@ internal sealed class EmailLogger : ILogger
         this._provider = provider;
     }
 
-    public IDisposable? BeginScope<TState>(TState state) where TState : notnull
+    public IDisposable? BeginScope<TState>(TState state)
+        where TState : notnull
     {
         return default;
     }
@@ -31,7 +32,8 @@ internal sealed class EmailLogger : ILogger
             return false;
         }
 
-        return this._provider.IsEnabled && logLevel >= this._provider.Settings.MinimumLogLevelToSend;
+        return this._provider.IsEnabled
+            && logLevel >= this._provider.Settings.MinimumLogLevelToSend;
     }
 
     public void Log<TState>(
@@ -39,7 +41,8 @@ internal sealed class EmailLogger : ILogger
         EventId eventId,
         TState state,
         Exception? exception,
-        Func<TState, Exception?, string> formatter)
+        Func<TState, Exception?, string> formatter
+    )
     {
         if (!this.IsEnabled(logLevel))
         {
@@ -54,7 +57,7 @@ internal sealed class EmailLogger : ILogger
             Category = this._categoryName,
             EventId = eventId,
             Message = message,
-            Exception = exception
+            Exception = exception,
         };
 
         this._provider.AddLog(logEntry);

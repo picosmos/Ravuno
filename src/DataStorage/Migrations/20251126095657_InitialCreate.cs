@@ -23,18 +23,26 @@ public partial class InitialCreate : Migration
                 Description = table.Column<string>(type: "TEXT", nullable: true),
                 Location = table.Column<string>(type: "TEXT", maxLength: 500, nullable: true),
                 Price = table.Column<string>(type: "TEXT", maxLength: 100, nullable: true),
-                EnrollmentDeadline = table.Column<DateTime>(type: "TEXT", nullable: false)
+                EnrollmentDeadline = table.Column<DateTime>(type: "TEXT", nullable: false),
             },
             constraints: table =>
             {
-                table.PrimaryKey("PK_Items", x => new { x.Source, x.RetrievedAt, x.Url });
-            });
+                table.PrimaryKey(
+                    "PK_Items",
+                    x => new
+                    {
+                        x.Source,
+                        x.RetrievedAt,
+                        x.Url,
+                    }
+                );
+            }
+        );
     }
 
     /// <inheritdoc />
     protected override void Down(MigrationBuilder migrationBuilder)
     {
-        migrationBuilder.DropTable(
-            name: "Items");
+        migrationBuilder.DropTable(name: "Items");
     }
 }

@@ -6,19 +6,23 @@ namespace Ravuno.WebAPI.Extensions;
 
 public static class DataStorageServiceExtensions
 {
-    public static IServiceCollection AddDataStorage(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddDataStorage(
+        this IServiceCollection services,
+        IConfiguration configuration
+    )
     {
-        var connectionString = configuration.GetConnectionString("DataStorage")
-            ?? "Data Source=ravuno.db";
+        var connectionString =
+            configuration.GetConnectionString("DataStorage") ?? "Data Source=ravuno.db";
 
         services.AddSingleton<DateTimeKindInterceptor>();
 
-        services.AddDbContext<DataStorageContext>((serviceProvider, options) =>
-        {
-            var interceptor = serviceProvider.GetRequiredService<DateTimeKindInterceptor>();
-            options.UseSqlite(connectionString)
-                   .AddInterceptors(interceptor);
-        });
+        services.AddDbContext<DataStorageContext>(
+            (serviceProvider, options) =>
+            {
+                var interceptor = serviceProvider.GetRequiredService<DateTimeKindInterceptor>();
+                options.UseSqlite(connectionString).AddInterceptors(interceptor);
+            }
+        );
 
         return services;
     }

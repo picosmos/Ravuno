@@ -27,7 +27,11 @@ public class Item
     [LocalTime]
     public DateTime EventEndDateTime { get; set; }
 
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1819:Properties should not return arrays", Justification = "Raw data tags")]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage(
+        "Performance",
+        "CA1819:Properties should not return arrays",
+        Justification = "Raw data tags"
+    )]
     public string[]? Tags { get; set; }
 
     public string? Title { get; set; }
@@ -38,7 +42,11 @@ public class Item
 
     public string? Location { get; set; }
 
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1056:URI-like properties should not be strings", Justification = "Entity object with raw data")]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage(
+        "Design",
+        "CA1056:URI-like properties should not be strings",
+        Justification = "Entity object with raw data"
+    )]
     public string? Url { get; set; }
 
     public string? Price { get; set; }

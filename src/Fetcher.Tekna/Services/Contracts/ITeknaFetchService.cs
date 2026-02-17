@@ -2,6 +2,4 @@ using Ravuno.Core.Contracts;
 
 namespace Ravuno.Fetcher.Tekna.Services.Contracts;
 
-public interface ITeknaFetchService : IFetcherService
-{
-}
+public interface ITeknaFetchService : IFetcherService { }

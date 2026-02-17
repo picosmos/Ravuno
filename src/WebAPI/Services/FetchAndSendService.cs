@@ -31,7 +31,8 @@ public class FetchAndSendService
         ILogger<FetchAndSendService> logger,
         DataStorageContext dbContext,
         IEmailService emailService,
-        IUpdateConfigurationService configService)
+        IUpdateConfigurationService configService
+    )
     {
         this._serviceProvider = serviceProvider;
         this._logger = logger;
@@ -49,21 +50,33 @@ public class FetchAndSendService
 
             // Get update configurations
             var updateConfigs = await this._configService.GetUpdateConfigurationsAsync();
-            this._logger.LogInformation("Loaded {Count} update configurations", updateConfigs.Count);
+            this._logger.LogInformation(
+                "Loaded {Count} update configurations",
+                updateConfigs.Count
+            );
 
             // Execute "before" queries for all configurations
             var beforeResultsDict = new Dictionary<string, List<Item>>();
             foreach (var config in updateConfigs)
             {
-                var beforeResults = await this.ExecuteSqlQueryAsync(config.SqlQuery, cancellationToken);
+                var beforeResults = await this.ExecuteSqlQueryAsync(
+                    config.SqlQuery,
+                    cancellationToken
+                );
                 beforeResultsDict[config.QueryTitle] = beforeResults;
-                this._logger.LogInformation("Query '{QueryTitle}' returned {Count} items before update",
-                    config.QueryTitle, beforeResults.Count);
+                this._logger.LogInformation(
+                    "Query '{QueryTitle}' returned {Count} items before update",
+                    config.QueryTitle,
+                    beforeResults.Count
+                );
             }
 
-            var enabledFetchers = ItemFetcher.Select(kvp => (kvp.Key, this._serviceProvider.GetService(kvp.Value) as IFetcherService))
-                    .Where(fetcher => fetcher.Item2 != null && fetcher.Item2.IsEnabled)
-                    .ToDictionary(fetcher => fetcher.Key, fetcher => fetcher.Item2!);
+            var enabledFetchers = ItemFetcher
+                .Select(kvp =>
+                    (kvp.Key, this._serviceProvider.GetService(kvp.Value) as IFetcherService)
+                )
+                .Where(fetcher => fetcher.Item2 != null && fetcher.Item2.IsEnabled)
+                .ToDictionary(fetcher => fetcher.Key, fetcher => fetcher.Item2!);
 
             var allItems = new List<Item>();
             var fetchHistoryTrackerItems = new Dictionary<ItemSource, FetchHistory>();
@@ -71,20 +84,31 @@ public class FetchAndSendService
             {
                 try
                 {
-                    this._logger.LogInformation("Preparing to fetch items from source: {Source}", source);
+                    this._logger.LogInformation(
+                        "Preparing to fetch items from source: {Source}",
+                        source
+                    );
 
-                    var existingItems = await this._dbContext.Items
-                        .Where(i => i.Source == source)
+                    var existingItems = await this
+                        ._dbContext.Items.Where(i => i.Source == source)
                         .ToListAsync(cancellationToken);
 
                     this._logger.LogInformation("Fetching data from {Source}", source);
                     var startTime = DateTime.UtcNow;
                     var stopwatch = System.Diagnostics.Stopwatch.StartNew();
 
-                    var items = await fetcherService.FetchAsync(existingItems, detailed, cancellationToken);
+                    var items = await fetcherService.FetchAsync(
+                        existingItems,
+                        detailed,
+                        cancellationToken
+                    );
 
                     stopwatch.Stop();
-                    this._logger.LogInformation("Fetched {Count} items from {Source}", items.Count, source);
+                    this._logger.LogInformation(
+                        "Fetched {Count} items from {Source}",
+                        items.Count,
+                        source
+                    );
 
                     var fetchHistory = new FetchHistory
                     {
@@ -111,7 +135,10 @@ public class FetchAndSendService
             var allFetchedItems = allItems;
 
             // Compare and update database, tracking stats per source
-            var (newItems, updatedItems) = await this.CompareAndUpdateItemsAsync(allFetchedItems, cancellationToken);
+            var (newItems, updatedItems) = await this.CompareAndUpdateItemsAsync(
+                allFetchedItems,
+                cancellationToken
+            );
 
             foreach (var (source, _) in enabledFetchers)
             {
@@ -127,8 +154,11 @@ public class FetchAndSendService
 
             await this._dbContext.SaveChangesAsync(cancellationToken);
 
-            this._logger.LogInformation("Found {NewCount} new items and {UpdatedCount} updated items total",
-                newItems.Count, updatedItems.Count);
+            this._logger.LogInformation(
+                "Found {NewCount} new items and {UpdatedCount} updated items total",
+                newItems.Count,
+                updatedItems.Count
+            );
 
             // Process each update configuration
             foreach (var config in updateConfigs)
@@ -138,11 +168,16 @@ public class FetchAndSendService
                     await this.ProcessUpdateConfigurationAsync(
                         config,
                         beforeResultsDict[config.QueryTitle],
-                        cancellationToken);
+                        cancellationToken
+                    );
                 }
                 catch (Exception ex)
                 {
-                    this._logger.LogError(ex, "Error processing update configuration {QueryTitle}", config.QueryTitle);
+                    this._logger.LogError(
+                        ex,
+                        "Error processing update configuration {QueryTitle}",
+                        config.QueryTitle
+                    );
                 }
             }
 
@@ -157,47 +192,76 @@ public class FetchAndSendService
     private async Task ProcessUpdateConfigurationAsync(
         Models.UpdateConfiguration config,
         List<Item> beforeResults,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         this._logger.LogInformation("Processing configuration: {QueryTitle}", config.QueryTitle);
 
-        this._logger.LogInformation("Query returned {Count} items before update", beforeResults.Count);
+        this._logger.LogInformation(
+            "Query returned {Count} items before update",
+            beforeResults.Count
+        );
 
         // Execute SQL query after updates
         var afterResults = await this.ExecuteSqlQueryAsync(config.SqlQuery, cancellationToken);
-        this._logger.LogInformation("Query returned {Count} items after update", afterResults.Count);
+        this._logger.LogInformation(
+            "Query returned {Count} items after update",
+            afterResults.Count
+        );
 
         // Check if this query has been sent before
-        var lastSendHistory = await this._dbContext.SendUpdateHistories
-            .Where(sh => sh.QueryTitle == config.QueryTitle && config.EmailReceiverAddresses.Contains(sh.EmailReceiverAddress))
+        var lastSendHistory = await this
+            ._dbContext.SendUpdateHistories.Where(sh =>
+                sh.QueryTitle == config.QueryTitle
+                && config.EmailReceiverAddresses.Contains(sh.EmailReceiverAddress)
+            )
             .OrderByDescending(sh => sh.SentAt)
             .FirstOrDefaultAsync(cancellationToken);
 
         List<Item> newDelta;
         List<Item> updatedDelta;
 
-        if (lastSendHistory == null && beforeResults.Count == afterResults.Count &&
-            beforeResults.TrueForAll(before => afterResults.Exists(after => before.IsEqualTo(after))))
+        if (
+            lastSendHistory == null
+            && beforeResults.Count == afterResults.Count
+            && beforeResults.TrueForAll(before =>
+                afterResults.Exists(after => before.IsEqualTo(after))
+            )
+        )
         {
             // Never sent before and before/after match - send all as new
-            this._logger.LogInformation("First time sending for {QueryTitle} with no changes detected - sending all {Count} items as new",
-                config.QueryTitle, afterResults.Count);
+            this._logger.LogInformation(
+                "First time sending for {QueryTitle} with no changes detected - sending all {Count} items as new",
+                config.QueryTitle,
+                afterResults.Count
+            );
             newDelta = afterResults;
             updatedDelta = [];
         }
         else
         {
             // Calculate deltas normally
-            newDelta = [.. afterResults
-                .Where(after => !beforeResults.Exists(before =>
-                    before.IsEqualTo(after)))];
+            newDelta =
+            [
+                .. afterResults.Where(after =>
+                    !beforeResults.Exists(before => before.IsEqualTo(after))
+                ),
+            ];
 
-            updatedDelta = [.. afterResults
-                .Where(after => beforeResults.Exists(before =>
-                    before.IsEqualTo(after) && !before.IsFullyEqualTo(after)))];
+            updatedDelta =
+            [
+                .. afterResults.Where(after =>
+                    beforeResults.Exists(before =>
+                        before.IsEqualTo(after) && !before.IsFullyEqualTo(after)
+                    )
+                ),
+            ];
 
-            this._logger.LogInformation("Delta: {NewCount} new, {UpdatedCount} updated",
-                newDelta.Count, updatedDelta.Count);
+            this._logger.LogInformation(
+                "Delta: {NewCount} new, {UpdatedCount} updated",
+                newDelta.Count,
+                updatedDelta.Count
+            );
         }
 
         // Send email if there are changes
@@ -211,8 +275,13 @@ public class FetchAndSendService
                         receiver,
                         config.QueryTitle,
                         newDelta,
-                        updatedDelta);
-                    this._logger.LogInformation("Email sent to {Email} for {QueryTitle}", receiver, config.QueryTitle);
+                        updatedDelta
+                    );
+                    this._logger.LogInformation(
+                        "Email sent to {Email} for {QueryTitle}",
+                        receiver,
+                        config.QueryTitle
+                    );
 
                     var sendHistory = new SendUpdateHistory
                     {
@@ -220,28 +289,42 @@ public class FetchAndSendService
                         EmailReceiverAddress = receiver,
                         SentAt = DateTime.UtcNow,
                         NewItemsCount = newDelta.Count,
-                        UpdatedItemsCount = updatedDelta.Count
+                        UpdatedItemsCount = updatedDelta.Count,
                     };
                     this._dbContext.SendUpdateHistories.Add(sendHistory);
                     await this._dbContext.SaveChangesAsync(cancellationToken);
-                    this._logger.LogInformation("Recorded send history for {QueryTitle} and {Email}: {NewCount} new, {UpdatedCount} updated",
-                        config.QueryTitle, receiver, newDelta.Count, updatedDelta.Count);
+                    this._logger.LogInformation(
+                        "Recorded send history for {QueryTitle} and {Email}: {NewCount} new, {UpdatedCount} updated",
+                        config.QueryTitle,
+                        receiver,
+                        newDelta.Count,
+                        updatedDelta.Count
+                    );
                 }
                 catch (Exception ex)
                 {
-                    this._logger.LogError(ex, "Error sending email or recording history for {QueryTitle} to {Email}", config.QueryTitle, receiver);
+                    this._logger.LogError(
+                        ex,
+                        "Error sending email or recording history for {QueryTitle} to {Email}",
+                        config.QueryTitle,
+                        receiver
+                    );
                 }
             }
         }
         else
         {
-            this._logger.LogInformation("No changes detected for {QueryTitle}, skipping email", config.QueryTitle);
+            this._logger.LogInformation(
+                "No changes detected for {QueryTitle}, skipping email",
+                config.QueryTitle
+            );
         }
     }
 
     private async Task<(List<Item> newItems, List<Item> updatedItems)> CompareAndUpdateItemsAsync(
         List<Item> fetchedItems,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         var newItems = new List<Item>();
         var updatedItems = new List<Item>();
@@ -249,11 +332,10 @@ public class FetchAndSendService
         foreach (var fetchedItem in fetchedItems)
         {
             // Find existing item by source and source ID
-            var existingItem = await this._dbContext.Items
-                .FirstOrDefaultAsync(i =>
-                    i.Source == fetchedItem.Source &&
-                    i.SourceId == fetchedItem.SourceId,
-                    cancellationToken);
+            var existingItem = await this._dbContext.Items.FirstOrDefaultAsync(
+                i => i.Source == fetchedItem.Source && i.SourceId == fetchedItem.SourceId,
+                cancellationToken
+            );
 
             if (existingItem == null)
             {
@@ -296,7 +378,12 @@ public class FetchAndSendService
                     hasChanges = true;
                 }
 
-                if (!(existingItem.Tags?.SequenceEqual(fetchedItem.Tags ?? []) ?? (fetchedItem.Tags == null)))
+                if (
+                    !(
+                        existingItem.Tags?.SequenceEqual(fetchedItem.Tags ?? [])
+                        ?? (fetchedItem.Tags == null)
+                    )
+                )
                 {
                     existingItem.Tags = fetchedItem.Tags;
                     hasChanges = true;
@@ -317,7 +404,8 @@ public class FetchAndSendService
 
     private async Task<List<Item>> ExecuteSqlQueryAsync(
         string sqlQuery,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         return await this._configService.ExecuteSqlQueryAsync(sqlQuery, cancellationToken);
     }

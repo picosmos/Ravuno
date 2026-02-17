@@ -23,7 +23,9 @@ public static class DatabaseExtensions
                 logger.LogInformation("Database migrations applied successfully");
             }
 
-            logger.LogWarning("Application started - this indicates a restart, which should not happen during normal operation. Check previous logs if this was not an intended (re)start.");
+            logger.LogWarning(
+                "Application started - this indicates a restart, which should not happen during normal operation. Check previous logs if this was not an intended (re)start."
+            );
         }
         catch (Exception ex)
         {

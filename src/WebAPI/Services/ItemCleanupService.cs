@@ -14,7 +14,8 @@ public class ItemCleanupService : BackgroundService
     public ItemCleanupService(
         IServiceProvider serviceProvider,
         ILogger<ItemCleanupService> logger,
-        IOptions<CleanupSettings> settings)
+        IOptions<CleanupSettings> settings
+    )
     {
         ArgumentNullException.ThrowIfNull(settings);
         this._serviceProvider = serviceProvider;
@@ -27,7 +28,8 @@ public class ItemCleanupService : BackgroundService
         this._logger.LogInformation(
             "ItemCleanupService is starting. Cleanup interval: {Interval}, Retention time span: {Retention}",
             this._settings.CleanUpInterval,
-            this._settings.HistoricRetentionTimeSpan);
+            this._settings.HistoricRetentionTimeSpan
+        );
 
         while (!stoppingToken.IsCancellationRequested)
         {
@@ -40,7 +42,10 @@ public class ItemCleanupService : BackgroundService
                 this._logger.LogError(ex, "Error occurred during cleanup operation");
             }
 
-            this._logger.LogInformation("Next cleanup scheduled in {Interval}", this._settings.CleanUpInterval);
+            this._logger.LogInformation(
+                "Next cleanup scheduled in {Interval}",
+                this._settings.CleanUpInterval
+            );
             await Task.Delay(this._settings.CleanUpInterval, stoppingToken);
         }
 
@@ -56,10 +61,11 @@ public class ItemCleanupService : BackgroundService
 
         this._logger.LogInformation(
             "Starting cleanup of items with EventStartDateTime and EventEndDateTime before {CutoffDate}",
-            cutoffDate);
+            cutoffDate
+        );
 
-        var itemsToDelete = await dbContext.Items
-            .Where(i => i.EventStartDateTime < cutoffDate && i.EventEndDateTime < cutoffDate)
+        var itemsToDelete = await dbContext
+            .Items.Where(i => i.EventStartDateTime < cutoffDate && i.EventEndDateTime < cutoffDate)
             .ToListAsync(cancellationToken);
 
         if (itemsToDelete.Count > 0)
@@ -70,7 +76,8 @@ public class ItemCleanupService : BackgroundService
             this._logger.LogInformation(
                 "Cleanup completed. Removed {Count} items older than {CutoffDate}",
                 itemsToDelete.Count,
-                cutoffDate);
+                cutoffDate
+            );
         }
         else
         {

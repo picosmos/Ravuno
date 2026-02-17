@@ -16,7 +16,8 @@ public static partial class EmailServiceExtensions
         string receiverAddress,
         string queryTitle,
         List<Item> newItems,
-        List<Item> updatedItems)
+        List<Item> updatedItems
+    )
     {
         ArgumentNullException.ThrowIfNull(emailService);
         ArgumentNullException.ThrowIfNull(newItems);
@@ -61,13 +62,28 @@ public static partial class EmailServiceExtensions
                 var tags = item.Tags != null ? string.Join(", ", item.Tags) : "";
 
                 sb.AppendLine("<tr>");
-                sb.AppendLine(CultureInfo.InvariantCulture, $"<td><a href=\"{item.Url}\">{item.Title}</a></td>");
-                sb.AppendLine(CultureInfo.InvariantCulture, $"<td>{item.EventStartDateTime:ddd, yyyy-MM-dd HH:mm} to<br/>{item.EventEndDateTime:ddd, yyyy-MM-dd HH:mm}<br/>({item.EnrollmentDeadline:ddd, yyyy-MM-dd HH:mm})</td>");
-                sb.AppendLine(CultureInfo.InvariantCulture, $"<td>{item.Location?.Replace("\n", "<br/>")}</td>");
-                sb.AppendLine(CultureInfo.InvariantCulture, $"<td>{item.Price?.Replace("\n", "<br/>")}</td>");
+                sb.AppendLine(
+                    CultureInfo.InvariantCulture,
+                    $"<td><a href=\"{item.Url}\">{item.Title}</a></td>"
+                );
+                sb.AppendLine(
+                    CultureInfo.InvariantCulture,
+                    $"<td>{item.EventStartDateTime:ddd, yyyy-MM-dd HH:mm} to<br/>{item.EventEndDateTime:ddd, yyyy-MM-dd HH:mm}<br/>({item.EnrollmentDeadline:ddd, yyyy-MM-dd HH:mm})</td>"
+                );
+                sb.AppendLine(
+                    CultureInfo.InvariantCulture,
+                    $"<td>{item.Location?.Replace("\n", "<br/>")}</td>"
+                );
+                sb.AppendLine(
+                    CultureInfo.InvariantCulture,
+                    $"<td>{item.Price?.Replace("\n", "<br/>")}</td>"
+                );
                 sb.AppendLine("</tr>");
                 sb.AppendLine("<tr>");
-                sb.AppendLine(CultureInfo.InvariantCulture, $"<td colspan=\"5\" class=\"description\">{description}<br/>{tags}</td>");
+                sb.AppendLine(
+                    CultureInfo.InvariantCulture,
+                    $"<td colspan=\"5\" class=\"description\">{description}<br/>{tags}</td>"
+                );
                 sb.AppendLine("</tr>");
             }
 
@@ -82,16 +98,22 @@ public static partial class EmailServiceExtensions
         sb.AppendLine("body { font-family: 'Trebuchet MS', Arial, sans-serif; }");
         sb.AppendLine("h2 { color: #333; }");
         sb.AppendLine("table { border-collapse: collapse; min-width: 100%; margin-bottom: 20px; }");
-        sb.AppendLine("th, td { border: 1px solid #ddd; padding: 2px 6px 2px 6px; text-align: left; vertical-align: top; }");
+        sb.AppendLine(
+            "th, td { border: 1px solid #ddd; padding: 2px 6px 2px 6px; text-align: left; vertical-align: top; }"
+        );
         sb.AppendLine("th { background-color: #4CAF50; color: white; }");
         sb.AppendLine("tr:nth-child(even) { background-color: #f2f2f2; }");
         sb.AppendLine("a { color: #1a73e8; text-decoration: none; }");
         sb.AppendLine(".description { font-size: 0.9em; padding-bottom: 8px; color: #555; }");
-        sb.AppendLine(".tags { font-size: 0.85em; margin-top: 4px; color: #777; font-style: italic; }");
+        sb.AppendLine(
+            ".tags { font-size: 0.85em; margin-top: 4px; color: #777; font-style: italic; }"
+        );
         sb.AppendLine("</style>");
         sb.AppendLine("</head>");
         sb.AppendLine("<body>");
-        sb.AppendLine("<p><em>All timestamps are given as provided by the data sources. Usually local time.</em></p>");
+        sb.AppendLine(
+            "<p><em>All timestamps are given as provided by the data sources. Usually local time.</em></p>"
+        );
 
         RenderTable(sb, "New Items", newItems);
         RenderTable(sb, "Updated Items", updatedItems);
@@ -109,7 +131,8 @@ public static partial class EmailServiceExtensions
             return string.Empty;
         }
 
-        var htmlWithLinebreaks = HtmlLineBreaksRegex().Replace(html.Replace("\r", "").Replace("\n", ""), "\n");
+        var htmlWithLinebreaks = HtmlLineBreaksRegex()
+            .Replace(html.Replace("\r", "").Replace("\n", ""), "\n");
         var text = HtmlTagsRegex().Replace(htmlWithLinebreaks, string.Empty);
         text = System.Net.WebUtility.HtmlDecode(text);
         return MultipleLineBreaksRegex().Replace(text, "\n").Trim();

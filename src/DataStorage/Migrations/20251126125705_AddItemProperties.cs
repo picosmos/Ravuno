@@ -14,25 +14,23 @@ namespace Ravuno.DataStorage.Migrations
                 name: "Organizer",
                 table: "Items",
                 type: "TEXT",
-                nullable: true);
+                nullable: true
+            );
 
             migrationBuilder.AddColumn<string>(
                 name: "Tags",
                 table: "Items",
                 type: "TEXT",
-                nullable: true);
+                nullable: true
+            );
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "Organizer",
-                table: "Items");
+            migrationBuilder.DropColumn(name: "Organizer", table: "Items");
 
-            migrationBuilder.DropColumn(
-                name: "Tags",
-                table: "Items");
+            migrationBuilder.DropColumn(name: "Tags", table: "Items");
         }
     }
 }

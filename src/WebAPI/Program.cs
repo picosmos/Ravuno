@@ -29,13 +29,28 @@ if (builder.Environment.IsDevelopment())
 builder.Services.ConfigureAndValidateEmailLoggerSettings(builder.Configuration, "Logging:Email");
 builder.Logging.AddEmailLogger();
 
-builder.Services.ConfigureAndValidateSettings<EmailSettings>(builder.Configuration, "EmailSettings");
+builder.Services.ConfigureAndValidateSettings<EmailSettings>(
+    builder.Configuration,
+    "EmailSettings"
+);
 builder.Services.AddSingleton<IEmailService, EmailService>();
 
-builder.Services.ConfigureAndValidateSettings<FetchAndSendSettings>(builder.Configuration, "FetchAndSendSettings");
-builder.Services.ConfigureAndValidateSettings<TeknaSettings>(builder.Configuration, "FetcherSettings:Tekna");
-builder.Services.ConfigureAndValidateSettings<DntActivitiesSettings>(builder.Configuration, "FetcherSettings:DntActivities");
-builder.Services.ConfigureAndValidateSettings<CleanupSettings>(builder.Configuration, "CleanupSettings");
+builder.Services.ConfigureAndValidateSettings<FetchAndSendSettings>(
+    builder.Configuration,
+    "FetchAndSendSettings"
+);
+builder.Services.ConfigureAndValidateSettings<TeknaSettings>(
+    builder.Configuration,
+    "FetcherSettings:Tekna"
+);
+builder.Services.ConfigureAndValidateSettings<DntActivitiesSettings>(
+    builder.Configuration,
+    "FetcherSettings:DntActivities"
+);
+builder.Services.ConfigureAndValidateSettings<CleanupSettings>(
+    builder.Configuration,
+    "CleanupSettings"
+);
 
 builder.Services.AddHttpClient<ITeknaFetchService, TeknaFetchService>();
 builder.Services.AddHttpClient<IDntActivityFetchService, DntActivityFetchService>();
@@ -44,7 +59,8 @@ builder.Services.AddMemoryCache();
 builder.Services.AddDataStorage(builder.Configuration);
 
 // Configure data protection to persist keys for future non-readonly features
-builder.Services.AddDataProtection()
+builder
+    .Services.AddDataProtection()
     .PersistKeysToFileSystem(new DirectoryInfo("/app/data/keys"))
     .SetApplicationName("Ravuno");
 
@@ -57,16 +73,20 @@ builder.Services.AddControllersWithViews();
 
 builder.Services.AddRateLimiter(options =>
 {
-    options.AddPolicy("RavunoApi", context =>
-        RateLimitPartition.GetFixedWindowLimiter(
-            partitionKey: context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
-            factory: _ => new FixedWindowRateLimiterOptions
-            {
-                Window = TimeSpan.FromMinutes(1),
-                PermitLimit = 20,
-                QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
-                QueueLimit = 5
-            }));
+    options.AddPolicy(
+        "RavunoApi",
+        context =>
+            RateLimitPartition.GetFixedWindowLimiter(
+                partitionKey: context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+                factory: _ => new FixedWindowRateLimiterOptions
+                {
+                    Window = TimeSpan.FromMinutes(1),
+                    PermitLimit = 20,
+                    QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                    QueueLimit = 5,
+                }
+            )
+    );
 });
 
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
@@ -80,9 +100,7 @@ builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
     {
-        policy.AllowAnyOrigin()
-              .AllowAnyMethod()
-              .AllowAnyHeader();
+        policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
     });
 });
 
@@ -105,8 +123,6 @@ app.UseRateLimiter();
 
 app.UseCors();
 
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Stats}/{action=FetchHistory}/{id?}");
+app.MapControllerRoute(name: "default", pattern: "{controller=Stats}/{action=FetchHistory}/{id?}");
 
 app.Run();

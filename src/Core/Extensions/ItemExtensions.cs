@@ -13,11 +13,11 @@ public static class ItemExtensions
         ArgumentNullException.ThrowIfNull(item1);
         ArgumentNullException.ThrowIfNull(item2);
 
-        return item1.Source == item2.Source &&
-               item1.Title == item2.Title &&
-               item1.EventEndDateTime.Date == item2.EventEndDateTime.Date &&
-               item1.EventStartDateTime.Date == item2.EventStartDateTime.Date &&
-               item1.SourceId == item2.SourceId;
+        return item1.Source == item2.Source
+            && item1.Title == item2.Title
+            && item1.EventEndDateTime.Date == item2.EventEndDateTime.Date
+            && item1.EventStartDateTime.Date == item2.EventStartDateTime.Date
+            && item1.SourceId == item2.SourceId;
     }
 
     /// <summary>
@@ -29,13 +29,13 @@ public static class ItemExtensions
         ArgumentNullException.ThrowIfNull(item1);
         ArgumentNullException.ThrowIfNull(item2);
 
-        return item1.IsEqualTo(item2) &&
-               item1.EventStartDateTime == item2.EventStartDateTime &&
-               item1.EventEndDateTime == item2.EventEndDateTime &&
-               item1.Price == item2.Price &&
-               item1.Description == item2.Description &&
-               item1.Location == item2.Location &&
-               item1.EnrollmentDeadline.Date == item2.EnrollmentDeadline.Date &&
-               item1.Url == item2.Url;
+        return item1.IsEqualTo(item2)
+            && item1.EventStartDateTime == item2.EventStartDateTime
+            && item1.EventEndDateTime == item2.EventEndDateTime
+            && item1.Price == item2.Price
+            && item1.Description == item2.Description
+            && item1.Location == item2.Location
+            && item1.EnrollmentDeadline.Date == item2.EnrollmentDeadline.Date
+            && item1.Url == item2.Url;
     }
 }

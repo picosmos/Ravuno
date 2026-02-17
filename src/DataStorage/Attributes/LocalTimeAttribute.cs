@@ -6,6 +6,4 @@ namespace Ravuno.DataStorage.Attributes;
 /// local time semantics are explicitly required.
 /// </summary>
 [AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
-public sealed class LocalTimeAttribute : Attribute
-{
-}
+public sealed class LocalTimeAttribute : Attribute { }

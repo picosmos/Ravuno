@@ -13,13 +13,15 @@ public static class SettingsServiceExtensions
     public static IServiceCollection ConfigureAndValidateSettings<TSettings>(
         this IServiceCollection services,
         IConfiguration configuration,
-        string sectionName)
+        string sectionName
+    )
         where TSettings : class
     {
         ArgumentNullException.ThrowIfNull(services);
         ArgumentNullException.ThrowIfNull(configuration);
 
-        services.Configure<TSettings>(configuration.GetSection(sectionName))
+        services
+            .Configure<TSettings>(configuration.GetSection(sectionName))
             .AddOptions<TSettings>()
             .Bind(configuration.GetSection(sectionName))
             .ValidateDataAnnotations()

@@ -17,10 +17,16 @@ public class EmailService(IOptions<EmailSettings> emailSettings) : IEmailService
 
     public async Task SendEmailAsync(string receiver, string subject, string body, bool isHtml)
     {
-        using var smtpClient = new SmtpClient(this._emailSettings.SmtpHost, this._emailSettings.SmtpPort)
+        using var smtpClient = new SmtpClient(
+            this._emailSettings.SmtpHost,
+            this._emailSettings.SmtpPort
+        )
         {
             EnableSsl = this._emailSettings.EnableSsl,
-            Credentials = new NetworkCredential(this._emailSettings.SmtpUsername, this._emailSettings.SmtpPassword)
+            Credentials = new NetworkCredential(
+                this._emailSettings.SmtpUsername,
+                this._emailSettings.SmtpPassword
+            ),
         };
 
         using var mailMessage = new MailMessage
@@ -28,7 +34,7 @@ public class EmailService(IOptions<EmailSettings> emailSettings) : IEmailService
             From = new MailAddress(this._emailSettings.FromEmail, this._emailSettings.FromName),
             Subject = subject,
             Body = body,
-            IsBodyHtml = isHtml
+            IsBodyHtml = isHtml,
         };
 
         mailMessage.To.Add(receiver);

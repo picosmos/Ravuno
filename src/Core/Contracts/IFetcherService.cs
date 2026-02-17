@@ -6,5 +6,9 @@ public interface IFetcherService
 {
     bool IsEnabled { get; }
 
-    Task<IReadOnlyList<Item>> FetchAsync(IReadOnlyCollection<Item> alreadyFetched, bool detailed, CancellationToken cancellationToken);
+    Task<IReadOnlyList<Item>> FetchAsync(
+        IReadOnlyCollection<Item> alreadyFetched,
+        bool detailed,
+        CancellationToken cancellationToken
+    );
 }

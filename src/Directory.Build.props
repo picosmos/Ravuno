@@ -7,12 +7,12 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>Ravuno</RootNamespace>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    
+
     <!-- Version information -->
     <AssemblyVersion>0.2.0.0</AssemblyVersion>
     <FileVersion>0.2.0.0</FileVersion>
     <Version>0.2.0</Version>
-    
+
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
     <AnalysisLevel>latest</AnalysisLevel>
@@ -20,7 +20,17 @@
 
   <ItemGroup>
     <!-- Additional analyzers for best practices -->
-    <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="10.0.100" PrivateAssets="all" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />
-    <PackageReference Include="SonarAnalyzer.CSharp" Version="9.16.0.82469" PrivateAssets="all" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />
+    <PackageReference
+      Include="Microsoft.CodeAnalysis.NetAnalyzers"
+      Version="10.0.100"
+      PrivateAssets="all"
+      IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive"
+    />
+    <PackageReference
+      Include="SonarAnalyzer.CSharp"
+      Version="9.16.0.82469"
+      PrivateAssets="all"
+      IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive"
+    />
   </ItemGroup>
 </Project>
