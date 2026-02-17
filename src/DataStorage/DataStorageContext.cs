@@ -11,6 +11,8 @@ public class DataStorageContext : DbContext
     public DbSet<Item> Items { get; set; }
     public DbSet<FetchHistory> FetchHistories { get; set; }
     public DbSet<SendUpdateHistory> SendUpdateHistories { get; set; }
+    public DbSet<SqlScript> SqlScripts { get; set; }
+    public DbSet<EmailReceiver> EmailReceivers { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
