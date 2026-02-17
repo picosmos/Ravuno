@@ -15,9 +15,15 @@ public static class DatabaseExtensions
         try
         {
             var context = services.GetRequiredService<DataStorageContext>();
-            logger.LogInformation("Applying database migrations...");
-            context.Database.Migrate();
-            logger.LogInformation("Database migrations applied successfully");
+            var pending = context.Database.GetPendingMigrations();
+            if (pending.Any())
+            {
+                logger.LogInformation("Applying {Count} pending migrations...", pending.Count());
+                context.Database.Migrate();
+                logger.LogInformation("Database migrations applied successfully");
+            }
+
+            logger.LogWarning("Application started - this indicates a restart, which should not happen during normal operation. Check previous logs if this was not an intended (re)start.");
         }
         catch (Exception ex)
         {
