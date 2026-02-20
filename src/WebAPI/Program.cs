@@ -18,6 +18,13 @@ using Ravuno.WebAPI.Settings;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Configure thread pool to handle concurrent operations better
+// These settings help prevent thread pool starvation
+System.Threading.ThreadPool.SetMinThreads(
+    workerThreads: Environment.ProcessorCount * 4,
+    completionPortThreads: Environment.ProcessorCount * 4
+);
+
 builder.Logging.ClearProviders();
 builder.Logging.AddSimpleConsole();
 
