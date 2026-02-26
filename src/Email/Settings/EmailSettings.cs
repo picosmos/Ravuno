@@ -25,4 +25,17 @@ public class EmailSettings
     public string FromName { get; set; } = string.Empty;
 
     public bool EnableSsl { get; set; } = true;
+
+    /// <summary>
+    /// Maximum number of retry attempts for sending emails when temporary failures occur.
+    /// </summary>
+    [Range(0, 10)]
+    public int MaxRetryAttempts { get; set; } = 3;
+
+    /// <summary>
+    /// Initial delay in milliseconds before the first retry attempt.
+    /// Subsequent retries will use exponential backoff.
+    /// </summary>
+    [Range(100, 60000)]
+    public int InitialRetryDelayMs { get; set; } = 2000;
 }
