@@ -203,7 +203,7 @@ public sealed class EmailLoggerProvider : ILoggerProvider
         {
             // Resolve IEmailService lazily to avoid circular dependency during startup
             var emailService = this._serviceProvider.GetRequiredService<IEmailService>();
-            
+
             await emailService.SendEmailAsync(
                 this.Settings.AdminEmailReceiver,
                 $"Application Logs - {logs.Count} entries ({logs[0].Timestamp:yyyy-MM-dd HH:mm:ss} UTC to {logs[^1].Timestamp:yyyy-MM-dd HH:mm:ss} UTC)",
