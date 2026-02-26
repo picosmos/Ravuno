@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using System.Globalization;
 using System.Text;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Ravuno.Email.Services.Contracts;
@@ -15,7 +16,7 @@ namespace Ravuno.Email.Logging;
 /// </summary>
 public sealed class EmailLoggerProvider : ILoggerProvider
 {
-    private readonly IEmailService _emailService;
+    private readonly IServiceProvider _serviceProvider;
     private readonly ConcurrentQueue<LogEntry> _logQueue = new();
     private readonly PeriodicTimer _periodicTimer;
     private readonly Task _timerTask;
@@ -25,14 +26,14 @@ public sealed class EmailLoggerProvider : ILoggerProvider
     private bool _disposed;
 
     public EmailLoggerProvider(
-        IEmailService emailService,
+        IServiceProvider serviceProvider,
         IOptions<EmailLogProviderSettings> settings
     )
     {
-        ArgumentNullException.ThrowIfNull(emailService);
+        ArgumentNullException.ThrowIfNull(serviceProvider);
         ArgumentNullException.ThrowIfNull(settings);
 
-        this._emailService = emailService;
+        this._serviceProvider = serviceProvider;
         this.Settings = settings.Value;
 
         // Use PeriodicTimer for efficient periodic checks without creating tasks on every log
@@ -200,7 +201,10 @@ public sealed class EmailLoggerProvider : ILoggerProvider
 
         try
         {
-            await this._emailService.SendEmailAsync(
+            // Resolve IEmailService lazily to avoid circular dependency during startup
+            var emailService = this._serviceProvider.GetRequiredService<IEmailService>();
+            
+            await emailService.SendEmailAsync(
                 this.Settings.AdminEmailReceiver,
                 $"Application Logs - {logs.Count} entries ({logs[0].Timestamp:yyyy-MM-dd HH:mm:ss} UTC to {logs[^1].Timestamp:yyyy-MM-dd HH:mm:ss} UTC)",
                 sb.ToString()
