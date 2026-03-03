@@ -59,15 +59,15 @@ public class QueryRepository(DataStorageContext dbContext) : IQueryRepository
     {
         ArgumentNullException.ThrowIfNull(query);
 
-        var entry = this._dbContext.Entry(query);
-        if (entry.State == EntityState.Detached)
+        var tracked = await this._dbContext.Queries.FindAsync(query.Id);
+        if (tracked == null)
         {
-            this._dbContext.Queries.Attach(query);
+            throw new InvalidOperationException($"Query with ID {query.Id} not found");
         }
 
-        entry.Property(q => q.Title).IsModified = true;
-        entry.Property(q => q.SqlQuery).IsModified = true;
-        entry.Property(q => q.UserId).IsModified = true;
+        tracked.Title = query.Title;
+        tracked.SqlQuery = query.SqlQuery;
+        tracked.UserId = query.UserId;
 
         await this._dbContext.SaveChangesAsync();
     }
