@@ -58,7 +58,17 @@ public class QueryRepository(DataStorageContext dbContext) : IQueryRepository
     public async Task UpdateAsync(Query query)
     {
         ArgumentNullException.ThrowIfNull(query);
-        this._dbContext.Queries.Update(query);
+
+        var entry = this._dbContext.Entry(query);
+        if (entry.State == EntityState.Detached)
+        {
+            this._dbContext.Queries.Attach(query);
+        }
+
+        entry.Property(q => q.Title).IsModified = true;
+        entry.Property(q => q.SqlQuery).IsModified = true;
+        entry.Property(q => q.UserId).IsModified = true;
+
         await this._dbContext.SaveChangesAsync();
     }
 
