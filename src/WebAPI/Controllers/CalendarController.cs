@@ -18,20 +18,6 @@ public class CalendarController : ControllerBase
         this._updateConfigService = updateConfigService;
     }
 
-    [HttpGet("{id:long}")]
-    public async Task<IActionResult> GetCalendar(long id)
-    {
-        var config = await this._updateConfigService.GetUpdateConfigurationByIdAsync(id);
-        if (config == null)
-        {
-            return this.NotFound();
-        }
-
-        var items = await this._updateConfigService.ExecuteSqlQueryAsync(config.SqlQuery);
-        var ics = BuildIcsFeed(items);
-        return this.File(Encoding.UTF8.GetBytes(ics), "text/calendar", config.QueryTitle + ".ics");
-    }
-
     [AllowAnonymous]
     [HttpGet("public/{publicId}")]
     public async Task<IActionResult> GetCalendarByPublicId(string publicId)
