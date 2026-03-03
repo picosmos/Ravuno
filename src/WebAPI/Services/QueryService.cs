@@ -51,7 +51,18 @@ public partial class QueryService(DataStorageContext dbContext) : IQueryService
             throw new InvalidOperationException($"A query with title '{title}' already exists");
         }
 
-        var publicId = Guid.NewGuid().ToString("N")[..32]; // Generate 32-char random ID
+        const string chars = "0123456789abcdef";
+        var publicId = string.Create(
+            32,
+            Random.Shared,
+            (span, random) =>
+            {
+                for (var i = 0; i < span.Length; i++)
+                {
+                    span[i] = chars[random.Next(chars.Length)];
+                }
+            }
+        );
 
         var sqlScript = new Query
         {
