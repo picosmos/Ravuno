@@ -15,8 +15,21 @@ namespace Ravuno.DataStorage.Migrations
                 table: "Queries",
                 type: "TEXT",
                 maxLength: 100,
-                nullable: false,
-                defaultValue: ""
+                nullable: true
+            );
+
+            migrationBuilder.Sql(
+                @"UPDATE Queries 
+                  SET PublicId = lower(hex(randomblob(16))) 
+                  WHERE PublicId IS NULL"
+            );
+
+            migrationBuilder.AlterColumn<string>(
+                name: "PublicId",
+                table: "Queries",
+                type: "TEXT",
+                maxLength: 100,
+                nullable: false
             );
 
             migrationBuilder.CreateIndex(
