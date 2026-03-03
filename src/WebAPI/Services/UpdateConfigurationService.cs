@@ -24,6 +24,7 @@ public class UpdateConfigurationService(DataStorageContext dbContext) : IUpdateC
                 Id = s.Id,
                 QueryTitle = s.Title,
                 SqlQuery = s.SqlQuery,
+                PublicId = s.PublicId,
                 EmailReceiverAddresses = [.. s.EmailReceivers.Select(e => e.EmailAddress)],
             }),
         ];
@@ -44,6 +45,7 @@ public class UpdateConfigurationService(DataStorageContext dbContext) : IUpdateC
                 Id = s.Id,
                 QueryTitle = s.Title,
                 SqlQuery = s.SqlQuery,
+                PublicId = s.PublicId,
                 EmailReceiverAddresses = [.. s.EmailReceivers.Select(e => e.EmailAddress)],
             }),
         ];
@@ -66,6 +68,29 @@ public class UpdateConfigurationService(DataStorageContext dbContext) : IUpdateC
             Id = query.Id,
             QueryTitle = query.Title,
             SqlQuery = query.SqlQuery,
+            PublicId = query.PublicId,
+            EmailReceiverAddresses = [.. query.EmailReceivers.Select(e => e.EmailAddress)],
+        };
+    }
+
+    public async Task<UpdateConfiguration?> GetUpdateConfigurationByPublicIdAsync(string publicId)
+    {
+        var query = await this
+            ._dbContext.Queries.Include(s => s.EmailReceivers)
+            .AsNoTracking()
+            .FirstOrDefaultAsync(s => s.PublicId == publicId);
+
+        if (query == null)
+        {
+            return null;
+        }
+
+        return new UpdateConfiguration
+        {
+            Id = query.Id,
+            QueryTitle = query.Title,
+            SqlQuery = query.SqlQuery,
+            PublicId = query.PublicId,
             EmailReceiverAddresses = [.. query.EmailReceivers.Select(e => e.EmailAddress)],
         };
     }

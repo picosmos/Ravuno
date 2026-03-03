@@ -32,6 +32,21 @@ public class CalendarController : ControllerBase
         return this.File(Encoding.UTF8.GetBytes(ics), "text/calendar", config.QueryTitle + ".ics");
     }
 
+    [AllowAnonymous]
+    [HttpGet("public/{publicId}")]
+    public async Task<IActionResult> GetCalendarByPublicId(string publicId)
+    {
+        var config = await this._updateConfigService.GetUpdateConfigurationByPublicIdAsync(publicId);
+        if (config == null)
+        {
+            return this.NotFound();
+        }
+
+        var items = await this._updateConfigService.ExecuteSqlQueryAsync(config.SqlQuery);
+        var ics = BuildIcsFeed(items);
+        return this.File(Encoding.UTF8.GetBytes(ics), "text/calendar", config.QueryTitle + ".ics");
+    }
+
     private static string BuildIcsFeed(List<Item> items)
     {
         var sb = new StringBuilder();

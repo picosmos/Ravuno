@@ -120,6 +120,10 @@ public class DataStorageContext : DbContext
 
             entity.Property(e => e.SqlQuery).IsRequired();
 
+            entity.Property(e => e.PublicId).IsRequired().HasMaxLength(100);
+
+            entity.HasIndex(e => e.PublicId).IsUnique();
+
             entity.HasOne(e => e.User).WithMany(u => u.Queries).HasForeignKey(e => e.UserId);
         });
     }

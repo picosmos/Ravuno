@@ -6,4 +6,5 @@ public class UpdateConfiguration
     public required List<string> EmailReceiverAddresses { get; set; } = [];
     public required string QueryTitle { get; set; }
     public required string SqlQuery { get; set; }
+    public required string PublicId { get; set; }
 }
