@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Ravuno.DataStorage.Models;
 
-public class SqlScript
+public class Query
 {
     [Key]
     public long Id { get; set; }
@@ -12,7 +12,7 @@ public class SqlScript
     public string Title { get; set; } = string.Empty;
 
     [Required]
-    public string Query { get; set; } = string.Empty;
+    public string SqlQuery { get; set; } = string.Empty;
 
     public int UserId { get; set; }
     public User User { get; set; } = null!;

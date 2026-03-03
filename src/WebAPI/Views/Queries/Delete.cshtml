@@ -1,4 +1,4 @@
-@model Ravuno.DataStorage.Models.SqlScript
+@model Ravuno.DataStorage.Models.Query
 @{
     ViewData["Title"] = "Delete Query";
     Layout = "_Layout";
@@ -19,7 +19,7 @@
         <tr>
             <td style="border: none; padding: 5px; vertical-align: top; font-weight: bold;">Query:</td>
             <td style="border: none; padding: 5px;">
-                <pre style="background: #f0f0f0; padding: 10px; overflow-x: auto;">@Model.Query</pre>
+                <pre style="background: #f0f0f0; padding: 10px; overflow-x: auto;">@Model.SqlQuery</pre>
             </td>
         </tr>
     </table>

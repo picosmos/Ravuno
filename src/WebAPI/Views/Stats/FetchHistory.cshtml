@@ -62,14 +62,14 @@ else
             }
             else
             {
-                <a href="/stats/fetchhistory?page=@i&pageSize=@ViewBag.PageSize">@i</a>
+                    <a href="/stats/fetch-history?page=@i&pageSize=@ViewBag.PageSize">@i</a>
             }
         }
         
         @if (ViewBag.CurrentPage < ViewBag.TotalPages)
         {
-            <a href="/stats/fetchhistory?page=@(ViewBag.CurrentPage + 1)&pageSize=@ViewBag.PageSize">Next &gt;</a>
-            <a href="/stats/fetchhistory?page=@ViewBag.TotalPages&pageSize=@ViewBag.PageSize">Last &raquo;</a>
+            <a href="/stats/fetch-history?page=@(ViewBag.CurrentPage + 1)&pageSize=@ViewBag.PageSize">Next &gt;</a>
+            <a href="/stats/fetch-history?page=@ViewBag.TotalPages&pageSize=@ViewBag.PageSize">Last &raquo;</a>
         }
     </div>
 }

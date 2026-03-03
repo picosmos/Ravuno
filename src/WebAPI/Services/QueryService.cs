@@ -19,24 +19,24 @@ public partial class QueryService(DataStorageContext dbContext) : IQueryService
     )]
     private static partial Regex DangerousKeywordsRegex();
 
-    public async Task<List<SqlScript>> GetAllByUserAsync(int userId)
+    public async Task<List<Query>> GetAllByUserAsync(int userId)
     {
         return await this
-            ._dbContext.SqlScripts.Where(s => s.UserId == userId)
+            ._dbContext.Queries.Where(s => s.UserId == userId)
             .OrderBy(s => s.Title)
             .AsNoTracking()
             .ToListAsync();
     }
 
-    public async Task<SqlScript?> GetByIdAsync(long id, int userId)
+    public async Task<Query?> GetByIdAsync(long id, int userId)
     {
         return await this
-            ._dbContext.SqlScripts.Where(s => s.Id == id && s.UserId == userId)
+            ._dbContext.Queries.Where(s => s.Id == id && s.UserId == userId)
             .AsNoTracking()
             .FirstOrDefaultAsync();
     }
 
-    public async Task<SqlScript> CreateAsync(string title, string query, int userId)
+    public async Task<Query> CreateAsync(string title, string query, int userId)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(title);
         ArgumentException.ThrowIfNullOrWhiteSpace(query);
@@ -51,14 +51,14 @@ public partial class QueryService(DataStorageContext dbContext) : IQueryService
             throw new InvalidOperationException($"A query with title '{title}' already exists");
         }
 
-        var sqlScript = new SqlScript
+        var sqlScript = new Query
         {
             Title = title.Trim(),
-            Query = query.Trim(),
+            SqlQuery = query.Trim(),
             UserId = userId,
         };
 
-        await this._dbContext.SqlScripts.AddAsync(sqlScript);
+        await this._dbContext.Queries.AddAsync(sqlScript);
         await this._dbContext.SaveChangesAsync();
 
         return sqlScript;
@@ -74,7 +74,7 @@ public partial class QueryService(DataStorageContext dbContext) : IQueryService
             throw new InvalidOperationException(error);
         }
 
-        var sqlScript = await this._dbContext.SqlScripts.FirstOrDefaultAsync(s =>
+        var sqlScript = await this._dbContext.Queries.FirstOrDefaultAsync(s =>
             s.Id == id && s.UserId == userId
         );
 
@@ -89,14 +89,14 @@ public partial class QueryService(DataStorageContext dbContext) : IQueryService
         }
 
         sqlScript.Title = title.Trim();
-        sqlScript.Query = query.Trim();
+        sqlScript.SqlQuery = query.Trim();
 
         await this._dbContext.SaveChangesAsync();
     }
 
     public async Task DeleteAsync(long id, int userId)
     {
-        var sqlScript = await this._dbContext.SqlScripts.FirstOrDefaultAsync(s =>
+        var sqlScript = await this._dbContext.Queries.FirstOrDefaultAsync(s =>
             s.Id == id && s.UserId == userId
         );
 
@@ -105,7 +105,7 @@ public partial class QueryService(DataStorageContext dbContext) : IQueryService
             throw new InvalidOperationException("Query not found or access denied");
         }
 
-        this._dbContext.SqlScripts.Remove(sqlScript);
+        this._dbContext.Queries.Remove(sqlScript);
         await this._dbContext.SaveChangesAsync();
     }
 
@@ -115,7 +115,7 @@ public partial class QueryService(DataStorageContext dbContext) : IQueryService
         long? excludeId = null
     )
     {
-        var query = this._dbContext.SqlScripts.Where(s =>
+        var query = this._dbContext.Queries.Where(s =>
             s.UserId == userId && EF.Functions.Like(s.Title, title)
         );
 

@@ -1,19 +1,19 @@
 @model List<Ravuno.DataStorage.Models.Query>
 @{
-    ViewData["Title"] = "My Queries";
+    ViewData["Title"] = "All Users' Queries";
     Layout = "_Layout";
 }
 
-<h2>My Queries</h2>
+<h2>All Users' Queries (Admin View)</h2>
 
 <div class="info">
-    <a href="/queries/create" style="background-color: #c0c0c0; border: 2px outset #fff; padding: 5px 15px; text-decoration: none; display: inline-block; cursor: pointer;">Create New Query</a>
+    <strong>Total Queries:</strong> @Model.Count
 </div>
 
 @if (Model == null || Model.Count == 0)
 {
     <div style="padding: 10px;">
-        <em>No queries found. <a href="/queries/create">Create your first query</a></em>
+        <em>No queries found in the system.</em>
     </div>
 }
 else
@@ -21,6 +21,8 @@ else
     <table>
         <thead>
             <tr>
+                <th>ID</th>
+                <th>User</th>
                 <th>Title</th>
                 <th>Query</th>
                 <th>Actions</th>
@@ -30,13 +32,13 @@ else
             @foreach (var query in Model)
             {
                 <tr>
+                    <td>@query.Id</td>
+                    <td>@query.User.Username</td>
                     <td>@query.Title</td>
                     <td style="max-width: 400px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
                         <code>@query.SqlQuery</code>
                     </td>
                     <td>
-                        <a href="/queries/edit/@query.Id" style="margin-right: 10px;">Edit</a>
-                        <a href="/queries/delete/@query.Id" style="color: #cc0000;">Delete</a><br />
                         <a href="/stats/view-query/@query.Id" style="margin-right: 10px;">View Results</a>
                         <a href="/calendar/@query.Id">Calendar Feed</a>
                     </td>
@@ -45,3 +47,7 @@ else
         </tbody>
     </table>
 }
+
+<p style="margin-top: 20px;">
+    <a href="/">← Back to Home</a>
+</p>

@@ -13,5 +13,5 @@ public class EmailReceiver
     [MaxLength(500)]
     public string EmailAddress { get; set; } = string.Empty;
 
-    public ICollection<SqlScript> SqlScripts { get; set; } = [];
+    public ICollection<Query> Queries { get; set; } = [];
 }

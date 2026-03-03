@@ -12,18 +12,18 @@ public class UpdateConfigurationService(DataStorageContext dbContext) : IUpdateC
 
     public async Task<List<UpdateConfiguration>> GetUpdateConfigurationsAsync()
     {
-        var sqlScripts = await this
-            ._dbContext.SqlScripts.Include(s => s.EmailReceivers)
+        var queries = await this
+            ._dbContext.Queries.Include(s => s.EmailReceivers)
             .AsNoTracking()
             .ToListAsync();
 
         return
         [
-            .. sqlScripts.Select(s => new UpdateConfiguration
+            .. queries.Select(s => new UpdateConfiguration
             {
                 Id = s.Id,
                 QueryTitle = s.Title,
-                SqlQuery = s.Query,
+                SqlQuery = s.SqlQuery,
                 EmailReceiverAddresses = [.. s.EmailReceivers.Select(e => e.EmailAddress)],
             }),
         ];
@@ -31,19 +31,19 @@ public class UpdateConfigurationService(DataStorageContext dbContext) : IUpdateC
 
     public async Task<List<UpdateConfiguration>> GetUpdateConfigurationsByUserAsync(int userId)
     {
-        var sqlScripts = await this
-            ._dbContext.SqlScripts.Include(s => s.EmailReceivers)
+        var queries = await this
+            ._dbContext.Queries.Include(s => s.EmailReceivers)
             .Where(s => s.UserId == userId)
             .AsNoTracking()
             .ToListAsync();
 
         return
         [
-            .. sqlScripts.Select(s => new UpdateConfiguration
+            .. queries.Select(s => new UpdateConfiguration
             {
                 Id = s.Id,
                 QueryTitle = s.Title,
-                SqlQuery = s.Query,
+                SqlQuery = s.SqlQuery,
                 EmailReceiverAddresses = [.. s.EmailReceivers.Select(e => e.EmailAddress)],
             }),
         ];
@@ -51,22 +51,22 @@ public class UpdateConfigurationService(DataStorageContext dbContext) : IUpdateC
 
     public async Task<UpdateConfiguration?> GetUpdateConfigurationByIdAsync(long id)
     {
-        var sqlScript = await this
-            ._dbContext.SqlScripts.Include(s => s.EmailReceivers)
+        var query = await this
+            ._dbContext.Queries.Include(s => s.EmailReceivers)
             .AsNoTracking()
             .FirstOrDefaultAsync(s => s.Id == id);
 
-        if (sqlScript == null)
+        if (query == null)
         {
             return null;
         }
 
         return new UpdateConfiguration
         {
-            Id = sqlScript.Id,
-            QueryTitle = sqlScript.Title,
-            SqlQuery = sqlScript.Query,
-            EmailReceiverAddresses = [.. sqlScript.EmailReceivers.Select(e => e.EmailAddress)],
+            Id = query.Id,
+            QueryTitle = query.Title,
+            SqlQuery = query.SqlQuery,
+            EmailReceiverAddresses = [.. query.EmailReceivers.Select(e => e.EmailAddress)],
         };
     }
 

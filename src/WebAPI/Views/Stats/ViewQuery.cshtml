@@ -84,8 +84,8 @@
             <div class="pagination">
                 @if (ViewBag.CurrentPage > 1)
                 {
-                    <a href="/stats/viewsql/@Uri.EscapeDataString(ViewBag.QueryTitle)?page=1&pageSize=@ViewBag.PageSize">&laquo; First</a>
-                    <a href="/stats/viewsql/@Uri.EscapeDataString(ViewBag.QueryTitle)?page=@(ViewBag.CurrentPage - 1)&pageSize=@ViewBag.PageSize">&lt; Previous</a>
+                    <a href="/stats/view-query/@ViewBag.QueryId?page=1&pageSize=@ViewBag.PageSize">&laquo; First</a>
+                    <a href="/stats/view-query/@ViewBag.QueryId?page=@(ViewBag.CurrentPage - 1)&pageSize=@ViewBag.PageSize">&lt; Previous</a>
                 }
                 
                 @for (int i = Math.Max(1, ViewBag.CurrentPage - 5); i <= Math.Min(ViewBag.TotalPages, ViewBag.CurrentPage + 5); i++)
@@ -96,14 +96,14 @@
                     }
                     else
                     {
-                        <a href="/stats/viewsql/@Uri.EscapeDataString(ViewBag.QueryTitle)?page=@i&pageSize=@ViewBag.PageSize">@i</a>
+                        <a href="/stats/view-query/@ViewBag.QueryId?page=@i&pageSize=@ViewBag.PageSize">@i</a>
                     }
                 }
                 
                 @if (ViewBag.CurrentPage < ViewBag.TotalPages)
                 {
-                    <a href="/stats/viewsql/@Uri.EscapeDataString(ViewBag.QueryTitle)?page=@(ViewBag.CurrentPage + 1)&pageSize=@ViewBag.PageSize">Next &gt;</a>
-                    <a href="/stats/viewsql/@Uri.EscapeDataString(ViewBag.QueryTitle)?page=@ViewBag.TotalPages&pageSize=@ViewBag.PageSize">Last &raquo;</a>
+                    <a href="/stats/view-query/@ViewBag.QueryId?page=@(ViewBag.CurrentPage + 1)&pageSize=@ViewBag.PageSize">Next &gt;</a>
+                    <a href="/stats/view-query/@ViewBag.QueryId?page=@ViewBag.TotalPages&pageSize=@ViewBag.PageSize">Last &raquo;</a>
                 }
             </div>
         }

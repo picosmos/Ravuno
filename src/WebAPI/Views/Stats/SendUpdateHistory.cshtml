@@ -50,8 +50,8 @@ else
     <div class="pagination">
         @if (ViewBag.CurrentPage > 1)
         {
-            <a href="/stats/sendupdatehistory?page=1&pageSize=@ViewBag.PageSize">&laquo; First</a>
-            <a href="/stats/sendupdatehistory?page=@(ViewBag.CurrentPage - 1)&pageSize=@ViewBag.PageSize">&lt; Previous</a>
+            <a href="/stats/send-update-history?page=1&pageSize=@ViewBag.PageSize">&laquo; First</a>
+            <a href="/stats/send-update-history?page=@(ViewBag.CurrentPage - 1)&pageSize=@ViewBag.PageSize">&lt; Previous</a>
         }
         
         @for (int i = Math.Max(1, ViewBag.CurrentPage - 5); i <= Math.Min(ViewBag.TotalPages, ViewBag.CurrentPage + 5); i++)
@@ -62,14 +62,14 @@ else
             }
             else
             {
-                <a href="/stats/sendupdatehistory?page=@i&pageSize=@ViewBag.PageSize">@i</a>
+                <a href="/stats/send-update-history?page=@i&pageSize=@ViewBag.PageSize">@i</a>
             }
         }
         
         @if (ViewBag.CurrentPage < ViewBag.TotalPages)
         {
-            <a href="/stats/sendupdatehistory?page=@(ViewBag.CurrentPage + 1)&pageSize=@ViewBag.PageSize">Next &gt;</a>
-            <a href="/stats/sendupdatehistory?page=@ViewBag.TotalPages&pageSize=@ViewBag.PageSize">Last &raquo;</a>
+            <a href="/stats/send-update-history?page=@(ViewBag.CurrentPage + 1)&pageSize=@ViewBag.PageSize">Next &gt;</a>
+            <a href="/stats/send-update-history?page=@ViewBag.TotalPages&pageSize=@ViewBag.PageSize">Last &raquo;</a>
         }
     </div>
 }

@@ -11,7 +11,7 @@ public class DataStorageContext : DbContext
     public DbSet<Item> Items { get; set; }
     public DbSet<FetchHistory> FetchHistories { get; set; }
     public DbSet<SendUpdateHistory> SendUpdateHistories { get; set; }
-    public DbSet<SqlScript> SqlScripts { get; set; }
+    public DbSet<Query> Queries { get; set; }
     public DbSet<EmailReceiver> EmailReceivers { get; set; }
     public DbSet<User> Users { get; set; }
     public DbSet<Role> Roles { get; set; }
@@ -112,15 +112,15 @@ public class DataStorageContext : DbContext
             entity.Property(e => e.CreatedAt).IsRequired();
         });
 
-        modelBuilder.Entity<SqlScript>(entity =>
+        modelBuilder.Entity<Query>(entity =>
         {
             entity.HasKey(e => e.Id);
 
             entity.Property(e => e.Title).IsRequired().HasMaxLength(500);
 
-            entity.Property(e => e.Query).IsRequired();
+            entity.Property(e => e.SqlQuery).IsRequired();
 
-            entity.HasOne(e => e.User).WithMany(u => u.SqlScripts).HasForeignKey(e => e.UserId);
+            entity.HasOne(e => e.User).WithMany(u => u.Queries).HasForeignKey(e => e.UserId);
         });
     }
 }

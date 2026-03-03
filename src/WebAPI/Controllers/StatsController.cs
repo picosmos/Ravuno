@@ -27,7 +27,7 @@ public class StatsController : Controller
     }
 
     [Authorize(Roles = RoleNames.Admin)]
-    [HttpGet("fetchhistory")]
+    [HttpGet("fetch-history")]
     public async Task<IActionResult> FetchHistory(int page = 1, int pageSize = 100)
     {
         if (page < 1)
@@ -53,7 +53,7 @@ public class StatsController : Controller
     }
 
     [Authorize(Roles = RoleNames.Admin)]
-    [HttpGet("sendupdatehistory")]
+    [HttpGet("send-update-history")]
     public async Task<IActionResult> SendUpdateHistory(int page = 1, int pageSize = 100)
     {
         if (page < 1)
@@ -103,8 +103,8 @@ public class StatsController : Controller
         return this.View(items);
     }
 
-    [HttpGet("viewsql/{id:long}")]
-    public async Task<IActionResult> ViewSql(long id, int page = 1, int pageSize = 100)
+    [HttpGet("view-query/{id:long}")]
+    public async Task<IActionResult> ViewQuery(long id, int page = 1, int pageSize = 100)
     {
         if (page < 1)
         {
@@ -131,6 +131,7 @@ public class StatsController : Controller
 
             var items = allResults.Skip((page - 1) * pageSize).Take(pageSize).ToList();
 
+            this.ViewBag.QueryId = id;
             this.ViewBag.QueryTitle = config.QueryTitle;
             this.ViewBag.SqlQuery = config.SqlQuery;
             this.ViewBag.EmailReceiver = string.Join(", ", config.EmailReceiverAddresses);
@@ -144,6 +145,28 @@ public class StatsController : Controller
         catch (Exception ex)
         {
             this._logger.LogError(ex, "Error retrieving SQL for query ID: {QueryId}", id);
+            return this.StatusCode(500);
+        }
+    }
+
+    [Authorize(Roles = RoleNames.Admin)]
+    [HttpGet("all-queries")]
+    public async Task<IActionResult> AllQueries()
+    {
+        try
+        {
+            var queries = await this
+                ._context.Queries.Include(q => q.User)
+                .OrderBy(q => q.User.Username)
+                .ThenBy(q => q.Title)
+                .AsNoTracking()
+                .ToListAsync();
+
+            return this.View(queries);
+        }
+        catch (Exception ex)
+        {
+            this._logger.LogError(ex, "Error retrieving all queries");
             return this.StatusCode(500);
         }
     }

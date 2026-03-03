@@ -1,4 +1,4 @@
-@model Ravuno.DataStorage.Models.SqlScript
+@model Ravuno.DataStorage.Models.Query
 @{
     ViewData["Title"] = "Edit Query";
     Layout = "_Layout";
@@ -25,7 +25,7 @@
             <tr>
                 <td style="border: none; padding: 5px; vertical-align: top;"><label for="query">SQL Query:</label></td>
                 <td style="border: none; padding: 5px;">
-                    <textarea id="query" name="query" required style="width: 500px; height: 200px; padding: 3px; font-family: monospace;">@(ViewBag.Query ?? Model.Query)</textarea>
+                    <textarea id="query" name="query" required style="width: 500px; height: 200px; padding: 3px; font-family: monospace;">@(ViewBag.Query ?? Model.SqlQuery)</textarea>
                     <br />
                     <small style="color: #666;">Only SELECT queries are allowed. No INSERT, UPDATE, DELETE, DROP, CREATE, ALTER, TRUNCATE, or EXECUTE statements.</small>
                 </td>
