@@ -9,17 +9,11 @@ namespace Ravuno.WebAPI.Controllers;
 public class QueriesController : Controller
 {
     private readonly IQueryService _queryService;
-    private readonly IUpdateConfigurationService _updateConfigService;
     private readonly ILogger<QueriesController> _logger;
 
-    public QueriesController(
-        IQueryService queryService,
-        IUpdateConfigurationService updateConfigService,
-        ILogger<QueriesController> logger
-    )
+    public QueriesController(IQueryService queryService, ILogger<QueriesController> logger)
     {
         this._queryService = queryService;
-        this._updateConfigService = updateConfigService;
         this._logger = logger;
     }
 
@@ -206,7 +200,7 @@ public class QueriesController : Controller
                 return this.Json(new { success = false, error = validationError });
             }
 
-            var items = await this._updateConfigService.ExecuteSqlQueryAsync(
+            var items = await this._queryService.ExecuteSqlQueryAsync(
                 query,
                 CancellationToken.None
             );

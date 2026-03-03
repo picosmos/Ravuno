@@ -9,15 +9,12 @@ namespace Ravuno.WebAPI.Controllers;
 [Authorize]
 public class HomeController : Controller
 {
-    private readonly IUpdateConfigurationService _updateConfigService;
+    private readonly IQueryService _queryService;
     private readonly ILogger<HomeController> _logger;
 
-    public HomeController(
-        IUpdateConfigurationService updateConfigService,
-        ILogger<HomeController> logger
-    )
+    public HomeController(IQueryService queryService, ILogger<HomeController> logger)
     {
-        this._updateConfigService = updateConfigService;
+        this._queryService = queryService;
         this._logger = logger;
     }
 
@@ -31,7 +28,7 @@ public class HomeController : Controller
                 System.Globalization.CultureInfo.InvariantCulture
             );
 
-            var configurations = await this._updateConfigService.GetUpdateConfigurationsByUserAsync(
+            var configurations = await this._queryService.GetUpdateConfigurationsByUserAsync(
                 userId
             );
             this.ViewBag.Queries = configurations;

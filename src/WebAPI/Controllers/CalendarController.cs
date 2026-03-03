@@ -11,26 +11,24 @@ namespace Ravuno.WebAPI.Controllers;
 [Route("calendar")]
 public class CalendarController : ControllerBase
 {
-    private readonly IUpdateConfigurationService _updateConfigService;
+    private readonly IQueryService _queryService;
 
-    public CalendarController(IUpdateConfigurationService updateConfigService)
+    public CalendarController(IQueryService queryService)
     {
-        this._updateConfigService = updateConfigService;
+        this._queryService = queryService;
     }
 
     [AllowAnonymous]
     [HttpGet("public/{publicId}")]
     public async Task<IActionResult> GetCalendarByPublicId(string publicId)
     {
-        var config = await this._updateConfigService.GetUpdateConfigurationByPublicIdAsync(
-            publicId
-        );
+        var config = await this._queryService.GetUpdateConfigurationByPublicIdAsync(publicId);
         if (config == null)
         {
             return this.NotFound();
         }
 
-        var items = await this._updateConfigService.ExecuteSqlQueryAsync(config.SqlQuery);
+        var items = await this._queryService.ExecuteSqlQueryAsync(config.SqlQuery);
         var ics = BuildIcsFeed(items);
         return this.File(Encoding.UTF8.GetBytes(ics), "text/calendar", config.QueryTitle + ".ics");
     }

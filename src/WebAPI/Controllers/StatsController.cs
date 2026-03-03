@@ -12,23 +12,20 @@ namespace Ravuno.WebAPI.Controllers;
 public class StatsController : Controller
 {
     private readonly DataStorageContext _context;
-    private readonly IUpdateConfigurationService _updateConfigService;
-    private readonly IUserService _userService;
     private readonly IQueryService _queryService;
+    private readonly IUserService _userService;
     private readonly ILogger<StatsController> _logger;
 
     public StatsController(
         DataStorageContext context,
-        IUpdateConfigurationService updateConfigService,
-        IUserService userService,
         IQueryService queryService,
+        IUserService userService,
         ILogger<StatsController> logger
     )
     {
         this._context = context;
-        this._updateConfigService = updateConfigService;
-        this._userService = userService;
         this._queryService = queryService;
+        this._userService = userService;
         this._logger = logger;
     }
 
@@ -119,7 +116,7 @@ public class StatsController : Controller
 
         try
         {
-            var config = await this._updateConfigService.GetUpdateConfigurationByIdAsync(id);
+            var config = await this._queryService.GetUpdateConfigurationByIdAsync(id);
 
             if (config == null)
             {
@@ -127,7 +124,7 @@ public class StatsController : Controller
             }
 
             // Execute SQL query
-            var allResults = await this._updateConfigService.ExecuteSqlQueryAsync(
+            var allResults = await this._queryService.ExecuteSqlQueryAsync(
                 config.SqlQuery,
                 this.HttpContext.RequestAborted
             );

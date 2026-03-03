@@ -17,7 +17,7 @@ public class FetchAndSendService
     private readonly ILogger<FetchAndSendService> _logger;
     private readonly DataStorageContext _dbContext;
     private readonly IEmailService _emailService;
-    private readonly IUpdateConfigurationService _configService;
+    private readonly IQueryService _queryService;
     private static readonly SemaphoreSlim _executionSemaphore = new(1, 1);
 
     private static readonly Dictionary<ItemSource, Type> ItemFetcher = new()
@@ -31,14 +31,14 @@ public class FetchAndSendService
         ILogger<FetchAndSendService> logger,
         DataStorageContext dbContext,
         IEmailService emailService,
-        IUpdateConfigurationService configService
+        IQueryService queryService
     )
     {
         this._serviceProvider = serviceProvider;
         this._logger = logger;
         this._dbContext = dbContext;
         this._emailService = emailService;
-        this._configService = configService;
+        this._queryService = queryService;
     }
 
     public async Task ProcessFetchAndSendAsync(bool detailed, CancellationToken cancellationToken)
@@ -49,7 +49,7 @@ public class FetchAndSendService
             this._logger.LogInformation("Starting fetch and send process");
 
             // Get update configurations
-            var updateConfigs = await this._configService.GetUpdateConfigurationsAsync();
+            var updateConfigs = await this._queryService.GetUpdateConfigurationsAsync();
             this._logger.LogInformation(
                 "Loaded {Count} update configurations",
                 updateConfigs.Count
@@ -411,6 +411,6 @@ public class FetchAndSendService
         CancellationToken cancellationToken
     )
     {
-        return await this._configService.ExecuteSqlQueryAsync(sqlQuery, cancellationToken);
+        return await this._queryService.ExecuteSqlQueryAsync(sqlQuery, cancellationToken);
     }
 }

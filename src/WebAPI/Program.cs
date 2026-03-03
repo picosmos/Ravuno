@@ -73,6 +73,8 @@ builder.Services.AddMemoryCache();
 builder.Services.AddDataStorage(builder.Configuration);
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IQueryRepository, QueryRepository>();
+builder.Services.AddScoped<IItemRepository, ItemRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IQueryService, QueryService>();
 
@@ -82,7 +84,6 @@ builder
     .PersistKeysToFileSystem(new DirectoryInfo("/app/data/keys"))
     .SetApplicationName("Ravuno");
 
-builder.Services.AddScoped<IUpdateConfigurationService, UpdateConfigurationService>();
 builder.Services.AddScoped<FetchAndSendService>();
 builder.Services.AddHostedService<FetchAndSendHostedService>();
 builder.Services.AddHostedService<ItemCleanupService>();
