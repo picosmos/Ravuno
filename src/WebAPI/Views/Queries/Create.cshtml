@@ -26,11 +26,19 @@
                 <td style="border: none; padding: 5px;">
                     <textarea id="query" name="query" required class="sql-editor" oninput="updatePreview(this)">@ViewBag.Query</textarea>
                     <br />
+                    <button type="button" onclick="testQuery()" style="background-color: #c0c0c0; border: 2px outset #fff; padding: 3px 10px; cursor: pointer; margin-top: 5px;">Test Query</button>
+                    <span id="test-status" style="margin-left: 10px; color: #666;"></span>
+                    <br />
                     <details style="margin-top: 5px;">
                         <summary style="cursor: pointer; color: #0000ff;">Show Preview</summary>
                         <pre style="margin-top: 5px; max-height: 200px; overflow: auto;"><code id="query-preview" class="language-sql">@ViewBag.Query</code></pre>
                     </details>
                     <small style="color: #666;">Only SELECT queries are allowed. No INSERT, UPDATE, DELETE, DROP, CREATE, ALTER, TRUNCATE, or EXECUTE statements.</small>
+                    
+                    <div id="test-results" style="display: none; margin-top: 10px; border: 2px solid #000; padding: 10px; background-color: #fff; max-height: 400px; overflow: auto;">
+                        <h3 style="margin-top: 0;">Test Results</h3>
+                        <div id="results-content"></div>
+                    </div>
                 </td>
             </tr>
             <tr>
@@ -57,6 +65,99 @@
                     window.Prism.highlightElement(preview);
                 }
             }
+        }
+        
+        async function testQuery() {
+            var queryText = document.getElementById('query').value.trim();
+            var statusEl = document.getElementById('test-status');
+            var resultsDiv = document.getElementById('test-results');
+            var contentDiv = document.getElementById('results-content');
+            
+            if (!queryText) {
+                statusEl.textContent = 'Please enter a query';
+                statusEl.style.color = '#ff0000';
+                return;
+            }
+            
+            statusEl.textContent = 'Testing...';
+            statusEl.style.color = '#0000ff';
+            resultsDiv.style.display = 'none';
+            
+            try {
+                var formData = new FormData();
+                formData.append('query', queryText);
+                
+                var response = await fetch('/queries/test', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                var data = await response.json();
+                
+                if (data.success) {
+                    statusEl.textContent = 'Success! Found ' + data.items.length + ' results';
+                    statusEl.style.color = '#008000';
+                    
+                    if (data.items.length > 0) {
+                        renderResults(data.items, contentDiv);
+                        resultsDiv.style.display = 'block';
+                    } else {
+                        contentDiv.innerHTML = '<p>No results found.</p>';
+                        resultsDiv.style.display = 'block';
+                    }
+                } else {
+                    statusEl.textContent = 'Error: ' + data.error;
+                    statusEl.style.color = '#ff0000';
+                    resultsDiv.style.display = 'none';
+                }
+            } catch (err) {
+                statusEl.textContent = 'Error: ' + err.message;
+                statusEl.style.color = '#ff0000';
+                resultsDiv.style.display = 'none';
+            }
+        }
+        
+        function renderResults(items, container) {
+            if (!items || items.length === 0) {
+                container.innerHTML = '<p>No results found.</p>';
+                return;
+            }
+            
+            // Get all keys from first item
+            var keys = Object.keys(items[0]);
+            
+            var html = '<table style="width: 100%; border-collapse: collapse;">';
+            html += '<thead><tr>';
+            keys.forEach(function(key) {
+                html += '<th style="border: 2px solid #000; padding: 5px; background-color: #c0c0c0; text-align: left;">' + key + '</th>';
+            });
+            html += '</tr></thead><tbody>';
+            
+            // Limit to first 100 rows
+            var displayItems = items.slice(0, 100);
+            displayItems.forEach(function(item) {
+                html += '<tr>';
+                keys.forEach(function(key) {
+                    var value = item[key];
+                    if (value === null || value === undefined) {
+                        value = '<em style="color: #999;">null</em>';
+                    } else if (Array.isArray(value)) {
+                        value = value.join(', ');
+                    } else {
+                        value = String(value);
+                    }
+                    html += '<td style="border: 1px solid #808080; padding: 5px;">' + value + '</td>';
+                });
+                html += '</tr>';
+            });
+            
+            html += '</tbody></table>';
+            
+            if (items.length > 100) {
+                html += '<p style="margin-top: 10px; color: #666;"><em>Showing first 100 of ' + items.length + ' results</em></p>';
+            }
+            
+            container.innerHTML = html;
         }
         
         // Initial highlight on page load

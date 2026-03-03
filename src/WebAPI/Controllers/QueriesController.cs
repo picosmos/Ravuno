@@ -9,11 +9,17 @@ namespace Ravuno.WebAPI.Controllers;
 public class QueriesController : Controller
 {
     private readonly IQueryService _queryService;
+    private readonly IUpdateConfigurationService _updateConfigService;
     private readonly ILogger<QueriesController> _logger;
 
-    public QueriesController(IQueryService queryService, ILogger<QueriesController> logger)
+    public QueriesController(
+        IQueryService queryService,
+        IUpdateConfigurationService updateConfigService,
+        ILogger<QueriesController> logger
+    )
     {
         this._queryService = queryService;
+        this._updateConfigService = updateConfigService;
         this._logger = logger;
     }
 
@@ -182,6 +188,66 @@ public class QueriesController : Controller
             this.ViewBag.Title = title;
             this.ViewBag.Query = query;
             return this.View(existingQuery);
+        }
+    }
+
+    [HttpPost("/queries/test")]
+    public async Task<IActionResult> TestQuery([FromForm] string query)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(query))
+            {
+                return this.Json(new { success = false, error = "Query is required" });
+            }
+
+            if (!this._queryService.ValidateSelectOnlyQuery(query, out var validationError))
+            {
+                return this.Json(new { success = false, error = validationError });
+            }
+
+            var items = await this._updateConfigService.ExecuteSqlQueryAsync(
+                query,
+                CancellationToken.None
+            );
+
+            return this.Json(
+                new
+                {
+                    success = true,
+                    items = items.Select(i => new
+                    {
+                        i.Id,
+                        Source = i.Source.ToString(),
+                        i.SourceId,
+                        RetrievedAt = i.RetrievedAt.ToString(
+                            "yyyy-MM-dd HH:mm:ss",
+                            System.Globalization.CultureInfo.InvariantCulture
+                        ),
+                        EventStartDateTime = i.EventStartDateTime.ToString(
+                            "yyyy-MM-dd HH:mm:ss",
+                            System.Globalization.CultureInfo.InvariantCulture
+                        ),
+                        EventEndDateTime = i.EventEndDateTime.ToString(
+                            "yyyy-MM-dd HH:mm:ss",
+                            System.Globalization.CultureInfo.InvariantCulture
+                        ),
+                        i.Tags,
+                        i.Title,
+                        i.Description,
+                        i.Organizer,
+                        i.Location,
+                        i.Url,
+                    }),
+                }
+            );
+        }
+        catch (Exception ex)
+        {
+            this._logger.LogError(ex, "Error testing query");
+            return this.Json(
+                new { success = false, error = "Error executing query: " + ex.Message }
+            );
         }
     }
 

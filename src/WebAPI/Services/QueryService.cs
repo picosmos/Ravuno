@@ -88,15 +88,9 @@ public partial class QueryService(DataStorageContext dbContext) : IQueryService
             throw new InvalidOperationException(error);
         }
 
-        var sqlScript = await this._dbContext.Queries.FirstOrDefaultAsync(s =>
-            s.Id == id && s.UserId == userId
-        );
-
-        if (sqlScript is null)
-        {
-            throw new InvalidOperationException("Query not found or access denied");
-        }
-
+        var sqlScript =
+            await this._dbContext.Queries.FirstOrDefaultAsync(s => s.Id == id && s.UserId == userId)
+            ?? throw new InvalidOperationException("Query not found or access denied");
         if (await this.TitleExistsForUserAsync(title, userId, id))
         {
             throw new InvalidOperationException($"A query with title '{title}' already exists");
@@ -110,28 +104,18 @@ public partial class QueryService(DataStorageContext dbContext) : IQueryService
 
     public async Task ReassignQueryAsync(long id, int newUserId)
     {
-        var sqlScript = await this._dbContext.Queries.FirstOrDefaultAsync(s => s.Id == id);
-
-        if (sqlScript is null)
-        {
-            throw new InvalidOperationException("Query not found");
-        }
-
+        var sqlScript =
+            await this._dbContext.Queries.FirstOrDefaultAsync(s => s.Id == id)
+            ?? throw new InvalidOperationException("Query not found");
         sqlScript.UserId = newUserId;
         await this._dbContext.SaveChangesAsync();
     }
 
     public async Task DeleteAsync(long id, int userId)
     {
-        var sqlScript = await this._dbContext.Queries.FirstOrDefaultAsync(s =>
-            s.Id == id && s.UserId == userId
-        );
-
-        if (sqlScript is null)
-        {
-            throw new InvalidOperationException("Query not found or access denied");
-        }
-
+        var sqlScript =
+            await this._dbContext.Queries.FirstOrDefaultAsync(s => s.Id == id && s.UserId == userId)
+            ?? throw new InvalidOperationException("Query not found or access denied");
         this._dbContext.Queries.Remove(sqlScript);
         await this._dbContext.SaveChangesAsync();
     }
