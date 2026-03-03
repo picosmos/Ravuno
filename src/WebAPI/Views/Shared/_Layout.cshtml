@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Ravuno Stats</title>
     <link rel="stylesheet" href="/css/style.css" />
-    <link rel="stylesheet" href="/css/prism.css" />
+    <link rel="stylesheet" href="/css/codemirror.min.css" />
 </head>
 <body>
     <h1>Ravuno Statistics Portal</h1>
@@ -32,7 +32,10 @@
         @RenderBody()
     </div>
     
-    <script src="/js/prism.js"></script>
+    <script src="/js/codemirror.min.js"></script>
+    <script src="/js/codemirror-sql.min.js"></script>
+    <script src="/js/query.js"></script>
+    <script src="/js/codemirror-highlight.js"></script>
     @RenderSection("Scripts", required: false)
 </body>
 </html>

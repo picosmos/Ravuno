@@ -24,21 +24,17 @@
             <tr>
                 <td><label for="query">SQL Query:</label></td>
                 <td>
-                    <textarea id="query" name="query" required class="sql-editor" oninput="updatePreview(this)">@ViewBag.QuerySql</textarea>
-                    <br />
+                    <div id="editor-wrapper" style="border: 1px solid #ccc; margin-bottom: 10px;"></div>
+                    <textarea id="query" name="query" required style="display: none;">@ViewBag.QuerySql</textarea>
                     <button type="button" onclick="testQuery()" class="margin-top">Test Query</button>
                     <span id="test-status"></span>
                     <br />
-                    <details>
-                        <summary>Show Preview</summary>
-                        <pre><code id="query-preview" class="language-sql">@ViewBag.QuerySql</code></pre>
-                    </details>
                     <small class="text-muted">Only SELECT queries are allowed. No INSERT, UPDATE, DELETE, DROP, CREATE, ALTER, TRUNCATE, or EXECUTE statements.</small>
                     
-                    <div id="test-results">
-                        <h3>Test Results</h3>
-                        <div id="results-content"></div>
-                    </div>
+                    <details id="test-results" style="margin-top: 15px;">
+                        <summary style="cursor: pointer; font-weight: bold;">Test Results</summary>
+                        <div id="results-content" style="margin-top: 10px;"></div>
+                    </details>
                 </td>
             </tr>
             <tr>
@@ -56,5 +52,15 @@
 </div>
 
 @section Scripts {
-    <script src="/js/query.js"></script>
+    <script>
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function() {
+                initializeCodeMirror('editor-wrapper', 'query');
+            });
+        } else {
+            setTimeout(function() {
+                initializeCodeMirror('editor-wrapper', 'query');
+            }, 0);
+        }
+    </script>
 }

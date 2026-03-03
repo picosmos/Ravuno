@@ -1,19 +1,46 @@
 // Query editor JavaScript functions
 
-function updatePreview(textarea) {
-    var preview = document.getElementById('query-preview');
-    if (preview) {
-        preview.textContent = textarea.value;
-        if (window.Prism) {
-            window.Prism.highlightElement(preview);
-        }
+var editorInstance = null;
+
+function initializeCodeMirror(wrapperId, textareaId) {
+    var wrapper = document.getElementById(wrapperId);
+    var textarea = document.getElementById(textareaId);
+    
+    if (!wrapper || !textarea) {
+        console.error('CodeMirror initialization failed: elements not found', wrapperId, textareaId);
+        return;
     }
+    
+    if (typeof CodeMirror === 'undefined') {
+        console.error('CodeMirror is not loaded');
+        return;
+    }
+    
+    editorInstance = CodeMirror(wrapper, {
+        value: textarea.value || '',
+        mode: 'text/x-sql',
+        lineNumbers: true,
+        theme: 'default',
+        indentWithTabs: false,
+        indentUnit: 4,
+        tabSize: 4,
+        lineWrapping: true,
+        viewportMargin: Infinity
+    });
+    
+    // Sync CodeMirror content to hidden textarea on change
+    editorInstance.on('change', function() {
+        textarea.value = editorInstance.getValue();
+    });
+    
+    // Set height
+    editorInstance.setSize(null, '300px');
 }
 
 async function testQuery() {
-    var queryText = document.getElementById('query').value.trim();
+    var queryText = editorInstance ? editorInstance.getValue().trim() : document.getElementById('query').value.trim();
     var statusEl = document.getElementById('test-status');
-    var resultsDiv = document.getElementById('test-results');
+    var resultsDetails = document.getElementById('test-results');
     var contentDiv = document.getElementById('results-content');
     
     if (!queryText) {
@@ -24,7 +51,7 @@ async function testQuery() {
     
     statusEl.textContent = 'Testing...';
     statusEl.style.color = '#0000ff';
-    resultsDiv.style.display = 'none';
+    resultsDetails.removeAttribute('open');
     
     try {
         var formData = new FormData();
@@ -43,20 +70,20 @@ async function testQuery() {
             
             if (data.items.length > 0) {
                 renderResults(data.items, contentDiv);
-                resultsDiv.style.display = 'block';
+                resultsDetails.setAttribute('open', '');
             } else {
                 contentDiv.innerHTML = '<p>No results found.</p>';
-                resultsDiv.style.display = 'block';
+                resultsDetails.setAttribute('open', '');
             }
         } else {
             statusEl.textContent = 'Error: ' + data.error;
             statusEl.style.color = '#ff0000';
-            resultsDiv.style.display = 'none';
+            resultsDetails.removeAttribute('open');
         }
     } catch (err) {
         statusEl.textContent = 'Error: ' + err.message;
         statusEl.style.color = '#ff0000';
-        resultsDiv.style.display = 'none';
+        resultsDetails.removeAttribute('open');
     }
 }
 
@@ -100,11 +127,3 @@ function renderResults(items, container) {
     
     container.innerHTML = html;
 }
-
-// Initialize preview on page load
-document.addEventListener('DOMContentLoaded', function() {
-    var textarea = document.getElementById('query');
-    if (textarea) {
-        updatePreview(textarea);
-    }
-});
