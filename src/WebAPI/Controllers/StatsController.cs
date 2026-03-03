@@ -189,16 +189,13 @@ public class StatsController : Controller
             var form = this.Request.Form;
             var reassignments = 0;
 
-            foreach (var key in form.Keys)
+            foreach (var key in form.Keys.Where(k => k.StartsWith("userId_", StringComparison.OrdinalIgnoreCase)))
             {
-                if (key.StartsWith("userId_", StringComparison.OrdinalIgnoreCase))
+                var queryIdStr = key["userId_".Length..];
+                if (long.TryParse(queryIdStr, out var queryId) && int.TryParse(form[key], out var userId))
                 {
-                    var queryIdStr = key["userId_".Length..];
-                    if (long.TryParse(queryIdStr, out var queryId) && int.TryParse(form[key], out var userId))
-                    {
-                        await this._queryService.ReassignQueryAsync(queryId, userId);
-                        reassignments++;
-                    }
+                    await this._queryService.ReassignQueryAsync(queryId, userId);
+                    reassignments++;
                 }
             }
 
