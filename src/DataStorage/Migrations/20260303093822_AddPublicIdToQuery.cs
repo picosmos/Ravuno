@@ -14,8 +14,9 @@ namespace Ravuno.DataStorage.Migrations
                 name: "PublicId",
                 table: "Queries",
                 type: "TEXT",
-                maxLength: 100,
-                nullable: true
+                maxLength: 32,
+                nullable: true,
+                collation: "NOCASE"
             );
 
             migrationBuilder.Sql(
@@ -28,8 +29,9 @@ namespace Ravuno.DataStorage.Migrations
                 name: "PublicId",
                 table: "Queries",
                 type: "TEXT",
-                maxLength: 100,
-                nullable: false
+                maxLength: 32,
+                nullable: false,
+                collation: "NOCASE"
             );
 
             migrationBuilder.CreateIndex(

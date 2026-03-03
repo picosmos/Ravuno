@@ -120,7 +120,7 @@ public class DataStorageContext : DbContext
 
             entity.Property(e => e.SqlQuery).IsRequired();
 
-            entity.Property(e => e.PublicId).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.PublicId).IsRequired().HasMaxLength(32).UseCollation("NOCASE");
 
             entity.HasIndex(e => e.PublicId).IsUnique();
 

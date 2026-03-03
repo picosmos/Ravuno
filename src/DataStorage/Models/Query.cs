@@ -15,7 +15,7 @@ public class Query
     public string SqlQuery { get; set; } = string.Empty;
 
     [Required]
-    [MaxLength(100)]
+    [MaxLength(32)]
     public string PublicId { get; set; } = string.Empty;
 
     public int UserId { get; set; }

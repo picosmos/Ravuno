@@ -51,7 +51,7 @@ public partial class QueryService(DataStorageContext dbContext) : IQueryService
             throw new InvalidOperationException($"A query with title '{title}' already exists");
         }
 
-        const string chars = "0123456789abcdef";
+        const string chars = "0123456789abcdefghijklmnopqrstuvwxzy";
         var publicId = string.Create(
             32,
             Random.Shared,
