@@ -189,8 +189,9 @@
         {
             <div class="user-info">
                 <span>Logged in as: <strong>@User.Identity?.Name</strong> (@User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value)</span>
-                <form method="post" action="/logout" style="display: inline;">
-                    <button type="submit">Logout</button>
+                <a href="/users/change-password" style="background-color: #008080; color: #fff; text-decoration: none; padding: 3px 10px; border: 2px outset #fff;">Change Password</a>
+                <form method="post" action="/logout" style="display: inline; margin: 0;">
+                    <button type="submit" style="background-color: #c0c0c0; border: 2px outset #fff; padding: 3px 10px; cursor: pointer;">Logout</button>
                 </form>
             </div>
         }
