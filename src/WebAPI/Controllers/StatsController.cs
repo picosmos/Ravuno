@@ -103,8 +103,8 @@ public class StatsController : Controller
         return this.View(items);
     }
 
-    [HttpGet("viewsql/{queryTitle}")]
-    public async Task<IActionResult> ViewSql(string queryTitle, int page = 1, int pageSize = 100)
+    [HttpGet("viewsql/{id:long}")]
+    public async Task<IActionResult> ViewSql(long id, int page = 1, int pageSize = 100)
     {
         if (page < 1)
         {
@@ -113,9 +113,7 @@ public class StatsController : Controller
 
         try
         {
-            var config = await this._updateConfigService.GetUpdateConfigurationByTitleAsync(
-                queryTitle
-            );
+            var config = await this._updateConfigService.GetUpdateConfigurationByIdAsync(id);
 
             if (config == null)
             {
@@ -145,11 +143,7 @@ public class StatsController : Controller
         }
         catch (Exception ex)
         {
-            this._logger.LogError(
-                ex,
-                "Error retrieving SQL for query title: {QueryTitle}",
-                queryTitle
-            );
+            this._logger.LogError(ex, "Error retrieving SQL for query ID: {QueryId}", id);
             return this.StatusCode(500);
         }
     }

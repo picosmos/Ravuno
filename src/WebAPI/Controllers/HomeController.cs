@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Ravuno.WebAPI.Models;
 using Ravuno.WebAPI.Services.Contracts;
 
 namespace Ravuno.WebAPI.Controllers;
@@ -33,12 +34,12 @@ public class HomeController : Controller
             var configurations = await this._updateConfigService.GetUpdateConfigurationsByUserAsync(
                 userId
             );
-            this.ViewBag.QueryTitles = configurations.Select(c => c.QueryTitle).ToList();
+            this.ViewBag.Queries = configurations;
         }
         catch (Exception ex)
         {
             this._logger.LogError(ex, "Error loading update configurations for home page");
-            this.ViewBag.QueryTitles = new List<string>();
+            this.ViewBag.Queries = new List<UpdateConfiguration>();
         }
 
         return this.View();

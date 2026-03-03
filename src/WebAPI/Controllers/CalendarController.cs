@@ -18,10 +18,10 @@ public class CalendarController : ControllerBase
         this._updateConfigService = updateConfigService;
     }
 
-    [HttpGet("{queryTitle}")]
-    public async Task<IActionResult> GetCalendar(string queryTitle)
+    [HttpGet("{id:long}")]
+    public async Task<IActionResult> GetCalendar(long id)
     {
-        var config = await this._updateConfigService.GetUpdateConfigurationByTitleAsync(queryTitle);
+        var config = await this._updateConfigService.GetUpdateConfigurationByIdAsync(id);
         if (config == null)
         {
             return this.NotFound();
@@ -29,7 +29,7 @@ public class CalendarController : ControllerBase
 
         var items = await this._updateConfigService.ExecuteSqlQueryAsync(config.SqlQuery);
         var ics = BuildIcsFeed(items);
-        return this.File(Encoding.UTF8.GetBytes(ics), "text/calendar", queryTitle + ".ics");
+        return this.File(Encoding.UTF8.GetBytes(ics), "text/calendar", config.QueryTitle + ".ics");
     }
 
     private static string BuildIcsFeed(List<Item> items)

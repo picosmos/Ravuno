@@ -49,14 +49,12 @@ public class UpdateConfigurationService(DataStorageContext dbContext) : IUpdateC
         ];
     }
 
-    public async Task<UpdateConfiguration?> GetUpdateConfigurationByTitleAsync(string queryTitle)
+    public async Task<UpdateConfiguration?> GetUpdateConfigurationByIdAsync(long id)
     {
-        ArgumentNullException.ThrowIfNull(queryTitle);
-
         var sqlScript = await this
             ._dbContext.SqlScripts.Include(s => s.EmailReceivers)
             .AsNoTracking()
-            .FirstOrDefaultAsync(s => EF.Functions.Like(s.Title, queryTitle));
+            .FirstOrDefaultAsync(s => s.Id == id);
 
         if (sqlScript == null)
         {
