@@ -14,5 +14,8 @@ public class SqlScript
     [Required]
     public string Query { get; set; } = string.Empty;
 
+    public int UserId { get; set; }
+    public User User { get; set; } = null!;
+
     public ICollection<EmailReceiver> EmailReceivers { get; set; } = [];
 }

@@ -18,6 +18,6 @@ public class User
 
     public int RoleId { get; set; }
     public Role Role { get; set; } = null!;
-
+    public ICollection<SqlScript> SqlScripts { get; set; } = [];
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }

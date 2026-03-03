@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Ravuno.WebAPI.Services.Contracts;
@@ -24,7 +25,14 @@ public class HomeController : Controller
     {
         try
         {
-            var configurations = await this._updateConfigService.GetUpdateConfigurationsAsync();
+            var userId = int.Parse(
+                this.User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0",
+                System.Globalization.CultureInfo.InvariantCulture
+            );
+
+            var configurations = await this._updateConfigService.GetUpdateConfigurationsByUserAsync(
+                userId
+            );
             this.ViewBag.QueryTitles = configurations.Select(c => c.QueryTitle).ToList();
         }
         catch (Exception ex)

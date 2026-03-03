@@ -29,6 +29,26 @@ public class UpdateConfigurationService(DataStorageContext dbContext) : IUpdateC
         ];
     }
 
+    public async Task<List<UpdateConfiguration>> GetUpdateConfigurationsByUserAsync(int userId)
+    {
+        var sqlScripts = await this
+            ._dbContext.SqlScripts.Include(s => s.EmailReceivers)
+            .Where(s => s.UserId == userId)
+            .AsNoTracking()
+            .ToListAsync();
+
+        return
+        [
+            .. sqlScripts.Select(s => new UpdateConfiguration
+            {
+                Id = s.Id,
+                QueryTitle = s.Title,
+                SqlQuery = s.Query,
+                EmailReceiverAddresses = [.. s.EmailReceivers.Select(e => e.EmailAddress)],
+            }),
+        ];
+    }
+
     public async Task<UpdateConfiguration?> GetUpdateConfigurationByTitleAsync(string queryTitle)
     {
         ArgumentNullException.ThrowIfNull(queryTitle);

@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Ravuno.DataStorage;
+using Ravuno.DataStorage.Constants;
 using Ravuno.WebAPI.Services.Contracts;
 
 namespace Ravuno.WebAPI.Controllers;
@@ -25,6 +26,7 @@ public class StatsController : Controller
         this._logger = logger;
     }
 
+    [Authorize(Roles = RoleNames.Admin)]
     [HttpGet("fetchhistory")]
     public async Task<IActionResult> FetchHistory(int page = 1, int pageSize = 100)
     {
@@ -50,6 +52,7 @@ public class StatsController : Controller
         return this.View(histories);
     }
 
+    [Authorize(Roles = RoleNames.Admin)]
     [HttpGet("sendupdatehistory")]
     public async Task<IActionResult> SendUpdateHistory(int page = 1, int pageSize = 100)
     {

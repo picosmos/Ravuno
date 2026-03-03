@@ -3,46 +3,38 @@
     Layout = "_Layout";
 }
 
-<h2>Available Routes</h2>
-
-<div class="info">
-    <strong>Welcome to the Ravuno Statistics Portal</strong>
-</div>
-
-<h2>User Management</h2>
+<h2>Admin</h2>
 <ul>
+    @if (User.IsInRole(RoleNames.Admin))
+    {
+        <li>
+            <a href="/stats/fetchhistory">/stats/fetchhistory</a><br />
+            <em style="font-size: 0.9em;">Fetch history records</em>
+        </li>
+        <li>
+            <a href="/stats/sendupdatehistory">/stats/sendupdatehistory</a><br />
+            <em style="font-size: 0.9em;">Send update history records</em>
+        </li>
+        <li>
+            <a href="/users">/users</a><br />
+            <em style="font-size: 0.9em;">Manage users</em>
+        </li>
+        <li>
+            <a href="/users/create">/users/create</a><br />
+            <em style="font-size: 0.9em;">Create new user</em>
+        </li>
+    }
+
     <li>
         <a href="/users/change-password">/users/change-password</a><br />
         <em style="font-size: 0.9em;">Change your password</em>
     </li>
-    @if (User.IsInRole(RoleNames.Admin))
-    {
-        <li>
-            <a href="/users">/users</a><br />
-            <em style="font-size: 0.9em;">Manage users (Admin only)</em>
-        </li>
-        <li>
-            <a href="/users/create">/users/create</a><br />
-            <em style="font-size: 0.9em;">Create new user (Admin only)</em>
-        </li>
-    }
 </ul>
 
-<h2>Statistics &amp; Data</h2>
+<h2>My Queries</h2>
 
 <ul>
-    <li>
-        <a href="/stats/fetchhistory">/stats/fetchhistory</a><br />
-        <em style="font-size: 0.9em;">Fetch history records</em>
-    </li>
-    <li>
-        <a href="/stats/sendupdatehistory">/stats/sendupdatehistory</a><br />
-        <em style="font-size: 0.9em;">Send update history records</em>
-    </li>
-    <li>
-        <a href="/stats/items">/stats/items</a><br />
-        <em style="font-size: 0.9em;">Items</em>
-    </li>
+
     @if (ViewBag.QueryTitles != null && ((List<string>)ViewBag.QueryTitles).Count > 0)
     {
         @foreach (var queryTitle in (List<string>)ViewBag.QueryTitles)

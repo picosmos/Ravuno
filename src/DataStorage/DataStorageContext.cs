@@ -111,5 +111,16 @@ public class DataStorageContext : DbContext
 
             entity.Property(e => e.CreatedAt).IsRequired();
         });
+
+        modelBuilder.Entity<SqlScript>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.Property(e => e.Title).IsRequired().HasMaxLength(500);
+
+            entity.Property(e => e.Query).IsRequired();
+
+            entity.HasOne(e => e.User).WithMany(u => u.SqlScripts).HasForeignKey(e => e.UserId);
+        });
     }
 }
