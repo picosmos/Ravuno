@@ -7,7 +7,7 @@ These instructions apply to code and content generated in this repository.
 - Match existing project conventions (naming, formatting, file layout).
 - In EntityFramework models: Always use Attribute bases configuration, never fluent API.
 - If implementing another service, model or other parts, check already existing things from the same layer to adhere to the same style.
-- Always use formatting tools like `dotnet csharpier format .` and `dotnet format`. 
+- For formatting use `dotnet csharpier format .`. 
 - Fix all warnings you introduced, not only errors.
 - Use CLI tools if available, e.g. for creating migrations instead of writing them from scratch.
 - In .NET, never use Console.WriteLine or similar for logging. The only use-case should be an CLI interface. Use always ILogger<T>.
