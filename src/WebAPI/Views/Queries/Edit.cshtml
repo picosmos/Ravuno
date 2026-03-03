@@ -1,0 +1,45 @@
+@model Ravuno.DataStorage.Models.SqlScript
+@{
+    ViewData["Title"] = "Edit Query";
+    Layout = "_Layout";
+}
+
+<h2>Edit Query</h2>
+
+<div class="container">
+    @if (ViewBag.Error != null)
+    {
+        <div style="background-color: #ff0000; color: #fff; padding: 10px; margin-bottom: 10px; border: 2px solid #000;">
+            @ViewBag.Error
+        </div>
+    }
+
+    <form method="post" action="/queries/edit/@Model.Id">
+        <table style="border: none; background: transparent;">
+            <tr>
+                <td style="border: none; padding: 5px; vertical-align: top;"><label for="title">Title:</label></td>
+                <td style="border: none; padding: 5px;">
+                    <input type="text" id="title" name="title" value="@(ViewBag.Title ?? Model.Title)" required style="width: 500px; padding: 3px;" />
+                </td>
+            </tr>
+            <tr>
+                <td style="border: none; padding: 5px; vertical-align: top;"><label for="query">SQL Query:</label></td>
+                <td style="border: none; padding: 5px;">
+                    <textarea id="query" name="query" required style="width: 500px; height: 200px; padding: 3px; font-family: monospace;">@(ViewBag.Query ?? Model.Query)</textarea>
+                    <br />
+                    <small style="color: #666;">Only SELECT queries are allowed. No INSERT, UPDATE, DELETE, DROP, CREATE, ALTER, TRUNCATE, or EXECUTE statements.</small>
+                </td>
+            </tr>
+            <tr>
+                <td style="border: none; padding: 5px;" colspan="2">
+                    <button type="submit" style="background-color: #c0c0c0; border: 2px outset #fff; padding: 5px 15px; cursor: pointer;">Save Changes</button>
+                    <a href="/queries" style="margin-left: 10px;">Cancel</a>
+                </td>
+            </tr>
+        </table>
+    </form>
+</div>
+
+<div style="margin-top: 20px;">
+    <a href="/queries">← Back to Queries</a>
+</div>

@@ -74,6 +74,7 @@ builder.Services.AddDataStorage(builder.Configuration);
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IQueryService, QueryService>();
 
 // Configure data protection to persist keys for future non-readonly features
 builder
