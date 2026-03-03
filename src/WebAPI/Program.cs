@@ -1,6 +1,9 @@
 using System.Threading.RateLimiting;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.HttpOverrides;
+using Ravuno.DataStorage.Repositories;
+using Ravuno.DataStorage.Repositories.Contracts;
 using Ravuno.Email.Extensions;
 using Ravuno.Email.Services;
 using Ravuno.Email.Services.Contracts;
@@ -58,12 +61,19 @@ builder.Services.ConfigureAndValidateSettings<CleanupSettings>(
     builder.Configuration,
     "CleanupSettings"
 );
+builder.Services.ConfigureAndValidateSettings<PasswordSettings>(
+    builder.Configuration,
+    "PasswordSettings"
+);
 
 builder.Services.AddHttpClient<ITeknaFetchService, TeknaFetchService>();
 builder.Services.AddHttpClient<IDntActivityFetchService, DntActivityFetchService>();
 
 builder.Services.AddMemoryCache();
 builder.Services.AddDataStorage(builder.Configuration);
+
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserService, UserService>();
 
 // Configure data protection to persist keys for future non-readonly features
 builder
@@ -75,6 +85,19 @@ builder.Services.AddScoped<IUpdateConfigurationService, UpdateConfigurationServi
 builder.Services.AddScoped<FetchAndSendService>();
 builder.Services.AddHostedService<FetchAndSendHostedService>();
 builder.Services.AddHostedService<ItemCleanupService>();
+
+builder
+    .Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/login";
+        options.LogoutPath = "/logout";
+        options.AccessDeniedPath = "/access-denied";
+        options.ExpireTimeSpan = TimeSpan.FromDays(7);
+        options.SlidingExpiration = true;
+    });
+
+builder.Services.AddAuthorization();
 
 builder.Services.AddControllersWithViews();
 
@@ -129,6 +152,9 @@ app.UseForwardedHeaders();
 app.UseRateLimiter();
 
 app.UseCors();
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllerRoute(name: "default", pattern: "{controller=Stats}/{action=FetchHistory}/{id?}");
 

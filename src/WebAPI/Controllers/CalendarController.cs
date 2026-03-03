@@ -1,10 +1,12 @@
 using System.Text;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Ravuno.DataStorage.Models;
 using Ravuno.WebAPI.Services.Contracts;
 
 namespace Ravuno.WebAPI.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("calendar")]
 public class CalendarController : ControllerBase

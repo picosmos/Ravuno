@@ -165,6 +165,16 @@
         <a href="/stats/items">Items</a>
     </div>
     
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <div class="info" style="margin-bottom: 20px;">
+            Logged in as: <strong>@User.Identity?.Name</strong> (@User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value)
+            <form method="post" action="/logout" style="display: inline; margin-left: 10px;">
+                <button type="submit" style="background-color: #c0c0c0; border: 2px outset #fff; padding: 2px 8px; cursor: pointer;">Logout</button>
+            </form>
+        </div>
+    }
+    
     <div class="container">
         @RenderBody()
     </div>

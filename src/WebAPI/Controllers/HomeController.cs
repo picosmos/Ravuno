@@ -1,8 +1,10 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Ravuno.WebAPI.Services.Contracts;
 
 namespace Ravuno.WebAPI.Controllers;
 
+[Authorize]
 public class HomeController : Controller
 {
     private readonly IUpdateConfigurationService _updateConfigService;

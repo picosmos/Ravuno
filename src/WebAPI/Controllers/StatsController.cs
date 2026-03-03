@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Ravuno.DataStorage;
@@ -5,6 +6,7 @@ using Ravuno.WebAPI.Services.Contracts;
 
 namespace Ravuno.WebAPI.Controllers;
 
+[Authorize]
 [Route("stats")]
 public class StatsController : Controller
 {

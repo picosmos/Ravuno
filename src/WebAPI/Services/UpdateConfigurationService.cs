@@ -17,15 +17,16 @@ public class UpdateConfigurationService(DataStorageContext dbContext) : IUpdateC
             .AsNoTracking()
             .ToListAsync();
 
-        return sqlScripts
-            .Select(s => new UpdateConfiguration
+        return
+        [
+            .. sqlScripts.Select(s => new UpdateConfiguration
             {
                 Id = s.Id,
                 QueryTitle = s.Title,
                 SqlQuery = s.Query,
-                EmailReceiverAddresses = s.EmailReceivers.Select(e => e.EmailAddress).ToList(),
-            })
-            .ToList();
+                EmailReceiverAddresses = [.. s.EmailReceivers.Select(e => e.EmailAddress)],
+            }),
+        ];
     }
 
     public async Task<UpdateConfiguration?> GetUpdateConfigurationByTitleAsync(string queryTitle)
@@ -47,7 +48,7 @@ public class UpdateConfigurationService(DataStorageContext dbContext) : IUpdateC
             Id = sqlScript.Id,
             QueryTitle = sqlScript.Title,
             SqlQuery = sqlScript.Query,
-            EmailReceiverAddresses = sqlScript.EmailReceivers.Select(e => e.EmailAddress).ToList(),
+            EmailReceiverAddresses = [.. sqlScript.EmailReceivers.Select(e => e.EmailAddress)],
         };
     }
 

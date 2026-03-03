@@ -77,14 +77,16 @@ namespace Ravuno.DataStorage.Migrations
                     }
                     else
                     {
-                        emailAddresses = emailLine
-                            .TrimStart('-')
-                            .Split(
-                                (char[])null!,
-                                StringSplitOptions.RemoveEmptyEntries
-                                    | StringSplitOptions.TrimEntries
-                            )
-                            .ToList();
+                        emailAddresses =
+                        [
+                            .. emailLine
+                                .TrimStart('-')
+                                .Split(
+                                    (char[])null!,
+                                    StringSplitOptions.RemoveEmptyEntries
+                                        | StringSplitOptions.TrimEntries
+                                ),
+                        ];
                     }
 
                     foreach (var email in emailAddresses)

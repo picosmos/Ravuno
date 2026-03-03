@@ -1,0 +1,48 @@
+@model List<Ravuno.DataStorage.Models.User>
+@{
+    ViewData["Title"] = "User Management";
+    Layout = "_Layout";
+}
+
+<h2>User Management</h2>
+
+<div class="container">
+    <p><a href="/users/create" style="color: #0000ff; text-decoration: underline;">Create New User</a></p>
+
+    @if (Model != null && Model.Count > 0)
+    {
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Username</th>
+                    <th>Role</th>
+                    <th>Created At</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var user in Model)
+                {
+                    <tr>
+                        <td>@user.Id</td>
+                        <td>@user.Username</td>
+                        <td>@user.Role.Name</td>
+                        <td>@user.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
+                        <td>
+                            <form method="post" action="/users/delete/@user.Id" style="display: inline;">
+                                <button type="submit" onclick="return confirm('Are you sure you want to delete user @user.Username?');" style="background-color: #c0c0c0; border: 2px outset #fff; padding: 2px 8px; cursor: pointer;">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <p>No users found.</p>
+    }
+</div>
+
+<p><a href="/" style="color: #0000ff; text-decoration: underline;">Back to Home</a></p>

@@ -9,6 +9,27 @@
     <strong>Welcome to the Ravuno Statistics Portal</strong>
 </div>
 
+<h2>User Management</h2>
+<ul>
+    <li>
+        <a href="/users/change-password">/users/change-password</a><br />
+        <em style="font-size: 0.9em;">Change your password</em>
+    </li>
+    @if (User.IsInRole(RoleNames.Admin))
+    {
+        <li>
+            <a href="/users">/users</a><br />
+            <em style="font-size: 0.9em;">Manage users (Admin only)</em>
+        </li>
+        <li>
+            <a href="/users/create">/users/create</a><br />
+            <em style="font-size: 0.9em;">Create new user (Admin only)</em>
+        </li>
+    }
+</ul>
+
+<h2>Statistics &amp; Data</h2>
+
 <ul>
     <li>
         <a href="/stats/fetchhistory">/stats/fetchhistory</a><br />
