@@ -99,13 +99,20 @@
             padding: 10px;
             background-color: #808080;
             border: 2px outset #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 5px;
         }
         
         .nav a {
             color: #fff;
             text-decoration: none;
             padding: 5px 15px;
-            margin-right: 5px;
             background-color: #000080;
             border: 2px outset #fff;
             display: inline-block;
@@ -117,6 +124,20 @@
         
         .nav a:hover {
             background-color: #0000ff;
+        }
+        
+        .user-info {
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .user-info button {
+            background-color: #c0c0c0;
+            border: 2px outset #fff;
+            padding: 2px 8px;
+            cursor: pointer;
         }
         
         pre {
@@ -159,21 +180,22 @@
     <h1>Ravuno Statistics Portal</h1>
     
     <div class="nav">
-        <a href="/">Home</a>
-        <a href="/stats/fetchhistory">Fetch History</a>
-        <a href="/stats/sendupdatehistory">Send Update History</a>
-        <a href="/stats/items">Items</a>
-    </div>
-    
-    @if (User.Identity?.IsAuthenticated == true)
-    {
-        <div class="info" style="margin-bottom: 20px;">
-            Logged in as: <strong>@User.Identity?.Name</strong> (@User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value)
-            <form method="post" action="/logout" style="display: inline; margin-left: 10px;">
-                <button type="submit" style="background-color: #c0c0c0; border: 2px outset #fff; padding: 2px 8px; cursor: pointer;">Logout</button>
-            </form>
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/stats/fetchhistory">Fetch History</a>
+            <a href="/stats/sendupdatehistory">Send Update History</a>
+            <a href="/stats/items">Items</a>
         </div>
-    }
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+            <div class="user-info">
+                <span>Logged in as: <strong>@User.Identity?.Name</strong> (@User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value)</span>
+                <form method="post" action="/logout" style="display: inline;">
+                    <button type="submit">Logout</button>
+                </form>
+            </div>
+        }
+    </div>
     
     <div class="container">
         @RenderBody()
