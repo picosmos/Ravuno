@@ -13,16 +13,22 @@ public class StatsController : Controller
 {
     private readonly DataStorageContext _context;
     private readonly IUpdateConfigurationService _updateConfigService;
+    private readonly IUserService _userService;
+    private readonly IQueryService _queryService;
     private readonly ILogger<StatsController> _logger;
 
     public StatsController(
         DataStorageContext context,
         IUpdateConfigurationService updateConfigService,
+        IUserService userService,
+        IQueryService queryService,
         ILogger<StatsController> logger
     )
     {
         this._context = context;
         this._updateConfigService = updateConfigService;
+        this._userService = userService;
+        this._queryService = queryService;
         this._logger = logger;
     }
 
@@ -162,12 +168,69 @@ public class StatsController : Controller
                 .AsNoTracking()
                 .ToListAsync();
 
+            var users = await this._userService.GetAllUsersAsync();
+            this.ViewBag.Users = users;
+
             return this.View(queries);
         }
         catch (Exception ex)
         {
             this._logger.LogError(ex, "Error retrieving all queries");
             return this.StatusCode(500);
+        }
+    }
+
+    [Authorize(Roles = RoleNames.Admin)]
+    [HttpPost("all-queries/reassign")]
+    public async Task<IActionResult> ReassignQueries()
+    {
+        try
+        {
+            var form = this.Request.Form;
+            var reassignments = 0;
+
+            foreach (var key in form.Keys)
+            {
+                if (key.StartsWith("userId_", StringComparison.OrdinalIgnoreCase))
+                {
+                    var queryIdStr = key["userId_".Length..];
+                    if (long.TryParse(queryIdStr, out var queryId) && int.TryParse(form[key], out var userId))
+                    {
+                        await this._queryService.ReassignQueryAsync(queryId, userId);
+                        reassignments++;
+                    }
+                }
+            }
+
+            var queries = await this
+                ._context.Queries.Include(q => q.User)
+                .OrderBy(q => q.User.Username)
+                .ThenBy(q => q.Title)
+                .AsNoTracking()
+                .ToListAsync();
+
+            var users = await this._userService.GetAllUsersAsync();
+            this.ViewBag.Users = users;
+            this.ViewBag.Success = $"Successfully reassigned {reassignments} queries";
+
+            return this.View("AllQueries", queries);
+        }
+        catch (Exception ex)
+        {
+            this._logger.LogError(ex, "Error reassigning queries");
+
+            var queries = await this
+                ._context.Queries.Include(q => q.User)
+                .OrderBy(q => q.User.Username)
+                .ThenBy(q => q.Title)
+                .AsNoTracking()
+                .ToListAsync();
+
+            var users = await this._userService.GetAllUsersAsync();
+            this.ViewBag.Users = users;
+            this.ViewBag.Error = "Error reassigning queries: " + ex.Message;
+
+            return this.View("AllQueries", queries);
         }
     }
 }

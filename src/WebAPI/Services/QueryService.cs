@@ -97,6 +97,19 @@ public partial class QueryService(DataStorageContext dbContext) : IQueryService
         await this._dbContext.SaveChangesAsync();
     }
 
+    public async Task ReassignQueryAsync(long id, int newUserId)
+    {
+        var sqlScript = await this._dbContext.Queries.FirstOrDefaultAsync(s => s.Id == id);
+
+        if (sqlScript is null)
+        {
+            throw new InvalidOperationException("Query not found");
+        }
+
+        sqlScript.UserId = newUserId;
+        await this._dbContext.SaveChangesAsync();
+    }
+
     public async Task DeleteAsync(long id, int userId)
     {
         var sqlScript = await this._dbContext.Queries.FirstOrDefaultAsync(s =>

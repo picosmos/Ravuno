@@ -10,6 +10,20 @@
     <strong>Total Queries:</strong> @Model.Count
 </div>
 
+@if (ViewBag.Success != null)
+{
+    <div style="background-color: #008000; color: #fff; padding: 10px; margin-bottom: 10px; border: 2px solid #000;">
+        @ViewBag.Success
+    </div>
+}
+
+@if (ViewBag.Error != null)
+{
+    <div style="background-color: #ff0000; color: #fff; padding: 10px; margin-bottom: 10px; border: 2px solid #000;">
+        @ViewBag.Error
+    </div>
+}
+
 @if (Model == null || Model.Count == 0)
 {
     <div style="padding: 10px;">
@@ -18,34 +32,49 @@
 }
 else
 {
-    <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>User</th>
-                <th>Title</th>
-                <th>Query</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var query in Model)
-            {
+    <form method="post" action="/stats/all-queries/reassign">
+        <table>
+            <thead>
                 <tr>
-                    <td>@query.Id</td>
-                    <td>@query.User.Username</td>
-                    <td>@query.Title</td>
-                    <td style="max-width: 400px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                        <code>@query.SqlQuery</code>
-                    </td>
-                    <td>
-                        <a href="/stats/view-query/@query.Id" style="margin-right: 10px;">View Results</a>
-                        <a href="/calendar/@query.Id">Calendar Feed</a>
-                    </td>
+                    <th>ID</th>
+                    <th>User</th>
+                    <th>Title</th>
+                    <th>Query</th>
+                    <th>Actions</th>
                 </tr>
-            }
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @foreach (var query in Model)
+                {
+                    <tr>
+                        <td>@query.Id</td>
+                        <td>
+                            <select name="userId_@query.Id" style="width: 150px; padding: 3px;">
+                                @if (ViewBag.Users != null)
+                                {
+                                    @foreach (var user in (List<Ravuno.DataStorage.Models.User>)ViewBag.Users)
+                                    {
+                                        <option value="@user.Id" selected="@(query.UserId == user.Id ? "selected" : null)">@user.Username</option>
+                                    }
+                                }
+                            </select>
+                        </td>
+                        <td>@query.Title</td>
+                        <td style="max-width: 400px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                            <code>@query.SqlQuery</code>
+                        </td>
+                        <td>
+                            <a href="/stats/view-query/@query.Id" style="margin-right: 10px;">View Results</a>
+                            <a href="/calendar/@query.Id">Calendar Feed</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <div style="margin-top: 20px;">
+            <button type="submit" style="background-color: #c0c0c0; border: 2px outset #fff; padding: 5px 15px; cursor: pointer;">Save Changes</button>
+        </div>
+    </form>
 }
 
 <p style="margin-top: 20px;">
