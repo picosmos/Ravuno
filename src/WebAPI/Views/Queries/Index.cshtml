@@ -7,12 +7,12 @@
 <h2>My Queries</h2>
 
 <div class="info">
-    <a href="/queries/create" style="background-color: #c0c0c0; border: 2px outset #fff; padding: 5px 15px; text-decoration: none; display: inline-block; cursor: pointer;">Create New Query</a>
+    <a href="/queries/create" class="btn">Create New Query</a>
 </div>
 
 @if (Model == null || Model.Count == 0)
 {
-    <div style="padding: 10px;">
+    <div class="container">
         <em>No queries found. <a href="/queries/create">Create your first query</a></em>
     </div>
 }
@@ -31,13 +31,13 @@ else
             {
                 <tr>
                     <td>@query.Title</td>
-                    <td style="max-width: 400px;">
+                    <td class="max-width-400">
                         <div class="query-cell"><code class="language-sql">@query.SqlQuery</code></div>
                     </td>
                     <td>
-                        <a href="/queries/edit/@query.Id" style="margin-right: 10px;">Edit</a>
-                        <a href="/queries/delete/@query.Id" style="color: #cc0000;">Delete</a><br />
-                        <a href="/stats/view-query/@query.Id" style="margin-right: 10px;">View Results</a>
+                        <a href="/queries/edit/@query.Id" class="margin-right">Edit</a>
+                        <a href="/queries/delete/@query.Id" class="text-danger">Delete</a><br />
+                        <a href="/stats/view-query/@query.Id" class="margin-right">View Results</a>
                         <a href="/calendar/public/@query.PublicId">Calendar Feed</a>
                     </td>
                 </tr>

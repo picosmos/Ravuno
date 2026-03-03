@@ -11,19 +11,19 @@
     <strong>Calendar Feed:</strong> <a href="/calendar/public/@ViewBag.PublicId">/calendar/public/@ViewBag.PublicId</a>
 </div>
 
-<details style="margin-bottom: 20px;">
-    <summary style="cursor: pointer; padding: 8px; background-color: #c0c0c0; border: 2px outset #fff; font-weight: bold;">
+<details class="inline">
+    <summary class="box">
         Show SQL Query
     </summary>
-    <pre style="margin-top: 10px;"><code class="language-sql">@ViewBag.SqlQuery</code></pre>
+    <pre><code class="language-sql">@ViewBag.SqlQuery</code></pre>
 </details>
 
-<details open style="margin-bottom: 20px;">
-    <summary style="cursor: pointer; padding: 8px; background-color: #c0c0c0; border: 2px outset #fff; font-weight: bold;">
+<details open>
+    <summary class="box">
         Query Results (@ViewBag.TotalCount items)
     </summary>
     
-    <div style="margin-top: 10px;">
+    <div class="margin-top">
         <div class="info">
             <strong>Total Records:</strong> @ViewBag.TotalCount | 
             <strong>Page:</strong> @ViewBag.CurrentPage of @ViewBag.TotalPages
@@ -111,7 +111,7 @@
     </div>
 </details>
 
-<p style="margin-top: 20px;">
+<p class="margin-top">
     <a href="/stats/sendupdatehistory">&laquo; Back to Send Update History</a> |
     <a href="/">Home</a>
 </p>

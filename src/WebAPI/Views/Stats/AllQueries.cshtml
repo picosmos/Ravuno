@@ -12,21 +12,21 @@
 
 @if (ViewBag.Success != null)
 {
-    <div style="background-color: #008000; color: #fff; padding: 10px; margin-bottom: 10px; border: 2px solid #000;">
+    <div class="success">
         @ViewBag.Success
     </div>
 }
 
 @if (ViewBag.Error != null)
 {
-    <div style="background-color: #ff0000; color: #fff; padding: 10px; margin-bottom: 10px; border: 2px solid #000;">
+    <div class="error">
         @ViewBag.Error
     </div>
 }
 
 @if (Model == null || Model.Count == 0)
 {
-    <div style="padding: 10px;">
+    <div class="container">
         <em>No queries found in the system.</em>
     </div>
 }
@@ -49,7 +49,7 @@ else
                     <tr>
                         <td>@query.Id</td>
                         <td>
-                            <select name="userId_@query.Id" style="width: 150px; padding: 3px;">
+                            <select name="userId_@query.Id">
                                 @if (ViewBag.Users != null)
                                 {
                                     @foreach (var user in (List<Ravuno.DataStorage.Models.User>)ViewBag.Users)
@@ -60,23 +60,23 @@ else
                             </select>
                         </td>
                         <td>@query.Title</td>
-                        <td style="max-width: 400px;">
+                        <td class="max-width-400">
                             <div class="query-cell"><code class="language-sql">@query.SqlQuery</code></div>
                         </td>
                         <td>
-                            <a href="/stats/view-query/@query.Id" style="margin-right: 10px;">View Results</a>
+                            <a href="/stats/view-query/@query.Id" class="margin-right">View Results</a>
                             <a href="/calendar/public/@query.PublicId">Calendar Feed</a>
                         </td>
                     </tr>
                 }
             </tbody>
         </table>
-        <div style="margin-top: 20px;">
-            <button type="submit" style="background-color: #c0c0c0; border: 2px outset #fff; padding: 5px 15px; cursor: pointer;">Save Changes</button>
+        <div class="margin-top">
+            <button type="submit" class="btn-primary">Save Changes</button>
         </div>
     </form>
 }
 
-<p style="margin-top: 20px;">
+<p class="margin-top">
     <a href="/">← Back to Home</a>
 </p>

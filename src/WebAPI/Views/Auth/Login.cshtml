@@ -8,34 +8,34 @@
 <div class="container">
     @if (ViewBag.Error != null)
     {
-        <div style="background-color: #ff0000; color: #fff; padding: 10px; margin-bottom: 10px; border: 2px solid #000;">
+        <div class="error">
             @ViewBag.Error
         </div>
     }
 
     <form method="post" action="/login?returnUrl=@ViewBag.ReturnUrl">
-        <table style="border: none; background: transparent;">
+        <table class="form-table">
             <tr>
-                <td style="border: none; padding: 5px;"><label for="username">Username:</label></td>
-                <td style="border: none; padding: 5px;">
-                    <input type="text" id="username" name="username" required autofocus style="width: 250px; padding: 3px;" />
+                <td><label for="username">Username:</label></td>
+                <td>
+                    <input type="text" id="username" name="username" required autofocus class="short" />
                 </td>
             </tr>
             <tr>
-                <td style="border: none; padding: 5px;"><label for="password">Password:</label></td>
-                <td style="border: none; padding: 5px;">
-                    <input type="password" id="password" name="password" required style="width: 250px; padding: 3px;" />
+                <td><label for="password">Password:</label></td>
+                <td>
+                    <input type="password" id="password" name="password" required class="short" />
                 </td>
             </tr>
             <tr>
-                <td style="border: none; padding: 5px;" colspan="2">
-                    <button type="submit" style="background-color: #c0c0c0; border: 2px outset #fff; padding: 5px 15px; cursor: pointer;">Login</button>
+                <td colspan="2">
+                    <button type="submit" class="btn-primary">Login</button>
                 </td>
             </tr>
         </table>
     </form>
 
-    <p style="margin-top: 20px; font-size: 0.9em;">
+    <p class="margin-top text-small">
         <em>Default credentials: username "admin", password "password"</em>
     </p>
 </div>
