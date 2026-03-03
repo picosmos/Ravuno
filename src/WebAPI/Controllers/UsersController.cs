@@ -58,6 +58,8 @@ public class UsersController : Controller
         {
             var roles = await this._userService.GetAllRolesAsync();
             this.ViewBag.Roles = roles;
+            this.ViewBag.Username = username;
+            this.ViewBag.RoleId = roleId;
 
             if (string.IsNullOrWhiteSpace(username))
             {
@@ -93,6 +95,8 @@ public class UsersController : Controller
             this.ViewBag.Error = "Error creating user: " + ex.Message;
             var roles = await this._userService.GetAllRolesAsync();
             this.ViewBag.Roles = roles;
+            this.ViewBag.Username = username;
+            this.ViewBag.RoleId = roleId;
             return this.View();
         }
     }
