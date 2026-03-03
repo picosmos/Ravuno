@@ -52,8 +52,8 @@ public class QueriesController : Controller
     {
         try
         {
-            this.ViewBag.Title = title;
-            this.ViewBag.Query = query;
+            this.ViewBag.QueryTitle = title;
+            this.ViewBag.QuerySql = query;
 
             if (string.IsNullOrWhiteSpace(title))
             {
@@ -89,8 +89,8 @@ public class QueriesController : Controller
         {
             this._logger.LogError(ex, "Error creating query");
             this.ViewBag.Error = "Error creating query: " + ex.Message;
-            this.ViewBag.Title = title;
-            this.ViewBag.Query = query;
+            this.ViewBag.QueryTitle = title;
+            this.ViewBag.QuerySql = query;
             return this.View();
         }
     }
@@ -141,8 +141,8 @@ public class QueriesController : Controller
             }
 
             this.ViewBag.Id = id;
-            this.ViewBag.Title = title;
-            this.ViewBag.Query = query;
+            this.ViewBag.QueryTitle = title;
+            this.ViewBag.QuerySql = query;
 
             if (string.IsNullOrWhiteSpace(title))
             {
@@ -179,8 +179,8 @@ public class QueriesController : Controller
             var existingQuery = await this._queryService.GetByIdAsync(id, userId);
             this.ViewBag.Error = "Error updating query: " + ex.Message;
             this.ViewBag.Id = id;
-            this.ViewBag.Title = title;
-            this.ViewBag.Query = query;
+            this.ViewBag.QueryTitle = title;
+            this.ViewBag.QuerySql = query;
             return this.View(existingQuery);
         }
     }

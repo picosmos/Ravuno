@@ -18,20 +18,20 @@
             <tr>
                 <td><label for="title">Title:</label></td>
                 <td>
-                    <input type="text" id="title" name="title" value="@ViewBag.Title" required />
+                    <input type="text" id="title" name="title" value="@ViewBag.QueryTitle" required />
                 </td>
             </tr>
             <tr>
                 <td><label for="query">SQL Query:</label></td>
                 <td>
-                    <textarea id="query" name="query" required class="sql-editor" oninput="updatePreview(this)">@ViewBag.Query</textarea>
+                    <textarea id="query" name="query" required class="sql-editor" oninput="updatePreview(this)">@ViewBag.QuerySql</textarea>
                     <br />
                     <button type="button" onclick="testQuery()" class="margin-top">Test Query</button>
                     <span id="test-status"></span>
                     <br />
                     <details>
                         <summary>Show Preview</summary>
-                        <pre><code id="query-preview" class="language-sql">@ViewBag.Query</code></pre>
+                        <pre><code id="query-preview" class="language-sql">@ViewBag.QuerySql</code></pre>
                     </details>
                     <small class="text-muted">Only SELECT queries are allowed. No INSERT, UPDATE, DELETE, DROP, CREATE, ALTER, TRUNCATE, or EXECUTE statements.</small>
                     
