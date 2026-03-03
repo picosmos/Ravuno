@@ -16,25 +16,23 @@ namespace Ravuno.DataStorage.Migrations
                 type: "TEXT",
                 maxLength: 100,
                 nullable: false,
-                defaultValue: "");
+                defaultValue: ""
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_Queries_PublicId",
                 table: "Queries",
                 column: "PublicId",
-                unique: true);
+                unique: true
+            );
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropIndex(
-                name: "IX_Queries_PublicId",
-                table: "Queries");
+            migrationBuilder.DropIndex(name: "IX_Queries_PublicId", table: "Queries");
 
-            migrationBuilder.DropColumn(
-                name: "PublicId",
-                table: "Queries");
+            migrationBuilder.DropColumn(name: "PublicId", table: "Queries");
         }
     }
 }

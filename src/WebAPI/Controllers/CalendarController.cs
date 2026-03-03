@@ -36,7 +36,9 @@ public class CalendarController : ControllerBase
     [HttpGet("public/{publicId}")]
     public async Task<IActionResult> GetCalendarByPublicId(string publicId)
     {
-        var config = await this._updateConfigService.GetUpdateConfigurationByPublicIdAsync(publicId);
+        var config = await this._updateConfigService.GetUpdateConfigurationByPublicIdAsync(
+            publicId
+        );
         if (config == null)
         {
             return this.NotFound();
