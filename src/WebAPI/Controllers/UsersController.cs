@@ -129,6 +129,74 @@ public class UsersController : Controller
         }
     }
 
+    [Authorize(Roles = RoleNames.Admin)]
+    [HttpGet("/users/edit/{id}")]
+    public async Task<IActionResult> Edit(int id)
+    {
+        try
+        {
+            var user = await this._userService.GetByIdAsync(id);
+            if (user == null)
+            {
+                return this.NotFound("User not found");
+            }
+
+            var roles = await this._userService.GetAllRolesAsync();
+            this.ViewBag.Roles = roles;
+            return this.View(user);
+        }
+        catch (Exception ex)
+        {
+            this._logger.LogError(ex, "Error loading edit user page");
+            return this.StatusCode(500, "Error loading page");
+        }
+    }
+
+    [Authorize(Roles = RoleNames.Admin)]
+    [HttpPost("/users/edit/{id}")]
+    public async Task<IActionResult> Edit(int id, string username, int roleId)
+    {
+        try
+        {
+            var user = await this._userService.GetByIdAsync(id);
+            if (user == null)
+            {
+                return this.NotFound("User not found");
+            }
+
+            var roles = await this._userService.GetAllRolesAsync();
+            this.ViewBag.Roles = roles;
+
+            if (string.IsNullOrWhiteSpace(username))
+            {
+                this.ViewBag.Error = "Username is required";
+                return this.View(user);
+            }
+
+            await this._userService.UpdateUserAsync(id, username, roleId);
+            this._logger.LogInformation("User {UserId} updated successfully", id);
+            return this.RedirectToAction("Index");
+        }
+        catch (InvalidOperationException ex)
+        {
+            this._logger.LogWarning(ex, "Error updating user {UserId}", id);
+            this.ViewBag.Error = ex.Message;
+            var user = await this._userService.GetByIdAsync(id);
+            var roles = await this._userService.GetAllRolesAsync();
+            this.ViewBag.Roles = roles;
+            return this.View(user);
+        }
+        catch (Exception ex)
+        {
+            this._logger.LogError(ex, "Error updating user {UserId}", id);
+            this.ViewBag.Error = "Error updating user: " + ex.Message;
+            var user = await this._userService.GetByIdAsync(id);
+            var roles = await this._userService.GetAllRolesAsync();
+            this.ViewBag.Roles = roles;
+            return this.View(user);
+        }
+    }
+
     [HttpGet("/users/change-password")]
     public IActionResult ChangePassword()
     {

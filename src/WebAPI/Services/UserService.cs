@@ -68,6 +68,26 @@ public partial class UserService : IUserService
         return await this._userRepository.CreateAsync(user);
     }
 
+    public async Task UpdateUserAsync(int id, string username, int roleId)
+    {
+        ArgumentNullException.ThrowIfNull(username);
+
+        var user =
+            await this._userRepository.GetByIdAsync(id)
+            ?? throw new InvalidOperationException("User not found.");
+
+        var existingUser = await this._userRepository.GetByUsernameAsync(username);
+        if (existingUser != null && existingUser.Id != id)
+        {
+            throw new InvalidOperationException($"Username '{username}' already exists.");
+        }
+
+        user.Username = username;
+        user.RoleId = roleId;
+
+        await this._userRepository.UpdateAsync(user);
+    }
+
     public async Task DeleteUserAsync(int id)
     {
         await this._userRepository.DeleteAsync(id);

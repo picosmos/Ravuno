@@ -8,6 +8,7 @@ public interface IUserService
     Task<User?> GetByUsernameAsync(string username);
     Task<List<User>> GetAllUsersAsync();
     Task<User> CreateUserAsync(string username, string password, int roleId);
+    Task UpdateUserAsync(int id, string username, int roleId);
     Task DeleteUserAsync(int id);
     Task<bool> ValidatePasswordAsync(User user, string password);
     Task ChangePasswordAsync(int userId, string newPassword);
