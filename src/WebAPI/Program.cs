@@ -150,6 +150,8 @@ app.ApplyDatabaseMigrations();
 
 app.UseForwardedHeaders();
 
+app.UseStaticFiles();
+
 app.UseRateLimiter();
 
 app.UseCors();

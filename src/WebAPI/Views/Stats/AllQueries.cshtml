@@ -60,8 +60,8 @@ else
                             </select>
                         </td>
                         <td>@query.Title</td>
-                        <td style="max-width: 400px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                            <code>@query.SqlQuery</code>
+                        <td style="max-width: 400px;">
+                            <div class="query-cell"><code class="language-sql">@query.SqlQuery</code></div>
                         </td>
                         <td>
                             <a href="/stats/view-query/@query.Id" style="margin-right: 10px;">View Results</a>

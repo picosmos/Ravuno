@@ -31,8 +31,8 @@ else
             {
                 <tr>
                     <td>@query.Title</td>
-                    <td style="max-width: 400px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                        <code>@query.SqlQuery</code>
+                    <td style="max-width: 400px;">
+                        <div class="query-cell"><code class="language-sql">@query.SqlQuery</code></div>
                     </td>
                     <td>
                         <a href="/queries/edit/@query.Id" style="margin-right: 10px;">Edit</a>

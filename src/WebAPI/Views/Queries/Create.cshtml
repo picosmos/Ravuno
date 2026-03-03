@@ -24,8 +24,12 @@
             <tr>
                 <td style="border: none; padding: 5px; vertical-align: top;"><label for="query">SQL Query:</label></td>
                 <td style="border: none; padding: 5px;">
-                    <textarea id="query" name="query" required style="width: 500px; height: 200px; padding: 3px; font-family: monospace;">@ViewBag.Query</textarea>
+                    <textarea id="query" name="query" required class="sql-editor" oninput="updatePreview(this)">@ViewBag.Query</textarea>
                     <br />
+                    <details style="margin-top: 5px;">
+                        <summary style="cursor: pointer; color: #0000ff;">Show Preview</summary>
+                        <pre style="margin-top: 5px; max-height: 200px; overflow: auto;"><code id="query-preview" class="language-sql">@ViewBag.Query</code></pre>
+                    </details>
                     <small style="color: #666;">Only SELECT queries are allowed. No INSERT, UPDATE, DELETE, DROP, CREATE, ALTER, TRUNCATE, or EXECUTE statements.</small>
                 </td>
             </tr>
@@ -42,3 +46,25 @@
 <div style="margin-top: 20px;">
     <a href="/queries">← Back to Queries</a>
 </div>
+
+@section Scripts {
+    <script>
+        function updatePreview(textarea) {
+            var preview = document.getElementById('query-preview');
+            if (preview) {
+                preview.textContent = textarea.value;
+                if (window.Prism) {
+                    window.Prism.highlightElement(preview);
+                }
+            }
+        }
+        
+        // Initial highlight on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            var textarea = document.getElementById('query');
+            if (textarea) {
+                updatePreview(textarea);
+            }
+        });
+    </script>
+}
