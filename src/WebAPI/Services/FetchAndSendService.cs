@@ -329,13 +329,17 @@ public class FetchAndSendService
         var newItems = new List<Item>();
         var updatedItems = new List<Item>();
 
+        // Load all existing items for the sources we're updating in one query
+        var sources = fetchedItems.Select(i => i.Source).Distinct().ToList();
+        var existingItemsDict = await this
+            ._dbContext.Items.Where(i => sources.Contains(i.Source))
+            .ToDictionaryAsync(i => (i.Source, i.SourceId), cancellationToken);
+
         foreach (var fetchedItem in fetchedItems)
         {
-            // Find existing item by source and source ID
-            var existingItem = await this._dbContext.Items.FirstOrDefaultAsync(
-                i => i.Source == fetchedItem.Source && i.SourceId == fetchedItem.SourceId,
-                cancellationToken
-            );
+            // Lookup existing item from the dictionary
+            var key = (fetchedItem.Source, fetchedItem.SourceId);
+            var existingItem = existingItemsDict.GetValueOrDefault(key);
 
             if (existingItem == null)
             {

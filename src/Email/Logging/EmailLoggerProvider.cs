@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using System.Globalization;
 using System.Text;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Ravuno.Email.Services.Contracts;
@@ -15,7 +16,7 @@ namespace Ravuno.Email.Logging;
 /// </summary>
 public sealed class EmailLoggerProvider : ILoggerProvider
 {
-    private readonly IEmailService _emailService;
+    private readonly IServiceProvider _serviceProvider;
     private readonly ConcurrentQueue<LogEntry> _logQueue = new();
     private readonly PeriodicTimer _periodicTimer;
     private readonly Task _timerTask;
@@ -25,14 +26,14 @@ public sealed class EmailLoggerProvider : ILoggerProvider
     private bool _disposed;
 
     public EmailLoggerProvider(
-        IEmailService emailService,
+        IServiceProvider serviceProvider,
         IOptions<EmailLogProviderSettings> settings
     )
     {
-        ArgumentNullException.ThrowIfNull(emailService);
+        ArgumentNullException.ThrowIfNull(serviceProvider);
         ArgumentNullException.ThrowIfNull(settings);
 
-        this._emailService = emailService;
+        this._serviceProvider = serviceProvider;
         this.Settings = settings.Value;
 
         // Use PeriodicTimer for efficient periodic checks without creating tasks on every log
@@ -200,7 +201,10 @@ public sealed class EmailLoggerProvider : ILoggerProvider
 
         try
         {
-            await this._emailService.SendEmailAsync(
+            // Resolve IEmailService lazily to avoid circular dependency during startup
+            var emailService = this._serviceProvider.GetRequiredService<IEmailService>();
+
+            await emailService.SendEmailAsync(
                 this.Settings.AdminEmailReceiver,
                 $"Application Logs - {logs.Count} entries ({logs[0].Timestamp:yyyy-MM-dd HH:mm:ss} UTC to {logs[^1].Timestamp:yyyy-MM-dd HH:mm:ss} UTC)",
                 sb.ToString()
@@ -231,30 +235,40 @@ public sealed class EmailLoggerProvider : ILoggerProvider
 
         this._disposed = true;
 
-        // Cancel the periodic timer and wait for it to complete
+        // Cancel the periodic timer and allow it to complete asynchronously
         this._cancellationTokenSource.Cancel();
-        try
-        {
-            this._timerTask.Wait(TimeSpan.FromSeconds(5));
-        }
-        catch (AggregateException)
-        {
-            // Ignore cancellation exceptions during disposal
-        }
 
-        // Try to send remaining logs before disposing
-        if (!this._logQueue.IsEmpty)
+        // Don't block on timer completion - let it finish naturally
+        // The timer task will complete when cancellation is processed
+        _ = Task.Run(async () =>
         {
             try
             {
-                this.SendLogsAsync(false).GetAwaiter().GetResult();
+                // Give the timer task a reasonable time to complete
+                await this._timerTask.WaitAsync(TimeSpan.FromSeconds(5));
             }
-            catch (Exception ex)
+            catch
             {
-                Console.Error.WriteLine(
-                    $"[EmailLoggerProvider] Failed to send remaining logs during disposal: {ex.Message}"
-                );
+                // Ignore exceptions during disposal
             }
+        });
+
+        // Don't block on sending remaining logs - queue them for background processing
+        if (!this._logQueue.IsEmpty)
+        {
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    await this.SendLogsAsync(false);
+                }
+                catch (Exception ex)
+                {
+                    await Console.Error.WriteLineAsync(
+                        $"[EmailLoggerProvider] Failed to send remaining logs during disposal: {ex.Message}"
+                    );
+                }
+            });
         }
 
         this._periodicTimer?.Dispose();

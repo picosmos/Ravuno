@@ -14,6 +14,14 @@ public static class DataStorageServiceExtensions
         var connectionString =
             configuration.GetConnectionString("DataStorage") ?? "Data Source=ravuno.db";
 
+        // Configure SQLite for better concurrency and performance
+        // Cache=Shared allows multiple connections to share cache
+        // Pooling is enabled by default in modern Microsoft.Data.Sqlite
+        if (!connectionString.Contains("Cache=", StringComparison.OrdinalIgnoreCase))
+        {
+            connectionString += connectionString.Contains('?') ? "&Cache=Shared" : ";Cache=Shared";
+        }
+
         services.AddSingleton<DateTimeKindInterceptor>();
 
         services.AddDbContext<DataStorageContext>(
