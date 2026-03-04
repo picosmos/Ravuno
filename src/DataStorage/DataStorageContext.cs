@@ -12,7 +12,6 @@ public class DataStorageContext : DbContext
     public DbSet<FetchHistory> FetchHistories { get; set; }
     public DbSet<SendUpdateHistory> SendUpdateHistories { get; set; }
     public DbSet<Query> Queries { get; set; }
-    public DbSet<EmailReceiver> EmailReceivers { get; set; }
     public DbSet<User> Users { get; set; }
     public DbSet<Role> Roles { get; set; }
     public DbSet<Group> Groups { get; set; }

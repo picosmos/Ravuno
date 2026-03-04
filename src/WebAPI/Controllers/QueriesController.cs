@@ -48,12 +48,13 @@ public class QueriesController : Controller
     }
 
     [HttpPost("/queries/create")]
-    public async Task<IActionResult> Create(string title, string query)
+    public async Task<IActionResult> Create(string title, string query, string email)
     {
         try
         {
             this.ViewBag.QueryTitle = title;
             this.ViewBag.QuerySql = query;
+            this.ViewBag.Email = email;
 
             if (string.IsNullOrWhiteSpace(title))
             {
@@ -64,6 +65,12 @@ public class QueriesController : Controller
             if (string.IsNullOrWhiteSpace(query))
             {
                 this.ViewBag.Error = "Query is required";
+                return this.View();
+            }
+
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                this.ViewBag.Error = "Email is required";
                 return this.View();
             }
 
@@ -81,7 +88,7 @@ public class QueriesController : Controller
                 return this.View();
             }
 
-            await this._queryService.CreateAsync(title, query, userId);
+            await this._queryService.CreateAsync(title, query, email, userId);
             this._logger.LogInformation("User {UserId} created query '{Title}'", userId, title);
             return this.RedirectToAction("Index");
         }
@@ -123,7 +130,7 @@ public class QueriesController : Controller
     }
 
     [HttpPost("/queries/edit/{id}")]
-    public async Task<IActionResult> Edit(long id, string title, string query)
+    public async Task<IActionResult> Edit(long id, string title, string query, string email)
     {
         try
         {
@@ -143,6 +150,7 @@ public class QueriesController : Controller
             this.ViewBag.Id = id;
             this.ViewBag.QueryTitle = title;
             this.ViewBag.QuerySql = query;
+            this.ViewBag.Email = email;
 
             if (string.IsNullOrWhiteSpace(title))
             {
@@ -153,6 +161,12 @@ public class QueriesController : Controller
             if (string.IsNullOrWhiteSpace(query))
             {
                 this.ViewBag.Error = "Query is required";
+                return this.View(existingQuery);
+            }
+
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                this.ViewBag.Error = "Email is required";
                 return this.View(existingQuery);
             }
 
@@ -168,7 +182,7 @@ public class QueriesController : Controller
                 return this.View(existingQuery);
             }
 
-            await this._queryService.UpdateAsync(id, title, query, userId);
+            await this._queryService.UpdateAsync(id, title, query, email, userId);
             this._logger.LogInformation("User {UserId} updated query {QueryId}", userId, id);
             return this.RedirectToAction("Index");
         }

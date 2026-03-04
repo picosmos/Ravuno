@@ -32,10 +32,11 @@ public partial class QueryService(IQueryRepository queryRepository, IItemReposit
         return await this._queryRepository.GetByIdAndUserAsync(id, userId);
     }
 
-    public async Task<Query> CreateAsync(string title, string query, int userId)
+    public async Task<Query> CreateAsync(string title, string query, string email, int userId)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(title);
         ArgumentException.ThrowIfNullOrWhiteSpace(query);
+        ArgumentException.ThrowIfNullOrWhiteSpace(email);
 
         if (!this.ValidateSelectOnlyQuery(query, out var error))
         {
@@ -64,6 +65,7 @@ public partial class QueryService(IQueryRepository queryRepository, IItemReposit
         {
             Title = title.Trim(),
             SqlQuery = query.Trim(),
+            Email = email.Trim(),
             PublicId = publicId,
             UserId = userId,
         };
@@ -71,10 +73,11 @@ public partial class QueryService(IQueryRepository queryRepository, IItemReposit
         return await this._queryRepository.CreateAsync(queryEntity);
     }
 
-    public async Task UpdateAsync(long id, string title, string query, int userId)
+    public async Task UpdateAsync(long id, string title, string query, string email, int userId)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(title);
         ArgumentException.ThrowIfNullOrWhiteSpace(query);
+        ArgumentException.ThrowIfNullOrWhiteSpace(email);
 
         if (!this.ValidateSelectOnlyQuery(query, out var error))
         {
@@ -92,6 +95,7 @@ public partial class QueryService(IQueryRepository queryRepository, IItemReposit
 
         queryEntity.Title = title.Trim();
         queryEntity.SqlQuery = query.Trim();
+        queryEntity.Email = email.Trim();
 
         await this._queryRepository.UpdateAsync(queryEntity);
     }
@@ -164,7 +168,7 @@ public partial class QueryService(IQueryRepository queryRepository, IItemReposit
                 QueryTitle = q.Title,
                 SqlQuery = q.SqlQuery,
                 PublicId = q.PublicId,
-                EmailReceiverAddresses = [.. q.EmailReceivers.Select(e => e.EmailAddress)],
+                Email = q.Email,
             }),
         ];
     }
@@ -180,7 +184,7 @@ public partial class QueryService(IQueryRepository queryRepository, IItemReposit
                 QueryTitle = q.Title,
                 SqlQuery = q.SqlQuery,
                 PublicId = q.PublicId,
-                EmailReceiverAddresses = [.. q.EmailReceivers.Select(e => e.EmailAddress)],
+                Email = q.Email,
             }),
         ];
     }
@@ -200,7 +204,7 @@ public partial class QueryService(IQueryRepository queryRepository, IItemReposit
             QueryTitle = query.Title,
             SqlQuery = query.SqlQuery,
             PublicId = query.PublicId,
-            EmailReceiverAddresses = [.. query.EmailReceivers.Select(e => e.EmailAddress)],
+            Email = query.Email,
         };
     }
 
@@ -219,7 +223,7 @@ public partial class QueryService(IQueryRepository queryRepository, IItemReposit
             QueryTitle = query.Title,
             SqlQuery = query.SqlQuery,
             PublicId = query.PublicId,
-            EmailReceiverAddresses = [.. query.EmailReceivers.Select(e => e.EmailAddress)],
+            Email = query.Email,
         };
     }
 

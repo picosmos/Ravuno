@@ -24,10 +24,7 @@ public class QueryRepository(DataStorageContext dbContext) : IQueryRepository
 
     public async Task<Query?> GetByIdAsync(long id)
     {
-        return await this
-            ._dbContext.Queries.Include(q => q.EmailReceivers)
-            .AsNoTracking()
-            .FirstOrDefaultAsync(q => q.Id == id);
+        return await this._dbContext.Queries.AsNoTracking().FirstOrDefaultAsync(q => q.Id == id);
     }
 
     public async Task<Query?> GetByIdAndUserAsync(long id, int userId)
@@ -42,8 +39,7 @@ public class QueryRepository(DataStorageContext dbContext) : IQueryRepository
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(publicId);
         return await this
-            ._dbContext.Queries.Include(q => q.EmailReceivers)
-            .AsNoTracking()
+            ._dbContext.Queries.AsNoTracking()
             .FirstOrDefaultAsync(q => q.PublicId == publicId);
     }
 
@@ -68,6 +64,7 @@ public class QueryRepository(DataStorageContext dbContext) : IQueryRepository
         tracked.Title = query.Title;
         tracked.SqlQuery = query.SqlQuery;
         tracked.UserId = query.UserId;
+        tracked.Email = query.Email;
 
         await this._dbContext.SaveChangesAsync();
     }
