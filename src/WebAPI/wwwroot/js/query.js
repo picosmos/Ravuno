@@ -52,6 +52,7 @@ async function testQuery() {
     statusEl.textContent = 'Testing...';
     statusEl.style.color = '#0000ff';
     resultsDetails.removeAttribute('open');
+    resultsDetails.style.display = 'none';
     
     try {
         var formData = new FormData();
@@ -70,19 +71,23 @@ async function testQuery() {
             
             if (data.items.length > 0) {
                 renderResults(data.items, contentDiv);
+                resultsDetails.style.display = 'block';
                 resultsDetails.setAttribute('open', '');
             } else {
                 contentDiv.innerHTML = '<p>No results found.</p>';
+                resultsDetails.style.display = 'block';
                 resultsDetails.setAttribute('open', '');
             }
         } else {
             statusEl.textContent = 'Error: ' + data.error;
             statusEl.style.color = '#ff0000';
+            resultsDetails.style.display = 'none';
             resultsDetails.removeAttribute('open');
         }
     } catch (err) {
         statusEl.textContent = 'Error: ' + err.message;
         statusEl.style.color = '#ff0000';
+        resultsDetails.style.display = 'none';
         resultsDetails.removeAttribute('open');
     }
 }
