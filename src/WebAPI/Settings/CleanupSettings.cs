@@ -9,6 +9,6 @@ public class CleanupSettings
     public TimeSpan CleanUpInterval { get; set; } = TimeSpan.FromHours(12);
 
     [Required]
-    [Range(typeof(TimeSpan), "1.00:00:00", "3650.00:00:00")]
+    [Range(typeof(TimeSpan), "1.00:00:00", "36500.00:00:00")]
     public TimeSpan HistoricRetentionTimeSpan { get; set; } = TimeSpan.FromDays(30);
 }
