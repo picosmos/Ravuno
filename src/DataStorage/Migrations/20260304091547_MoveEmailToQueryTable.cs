@@ -23,13 +23,13 @@ namespace Ravuno.DataStorage.Migrations
             // Step 2: Migrate data from EmailReceiverQuery join table to Queries.Email
             migrationBuilder.Sql(
                 @"UPDATE Queries 
-                  SET Email = (
+                  SET Email = COALESCE((
                       SELECT EmailReceivers.EmailAddress 
                       FROM EmailReceiverQuery 
                       JOIN EmailReceivers ON EmailReceiverQuery.EmailReceiversId = EmailReceivers.Id 
                       WHERE EmailReceiverQuery.QueriesId = Queries.Id 
                       LIMIT 1
-                  )"
+                  ), '')"
             );
 
             // Step 3: Drop the join table and EmailReceivers table
