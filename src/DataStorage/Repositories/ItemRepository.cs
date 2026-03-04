@@ -15,7 +15,7 @@ public class ItemRepository(DataStorageContext dbContext) : IItemRepository
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(sqlQuery);
         return await this
-            ._dbContext.Database.SqlQueryRaw<Item>(sqlQuery)
+            ._dbContext.Items.FromSqlRaw(sqlQuery)
             .AsNoTracking()
             .ToListAsync(cancellationToken);
     }
