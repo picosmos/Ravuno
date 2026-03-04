@@ -17,6 +17,7 @@ public class FetchAndSendService
     private readonly ILogger<FetchAndSendService> _logger;
     private readonly DataStorageContext _dbContext;
     private readonly IEmailService _emailService;
+    private readonly IHtmlService _htmlService;
     private readonly IQueryService _queryService;
     private static readonly SemaphoreSlim _executionSemaphore = new(1, 1);
 
@@ -31,6 +32,7 @@ public class FetchAndSendService
         ILogger<FetchAndSendService> logger,
         DataStorageContext dbContext,
         IEmailService emailService,
+        IHtmlService htmlService,
         IQueryService queryService
     )
     {
@@ -38,6 +40,7 @@ public class FetchAndSendService
         this._logger = logger;
         this._dbContext = dbContext;
         this._emailService = emailService;
+        this._htmlService = htmlService;
         this._queryService = queryService;
     }
 
@@ -269,6 +272,7 @@ public class FetchAndSendService
             try
             {
                 await this._emailService.SendItemUpdateEmailAsync(
+                    this._htmlService,
                     config.Email,
                     config.QueryTitle,
                     newDelta,

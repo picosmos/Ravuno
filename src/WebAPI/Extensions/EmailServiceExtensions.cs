@@ -1,18 +1,19 @@
 using System.Globalization;
 using System.Text;
-using System.Text.RegularExpressions;
 using Ravuno.DataStorage.Models;
 using Ravuno.Email.Services.Contracts;
+using Ravuno.WebAPI.Services.Contracts;
 
 namespace Ravuno.WebAPI.Extensions;
 
-public static partial class EmailServiceExtensions
+public static class EmailServiceExtensions
 {
     /// <summary>
     /// Sends an email with formatted item updates (new and updated items).
     /// </summary>
     public static async Task SendItemUpdateEmailAsync(
         this IEmailService emailService,
+        IHtmlService htmlService,
         string receiverAddress,
         string queryTitle,
         List<Item> newItems,
@@ -20,21 +21,26 @@ public static partial class EmailServiceExtensions
     )
     {
         ArgumentNullException.ThrowIfNull(emailService);
+        ArgumentNullException.ThrowIfNull(htmlService);
         ArgumentNullException.ThrowIfNull(newItems);
         ArgumentNullException.ThrowIfNull(updatedItems);
 
         var sortedNewItems = newItems.OrderBy(item => item.EventStartDateTime).ToList();
         var sortedUpdatedItems = updatedItems.OrderBy(item => item.EventStartDateTime).ToList();
 
-        var emailBody = BuildEmailBody(sortedNewItems, sortedUpdatedItems);
+        var emailBody = BuildEmailBody(htmlService, sortedNewItems, sortedUpdatedItems);
         var subject = $"[Ravuno] {queryTitle} ({newItems.Count} new, {updatedItems.Count} updated)";
 
         await emailService.SendEmailAsync(receiverAddress, subject, emailBody, isHtml: true);
     }
 
-    private static string BuildEmailBody(List<Item> newItems, List<Item> updatedItems)
+    private static string BuildEmailBody(
+        IHtmlService htmlService,
+        List<Item> newItems,
+        List<Item> updatedItems
+    )
     {
-        static void RenderTable(StringBuilder sb, string heading, List<Item> items)
+        void RenderTable(StringBuilder sb, string heading, List<Item> items)
         {
             if (items.Count == 0)
             {
@@ -52,7 +58,7 @@ public static partial class EmailServiceExtensions
 
             foreach (var item in items)
             {
-                var description = StripHtmlTags(item.Description ?? "");
+                var description = htmlService.StripHtmlTags(item.Description ?? "");
                 if (description.Length > 2500)
                 {
                     description = string.Concat(description.AsSpan(0, 2500), "...");
@@ -123,27 +129,4 @@ public static partial class EmailServiceExtensions
 
         return sb.ToString();
     }
-
-    private static string StripHtmlTags(string html)
-    {
-        if (string.IsNullOrEmpty(html))
-        {
-            return string.Empty;
-        }
-
-        var htmlWithLinebreaks = HtmlLineBreaksRegex()
-            .Replace(html.Replace("\r", "").Replace("\n", ""), "\n");
-        var text = HtmlTagsRegex().Replace(htmlWithLinebreaks, string.Empty);
-        text = System.Net.WebUtility.HtmlDecode(text);
-        return MultipleLineBreaksRegex().Replace(text, "\n").Trim();
-    }
-
-    [GeneratedRegex(@"<.*?>")]
-    private static partial Regex HtmlTagsRegex();
-
-    [GeneratedRegex(@"<(/?)(br|p)[^>]*>")]
-    private static partial Regex HtmlLineBreaksRegex();
-
-    [GeneratedRegex(@"(\n\s*)+")]
-    private static partial Regex MultipleLineBreaksRegex();
 }
