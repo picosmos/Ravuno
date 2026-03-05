@@ -18,9 +18,8 @@ public class Query
     [MaxLength(32)]
     public string PublicId { get; set; } = string.Empty;
 
-    [Required]
     [MaxLength(500)]
-    public string Email { get; set; } = string.Empty;
+    public string? Email { get; set; }
 
     public int UserId { get; set; }
     public User User { get; set; } = null!;

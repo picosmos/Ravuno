@@ -68,12 +68,6 @@ public class QueriesController : Controller
                 return this.View();
             }
 
-            if (string.IsNullOrWhiteSpace(email))
-            {
-                this.ViewBag.Error = "Email is required";
-                return this.View();
-            }
-
             if (!this._queryService.ValidateSelectOnlyQuery(query, out var validationError))
             {
                 this.ViewBag.Error = validationError;
@@ -161,12 +155,6 @@ public class QueriesController : Controller
             if (string.IsNullOrWhiteSpace(query))
             {
                 this.ViewBag.Error = "Query is required";
-                return this.View(existingQuery);
-            }
-
-            if (string.IsNullOrWhiteSpace(email))
-            {
-                this.ViewBag.Error = "Email is required";
                 return this.View(existingQuery);
             }
 

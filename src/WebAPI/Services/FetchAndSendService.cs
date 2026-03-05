@@ -269,47 +269,57 @@ public class FetchAndSendService
         // Send email if there are changes
         if (newDelta.Count > 0 || updatedDelta.Count > 0)
         {
-            try
+            if (string.IsNullOrWhiteSpace(config.Email))
             {
-                await this._emailService.SendItemUpdateEmailAsync(
-                    this._htmlService,
-                    config.Email,
-                    config.QueryTitle,
-                    newDelta,
-                    updatedDelta
-                );
                 this._logger.LogInformation(
-                    "Email sent to {Email} for {QueryTitle}",
-                    config.Email,
+                    "No email configured for {QueryTitle}, skipping email notification",
                     config.QueryTitle
                 );
-
-                var sendHistory = new SendUpdateHistory
-                {
-                    QueryTitle = config.QueryTitle,
-                    EmailReceiverAddress = config.Email,
-                    SentAt = DateTime.UtcNow,
-                    NewItemsCount = newDelta.Count,
-                    UpdatedItemsCount = updatedDelta.Count,
-                };
-                this._dbContext.SendUpdateHistories.Add(sendHistory);
-                await this._dbContext.SaveChangesAsync(cancellationToken);
-                this._logger.LogInformation(
-                    "Recorded send history for {QueryTitle} and {Email}: {NewCount} new, {UpdatedCount} updated",
-                    config.QueryTitle,
-                    config.Email,
-                    newDelta.Count,
-                    updatedDelta.Count
-                );
             }
-            catch (Exception ex)
+            else
             {
-                this._logger.LogError(
-                    ex,
-                    "Error sending email or recording history for {QueryTitle} to {Email}",
-                    config.QueryTitle,
-                    config.Email
-                );
+                try
+                {
+                    await this._emailService.SendItemUpdateEmailAsync(
+                        this._htmlService,
+                        config.Email,
+                        config.QueryTitle,
+                        newDelta,
+                        updatedDelta
+                    );
+                    this._logger.LogInformation(
+                        "Email sent to {Email} for {QueryTitle}",
+                        config.Email,
+                        config.QueryTitle
+                    );
+
+                    var sendHistory = new SendUpdateHistory
+                    {
+                        QueryTitle = config.QueryTitle,
+                        EmailReceiverAddress = config.Email,
+                        SentAt = DateTime.UtcNow,
+                        NewItemsCount = newDelta.Count,
+                        UpdatedItemsCount = updatedDelta.Count,
+                    };
+                    this._dbContext.SendUpdateHistories.Add(sendHistory);
+                    await this._dbContext.SaveChangesAsync(cancellationToken);
+                    this._logger.LogInformation(
+                        "Recorded send history for {QueryTitle} and {Email}: {NewCount} new, {UpdatedCount} updated",
+                        config.QueryTitle,
+                        config.Email,
+                        newDelta.Count,
+                        updatedDelta.Count
+                    );
+                }
+                catch (Exception ex)
+                {
+                    this._logger.LogError(
+                        ex,
+                        "Error sending email or recording history for {QueryTitle} to {Email}",
+                        config.QueryTitle,
+                        config.Email
+                    );
+                }
             }
         }
         else
